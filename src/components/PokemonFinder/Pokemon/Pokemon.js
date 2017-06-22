@@ -15,6 +15,9 @@ class Pokemon extends Component {
   render() {
     // if (!this.props.name)
     //   return null
+    if(this.props.pokemon.sprites)
+      var sprite = this.props.pokemon.sprites.front_default
+
     return (
       <div>
         <div className="pokemon-name">

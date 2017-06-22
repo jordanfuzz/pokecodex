@@ -25,6 +25,9 @@
     text-align: center;
     margin: 0 auto;
     border-radius: 5px;
+    font-family: 'Press Start 2P', sans-serif;
+    font-size: 10px;
+    color: white;
 }
 
 .pokemon-name {
