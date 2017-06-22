@@ -1,0 +1,23 @@
+.pokemon-container {
+    height: 200px;
+    width: 200px;
+    background-color: #3F3F3F;
+    text-align: center;
+    margin: 25vh auto 0 auto;
+    border-radius: 5px;
+}
+
+.input-container {
+    margin: 30px auto 0 auto;
+    padding-top: 6px;
+    height: 28px;
+    width: 230px;
+    background-color: #ed1b24;
+    border-radius: 4px;
+}
+
+.console {
+    border-radius: 2px;
+    width: 150px;
+    margin-right: 10px;
+}
