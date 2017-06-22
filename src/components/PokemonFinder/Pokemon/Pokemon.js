@@ -2,6 +2,8 @@ import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import dispatchGetPokemon from '../../../services/pokemonService'
 
+import './Pokemon.css'
+
 class Pokemon extends Component {
 
   componentWillReceiveProps(newProps) {
@@ -11,14 +13,20 @@ class Pokemon extends Component {
   }
 
   render() {
-    if (!this.props.name)
-      return null
-
+    // if (!this.props.name)
+    //   return null
     return (
       <div>
+        <div className="pokemon-name">
+          {this.props.pokemon.name}
+        </div>
+        <div> <img src={sprite} /> </div>
+
+      <div className="type-container">
         {this.props.pokemon.types ? this.props.pokemon.types.map((element, i) => {
-          return <p key={i}>{element.type.name}</p>
+          return <div className="type" key={i}>{element.type.name.toUpperCase().substring(0,6)}</div>
         }) : "Loading..."}
+      </div>
       </div>
     )
   }
