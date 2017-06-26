@@ -13,6 +13,10 @@
     padding: 25px 30px 30px 30px;
 }
 
+.hide-console {
+    display: none;
+}
+
 .team-member {
     height: 95px;
     width: 95px;
@@ -25,7 +29,7 @@
     margin: 30px auto 0 auto;
     padding-top: 6px;
     height: 28px;
-    width: 300px;
+    width: 225px;
     background-color: #ed1b24;
     border-radius: 4px;
 }
