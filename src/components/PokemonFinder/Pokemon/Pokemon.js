@@ -32,7 +32,7 @@ class Pokemon extends Component {
 
       <div className="type-container">
         {this.props.pokemon.types ? this.props.pokemon.types.map((element, i) => {
-          return <div className="type" style={{backgroundColor: getColor(element.type.name)}} key={i}>{element.type.name.toUpperCase().substring(0,6)}</div>
+          return <div className="type" style={{backgroundColor: getColor(element.type.name)}} key={i}>{formatType(element.type.name)}</div>
         }) : "Loading..."}
       </div>
       </div>
@@ -40,12 +40,22 @@ class Pokemon extends Component {
   }
 }
 
+function formatType(element) {
+  console.log(element)
+  if(element === "psychic")
+    return "PSYCHC"
+  else if (element === "fighting")
+    return "FIGHT"
+  else
+    return element.toUpperCase().substring(0,6)
+}
+
 function getColor (element) {
   console.log(element)
   switch (element) {
     case "bug":
       return "#A8B821"
-    case "fight":
+    case "fighting":
       return "#C03028"
     case "ghost":
       return "#715899"

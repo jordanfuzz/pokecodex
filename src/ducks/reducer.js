@@ -1,7 +1,8 @@
 let initialState = {
   pokemon: {},
   userTeam: [],
-  types: []
+  types: [],
+  resultsReady: false
 }
 
 const GET_POKEMON = "GET_POKEMON"
@@ -14,7 +15,7 @@ export default function reducer(state = initialState, action) {
     case GET_POKEMON + '_PENDING':
       return state
     case GET_POKEMON + '_FULFILLED':
-      return Object.assign({}, state, {pokemon: action.payload, types: []})
+      return Object.assign({}, state, {pokemon: action.payload, types: [], resultsReady: false})
     case ADD_TO_TEAM + '_PENDING':
       return state
     case ADD_TO_TEAM + '_FULFILLED':
@@ -26,7 +27,7 @@ export default function reducer(state = initialState, action) {
     case ADD_TYPE + '_FULFILLED':
       let newTypes = state.types.slice(0)
       newTypes.push(action.payload)
-      return Object.assign({}, state, {types: newTypes})
+      return Object.assign({}, state, {types: newTypes, resultsReady: true})
     default:
       return state
   }

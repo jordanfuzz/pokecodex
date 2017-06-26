@@ -88,7 +88,11 @@ class PokemonPicker extends Component {
 
         </div>
         <div className="results">
-          {this.state.wildPokemon && this.props.effectivePokemon ? `${this.props.effectivePokemon.name} is most effective against ${this.state.wildPokemon.name}!` : "nothing"}
+          {this.state.wildPokemon && this.props.effectivePokemon && this.props.resultsReady ?
+            `${this.props.effectivePokemon.name.charAt(0).toUpperCase() +
+            this.props.effectivePokemon.name.slice(1)}
+            is most effective against ${this.state.wildPokemon.name.charAt(0).toUpperCase() +
+            this.state.wildPokemon.name.slice(1)}!` : ""}
         </div>
       </div>
     )
@@ -131,7 +135,8 @@ function mapStateToProps(state) {
 
     return {
       pokemonTeam: state.userTeam,
-      effectivePokemon: state.userTeam[effectivenessArray.indexOf(max)]
+      effectivePokemon: state.userTeam[effectivenessArray.indexOf(max)],
+      resultsReady: state.resultsReady
     }
   }
 }
