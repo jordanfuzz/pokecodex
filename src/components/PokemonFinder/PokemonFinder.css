@@ -4,11 +4,11 @@
     width: 200px;
     background-color: #3F3F3F;
     text-align: center;
-    margin: 25vh auto 0 auto;
+    margin: 10vh auto 0 auto;
     border-radius: 5px;
 }
 
-.input-container {
+.finder-input-container {
     margin: 30px auto 0 auto;
     padding-top: 6px;
     height: 28px;
@@ -21,4 +21,11 @@
     border-radius: 2px;
     width: 150px;
     margin-right: 10px;
+}
+
+.finder-header {
+    font-family: 'Press Start 2P', sans-serif;
+    color: white;
+    font-size: 22px;
+    margin-top: 10vh;
 }

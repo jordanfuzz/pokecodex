@@ -33,7 +33,7 @@
     position: relative;
     background-color: #3F3F3F;
     text-align: center;
-    margin-top: 20vh;
+    margin-top: 5vh;
     margin-left: 45px;
     border-radius: 5px;
 }
@@ -47,11 +47,24 @@
     border-radius: 4px;
 }
 
+.calculate-button {
+    border: 5px solid #ed1b24;
+    border-radius: 4px;
+    margin-top: 10px;
+}
+
 .results {
     font-family: 'Press Start 2P', sans-serif;
     font-size: 18px;
     color: white;
     margin-top: 40px;
+}
+
+.picker-header {
+    font-family: 'Press Start 2P', sans-serif;
+    color: white;
+    font-size: 22px;
+    margin-top: 10vh;
 }
 
 

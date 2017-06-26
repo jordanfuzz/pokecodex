@@ -10,16 +10,37 @@
     align-items: center;
 }
 
+
+.nav-container:hover {
+
+    width: 200px;
+    justify-content: inherit;
+    padding-left: 20px;
+
+}
+
+
+
+
 .nav-list {
     list-style-type: none;
     padding-left: 0;
 }
 
-.nav-list li {
-
-}
 
 .menu-button {
     width: 50px;
     height: 50px;
+}
+
+.finder {
+
+}
+
+.picker {
+
+}
+
+.team {
+
 }

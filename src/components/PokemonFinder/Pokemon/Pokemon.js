@@ -19,6 +19,8 @@ class Pokemon extends Component {
       var sprite = this.props.pokemon.sprites.front_default
     }
     
+    
+    
     this.props.getPokemon(this.props.pokemon)
 
     return (

@@ -17,6 +17,13 @@
     display: none;
 }
 
+.team-header {
+    font-family: 'Press Start 2P', sans-serif;
+    color: white;
+    font-size: 22px;
+    margin-top: 10vh;
+}
+
 .team-member {
     height: 95px;
     width: 95px;

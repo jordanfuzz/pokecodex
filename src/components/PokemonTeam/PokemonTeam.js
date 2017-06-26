@@ -47,6 +47,8 @@ class PokemonTeam extends Component {
 
     return (
       <div>
+        <h1 className="team-header">Your Pokemon Team</h1>
+        
         <div className="pokemon-team-container">
           <div className="team-member" onClick={() => this.handleSelect(0)}><TeamMember pokemon={this.props.pokemonTeam[0]} index={0} /></div>
           <div className="team-member" onClick={() => this.handleSelect(1)}><TeamMember pokemon={this.props.pokemonTeam[1]} index={1} /></div>

@@ -38,11 +38,12 @@ export default class PokemonFinder extends Component {
 
     return (
       <div>
+        <h1 className="finder-header">Pokemon Finder</h1>
         <div className="pokemon-container">
           <Pokemon getPokemon={this.getPokemon} name={this.state.pokemonName}/>
         </div>
 
-        <div className="input-container">
+        <div className="finder-input-container">
           <input className="console" type="text" placeholder="Enter a pokemon: " value={this.state.userInput}
                  onChange={(e) => this.handleChange(e.target.value)}/>
           <button onClick={this.handleSearch}>Find!</button>

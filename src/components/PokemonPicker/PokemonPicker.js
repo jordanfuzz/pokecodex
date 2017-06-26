@@ -46,47 +46,15 @@ class PokemonPicker extends Component {
     this.setState({
       wildPokemon: pokemon
     })
+
+    
   }
 
   findEffectivePokemon() {
 
     //where do I put this?
+
     this.state.wildPokemon.types.forEach((element) => {dispatchAddType(element.type.name)})
-
-    let wildTypes = this.props.typeArray
-
-    let effectivenessArray = []
-    this.props.pokemonTeam.forEach((userPokemon) => {
-      var effectiveness = 0
-      wildTypes.forEach((wildType) => {
-        let noDamage = wildType.damage_relations.no_damage_from.map((element) => {return element.name})
-        let halfDamage = wildType.damage_relations.half_damage_from.map((element) => {return element.name})
-        let doubleDamage = wildType.damage_relations.double_damage_from.map((element) => {return element.name})
-        userPokemon.types.forEach((userType) => {
-          console.log(noDamage, halfDamage, doubleDamage)
-          if(noDamage.includes(userType)) {
-            effectiveness -= 2
-          }
-          else if(halfDamage.includes(userType)) {
-            effectiveness--
-            console.log("not very effective")
-          }
-          else if(doubleDamage.includes(userType)){
-            effectiveness++
-            console.log("it's super effective!")
-          }
-        })
-      })
-      effectivenessArray.push(effectiveness)
-    })
-
-    console.log(effectivenessArray)
-
-    let max = Math.max.apply(null, effectivenessArray)
-
-    this.setState({
-      effectivePokemon: this.props.pokemonTeam[effectivenessArray.indexOf(max)]
-    })
   }
   
   render() {
@@ -105,6 +73,7 @@ class PokemonPicker extends Component {
           </div>
 
           <div className="wild-pokemon-section">
+            <h1 className="picker-header">Pokemon Picker</h1>
             <div className="pokemon-display-container">
               <Pokemon name={this.state.pokemonName} getPokemon={this.getPokemon} />
             </div>
@@ -119,7 +88,7 @@ class PokemonPicker extends Component {
 
         </div>
         <div className="results">
-          {this.state.wildPokemon && this.state.effectivePokemon ? `${this.state.effectivePokemon.name} is most effective against ${this.state.wildPokemon.name}!` : ""}
+          {this.state.wildPokemon && this.props.effectivePokemon ? `${this.props.effectivePokemon.name} is most effective against ${this.state.wildPokemon.name}!` : "nothing"}
         </div>
       </div>
     )
@@ -127,9 +96,43 @@ class PokemonPicker extends Component {
 }
 
 function mapStateToProps(state) {
-  return {
-    pokemonTeam: state.userTeam,
-    typeArray: state.types
+  if (!state.types)
+    return { pokemonTeam: state.userTeam }
+
+
+  console.log('state', state)
+  if(state.types) {
+    let wildTypes = state.types
+
+    let effectivenessArray = []
+    state.userTeam.forEach((userPokemon) => {
+      var effectiveness = 0
+      wildTypes.forEach((wildType) => {
+        let noDamage = wildType.damage_relations.no_damage_from.map((element) => {return element.name})
+        let halfDamage = wildType.damage_relations.half_damage_from.map((element) => {return element.name})
+        let doubleDamage = wildType.damage_relations.double_damage_from.map((element) => {return element.name})
+        userPokemon.types.forEach((userType) => {
+          if(noDamage.includes(userType.type.name)) {
+            effectiveness -= 2
+          }
+          else if(halfDamage.includes(userType.type.name)) {
+            effectiveness--
+          }
+          else if(doubleDamage.includes(userType.type.name)){
+            effectiveness++
+          }
+        })
+      })
+      effectivenessArray.push(effectiveness)
+    })
+    
+    console.log(effectivenessArray)
+    let max = Math.max.apply(null, effectivenessArray)
+
+    return {
+      pokemonTeam: state.userTeam,
+      effectivePokemon: state.userTeam[effectivenessArray.indexOf(max)]
+    }
   }
 }
 
