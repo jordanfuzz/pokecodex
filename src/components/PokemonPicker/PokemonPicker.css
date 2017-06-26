@@ -11,7 +11,7 @@
     position: relative;
     background-color: #3F3F3F;
     text-align: center;
-    margin-top: 15vh;
+    margin-top: 5vh;
     border-radius: 5px;
     display: flex;
     justify-content: space-between;
@@ -33,7 +33,7 @@
     position: relative;
     background-color: #3F3F3F;
     text-align: center;
-    margin-top: 30vh;
+    margin-top: 20vh;
     margin-left: 45px;
     border-radius: 5px;
 }
@@ -47,6 +47,12 @@
     border-radius: 4px;
 }
 
+.results {
+    font-family: 'Press Start 2P', sans-serif;
+    font-size: 18px;
+    color: white;
+    margin-top: 40px;
+}
 
 
 .find-button {

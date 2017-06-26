@@ -2,8 +2,9 @@ import React, {Component} from 'react'
 import './PokemonTeam.css'
 import TeamMember from '../PokemonPicker/TeamMember/TeamMember'
 import {dispatchAddToTeam} from '../../services/pokemonService'
+import {connect} from 'react-redux'
 
-export default class PokemonTeam extends Component {
+class PokemonTeam extends Component {
   constructor() {
     super()
 
@@ -32,7 +33,7 @@ export default class PokemonTeam extends Component {
   }
 
   handleAdd() {
-    dispatchAddToTeam(this.state.userInput, this.state.currentSlot)
+    dispatchAddToTeam(this.state.userInput)
 
     this.setState({
       userInput: "",
@@ -46,16 +47,16 @@ export default class PokemonTeam extends Component {
 
     return (
       <div>
-        <div className="pokemon-team">
-          <div className="team-member" onClick={() => this.handleSelect(0)}><TeamMember name="bulbasaur" index={0} /></div>
-          <div className="team-member" onClick={() => this.handleSelect(1)}><TeamMember name="nidoking" index={1} /></div>
-          <div className="team-member" onClick={() => this.handleSelect(2)}><TeamMember name="gengar" index={2} /></div>
-          <div className="team-member" onClick={() => this.handleSelect(3)}><TeamMember name="gengar" index={3} /></div>
-          <div className="team-member" onClick={() => this.handleSelect(4)}><TeamMember name="gengar" index={4} /></div>
-          <div className="team-member" onClick={() => this.handleSelect(5)}><TeamMember name="gengar" index={5} /></div>
+        <div className="pokemon-team-container">
+          <div className="team-member" onClick={() => this.handleSelect(0)}><TeamMember pokemon={this.props.pokemonTeam[0]} index={0} /></div>
+          <div className="team-member" onClick={() => this.handleSelect(1)}><TeamMember pokemon={this.props.pokemonTeam[1]} index={1} /></div>
+          <div className="team-member" onClick={() => this.handleSelect(2)}><TeamMember pokemon={this.props.pokemonTeam[2]} index={2} /></div>
+          <div className="team-member" onClick={() => this.handleSelect(3)}><TeamMember pokemon={this.props.pokemonTeam[3]} index={3} /></div>
+          <div className="team-member" onClick={() => this.handleSelect(4)}><TeamMember pokemon={this.props.pokemonTeam[4]} index={4} /></div>
+          <div className="team-member" onClick={() => this.handleSelect(5)}><TeamMember pokemon={this.props.pokemonTeam[5]} index={5} /></div>
         </div>
         
-          <div className={`input-container ${this.state.addingPokemon ? "" : "hide-console"}`}>
+          <div className={`console-container ${this.state.addingPokemon ? "" : "hide-console"}`}>
             <input className="console" type="text" placeholder="Enter a pokemon..." value={this.state.userInput}
                    onChange={(e) => this.handleChange(e.target.value)}/>
             <button className="add-button" onClick={this.handleAdd}>Add!</button>
@@ -64,3 +65,13 @@ export default class PokemonTeam extends Component {
     )
   }
 }
+
+function mapStateToProps(state) {
+  return {
+    pokemonTeam: state.userTeam
+  }
+}
+
+
+
+export default connect(mapStateToProps)(PokemonTeam)

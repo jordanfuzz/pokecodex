@@ -13,6 +13,7 @@ export default class PokemonFinder extends Component {
     }
     this.handleChange = this.handleChange.bind(this)
     this.handleSearch = this.handleSearch.bind(this)
+    this.getPokemon = this.getPokemon.bind(this)
 
   }
 
@@ -29,13 +30,16 @@ export default class PokemonFinder extends Component {
     })
   }
 
+  getPokemon() {
+  }
+
 
   render() {
 
     return (
       <div>
         <div className="pokemon-container">
-          <Pokemon name={this.state.pokemonName}/>
+          <Pokemon getPokemon={this.getPokemon} name={this.state.pokemonName}/>
         </div>
 
         <div className="input-container">

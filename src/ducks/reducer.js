@@ -1,30 +1,32 @@
 let initialState = {
   pokemon: {},
-  userTeam: [{},{},{},{},{},{}]
+  userTeam: [],
+  types: []
 }
 
 const GET_POKEMON = "GET_POKEMON"
 const ADD_TO_TEAM = "ADD_TO_TEAM"
+const ADD_TYPE = "ADD_TYPE"
 
 //reducer
 export default function reducer(state = initialState, action) {
-  console.log(action.type)
   switch(action.type) {
     case GET_POKEMON + '_PENDING':
-      console.log("promise pending")
       return state
     case GET_POKEMON + '_FULFILLED':
-      return Object.assign({}, state, {pokemon: action.payload})
+      return Object.assign({}, state, {pokemon: action.payload, types: []})
     case ADD_TO_TEAM + '_PENDING':
       return state
     case ADD_TO_TEAM + '_FULFILLED':
-      console.log("Reducer fired!")
-      return state.userTeam.map((element, i) => {
-        if(i === action.payload[1])
-          return action.payload[0]
-        else
-          return element
-      })
+      let newTeam = state.userTeam.slice(0)
+      newTeam.push(action.payload)
+      return Object.assign({}, state, {userTeam: newTeam})
+    case ADD_TYPE + '_PENDING':
+      return state;
+    case ADD_TYPE + '_FULFILLED':
+      let newTypes = state.types.slice(0)
+      newTypes.push(action.payload)
+      return Object.assign({}, state, {types: newTypes})
     default:
       return state
   }
@@ -38,10 +40,16 @@ export function getPokemon(promise) {
   }
 }
 
-export function addToTeam(promise, index) {
-  console.log("AddToTeam fired!")
+export function addToTeam(promise) {
   return {
     type: ADD_TO_TEAM,
-    payload: [promise, index]
+    payload: promise
+  }
+}
+
+export function addType(promise) {
+  return {
+    type: ADD_TYPE,
+    payload: promise
   }
 }
