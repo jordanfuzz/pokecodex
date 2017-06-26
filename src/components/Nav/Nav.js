@@ -11,9 +11,20 @@ export default class Nav extends Component {
     return (
       <div className="nav-container">
         <ul className="nav-list">
-          <Link to="/"><li><img alt="Pokeball" className="menu-button finder" src={pokeball}/></li></Link>
-          <Link to="/picker"><li><img alt="Pokeball" className="menu-button picker" src={switchTeam}/></li></Link>
-          <Link to="/team"><li><img alt="Pokeball" className="menu-button team" src={threeballs}/></li></Link>
+          <Link className="no-underline" to="/">
+            <li className="list-item">
+              <img alt="Pokeball" className="menu-button finder" src={pokeball}/>
+              <span className="menu-text">Finder</span>
+            </li>
+          </Link>
+          <Link className="no-underline" to="/picker">
+            <li className="list-item"><img alt="Pokeball" className="menu-button picker" src={switchTeam}/>
+            <span className="menu-text">Picker</span>
+          </li></Link>
+          <Link className="no-underline" to="/team">
+            <li className="list-item"><img alt="Pokeball" className="menu-button team" src={threeballs}/>
+            <span className="menu-text">Team</span>
+          </li></Link>
         </ul>
       </div>
     )

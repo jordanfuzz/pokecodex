@@ -10,21 +10,41 @@
     align-items: center;
 }
 
+.list-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.no-underline {
+    text-decoration: none;
+}
 
 .nav-container:hover {
-
-    width: 200px;
-    justify-content: inherit;
+    width: 180px;
+    justify-content: flex-start;
     padding-left: 20px;
+    transition: 0.2s;
+}
+
+.nav-container:hover .menu-text {
+    display: inline-block;
 
 }
 
-
-
+.menu-text {
+    display: none;
+    color: #eee;
+    margin-left: 15px;
+}
 
 .nav-list {
     list-style-type: none;
     padding-left: 0;
+    font-family: 'Press Start 2P', sans-serif;
+    color: white;
+    font-size: 14px;
+    white-space: nowrap;
 }
 
 

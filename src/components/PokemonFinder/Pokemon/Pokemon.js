@@ -26,7 +26,7 @@ class Pokemon extends Component {
     return (
       <div>
         <div className="pokemon-name">
-          {this.props.pokemon.name}
+          {this.props.pokemon.name ? this.props.pokemon.name.charAt(0).toUpperCase() + this.props.pokemon.name.slice(1) : ""}
         </div>
         <div> <img alt={this.props.pokemon.name} className="sprite" src={sprite} /> </div>
 

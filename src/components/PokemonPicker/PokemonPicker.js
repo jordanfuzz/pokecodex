@@ -37,7 +37,7 @@ class PokemonPicker extends Component {
 
   handleSearch() {
     this.setState({
-      pokemonName: this.state.userInput,
+      pokemonName: this.state.userInput.toLowerCase(),
       userInput: ""
     })
   }
