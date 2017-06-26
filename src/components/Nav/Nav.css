@@ -1,17 +1,18 @@
 .nav-container {
     position: fixed;
     height: 100vh;
-    width: 10vw;
+    width: 90px;
     background-color: #ed1b24;
     left: 0;
     top: 0;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
 }
 
 .nav-list {
     list-style-type: none;
-    position: absolute;
-    margin-top: 40vh;
-    margin-left: -10%;
+    padding-left: 0;
 }
 
 .nav-list li {

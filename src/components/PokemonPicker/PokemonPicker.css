@@ -1,0 +1,60 @@
+.component-container {
+    display: flex;
+    justify-content: space-around;
+    padding: 0 175px;
+}
+
+.pokemon-team {
+    box-sizing: border-box;
+    height: 375px;
+    width: 270px;
+    position: relative;
+    background-color: #3F3F3F;
+    text-align: center;
+    margin-top: 15vh;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding: 25px 30px 30px 30px;
+}
+
+.team-member {
+    height: 95px;
+    width: 95px;
+    background-color: lightgray;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+.pokemon-display-container {
+    height: 200px;
+    width: 200px;
+    position: relative;
+    background-color: #3F3F3F;
+    text-align: center;
+    margin-top: 30vh;
+    margin-left: 45px;
+    border-radius: 5px;
+}
+
+.input-container {
+    margin: 30px auto 0 auto;
+    padding-top: 6px;
+    height: 28px;
+    width: 300px;
+    background-color: #ed1b24;
+    border-radius: 4px;
+}
+
+
+
+.find-button {
+    margin-right: 5px;
+}
+
+.console {
+    border-radius: 2px;
+    width: 150px;
+    margin-right: 10px;
+}

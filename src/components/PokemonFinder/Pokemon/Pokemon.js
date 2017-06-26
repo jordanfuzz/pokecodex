@@ -13,8 +13,8 @@ class Pokemon extends Component {
   }
 
   render() {
-    // if (!this.props.name)
-    //   return null
+    if (!this.props.name)
+      return null
     if(this.props.pokemon.sprites) {
       var sprite = this.props.pokemon.sprites.front_default
     }
@@ -24,7 +24,7 @@ class Pokemon extends Component {
         <div className="pokemon-name">
           {this.props.pokemon.name}
         </div>
-        <div> <img src={sprite} /> </div>
+        <div> <img alt={this.props.pokemon.name} className="sprite" src={sprite} /> </div>
 
       <div className="type-container">
         {this.props.pokemon.types ? this.props.pokemon.types.map((element, i) => {
@@ -78,7 +78,6 @@ function getColor (element) {
   }
 }
 function mapStateToProps(state) {
-  console.log('map', state)
   return {
     pokemon: state.pokemon
   }
