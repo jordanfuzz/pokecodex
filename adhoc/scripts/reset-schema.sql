@@ -35,8 +35,7 @@ create table sources (
   description text,
   image text,
   gen integer not null, --0 is all
-  source source_type,
-  is_battle_only boolean, 
+  source source_type
 );
 
 create table users_pokemon (
