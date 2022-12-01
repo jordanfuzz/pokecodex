@@ -68,15 +68,12 @@ for (let i = 201; i <= 201; i++) {
   basicSources.push(wildSource)
   basicSources.push(originalSource)
 
-  console.log(pokemon.identifier)
   const allVariantIds = allPokemon
     .filter(mon => mon.species_id === pokemon.id)
     .map(mon => mon.id)
 
-  console.log(allVariantIds)
   allVariantIds.forEach(id => {
     const variant = pokemonForms.find(form => form.pokemon_id === id)
-    console.log(variant.pokemon_id)
     if (['alola', 'galar', 'hisui'].includes(variant.form_identifier)) {
       const regionName =
         variant.form_identifier.charAt(0).toUpperCase() +

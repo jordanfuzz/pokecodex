@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
+import SourceEditor from './source-editor/source-editor'
 import './sources.scss'
 
 // Manual sources: Non-special variants (unown, minior, etc),
@@ -11,6 +12,8 @@ const Sources = () => {
   const [activePokemon, setActivePokemon] = useState(null)
   const [searchText, setSearchText] = useState('')
   const [pokemonSources, setPokemonSources] = useState([])
+  const [isEditMode, setIsEditMode] = useState(false)
+
   useEffect(async () => {
     const response = await axios.get('/api/pokemon')
     setPokemon(response.data.pokemon)
@@ -18,7 +21,6 @@ const Sources = () => {
 
   useEffect(async () => {
     if (!activePokemon) return
-    console.log('fetching sources')
 
     const response = await axios.get(
       `/api/sources?pokemonId=${activePokemon.id}`
@@ -27,8 +29,7 @@ const Sources = () => {
   }, [activePokemon])
 
   const handleSearch = () => {
-    if (!pokemon) return
-    console.log('searching!')
+    if (!pokemon || isEditMode) return
 
     const newActivePokemon = pokemon.find(
       mon => mon.name.toLowerCase() === searchText.toLowerCase()
@@ -44,6 +45,20 @@ const Sources = () => {
       e.preventDefault()
       handleSearch()
     }
+  }
+
+  const handleCancel = () => {
+    setIsEditMode(false)
+  }
+
+  const handleAddSource = async sourceData => {
+    if (!sourceData || !activePokemon.id) return
+    const response = await axios.post('/api/sources', {
+      source: sourceData,
+      pokemonId: activePokemon.id,
+    })
+    setPokemonSources(response.data.sources)
+    setIsEditMode(false)
   }
 
   const renderSourceRows = () => {
@@ -63,8 +78,6 @@ const Sources = () => {
       </tr>
     ))
   }
-
-  console.log(pokemonSources)
 
   return (
     <div className="sources-container">
@@ -86,30 +99,48 @@ const Sources = () => {
         </button>
       </div>
       <div className="sources-list-container">
-        <table className="sources-list-table">
-          <thead>
-            <tr className="sources-header-row">
-              <th>Image</th>
-              <th>Name</th>
-              <th>Type</th>
-              <th>Gen</th>
-              <th>Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pokemonSources?.length ? (
-              renderSourceRows()
-            ) : (
-              <tr className="empty-row source-data-row">
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+        {isEditMode ? (
+          <SourceEditor
+            handleCancel={handleCancel}
+            handleAddSource={handleAddSource}
+            pokemonId={activePokemon?.id}
+          />
+        ) : (
+          <>
+            <table className="sources-list-table">
+              <thead>
+                <tr className="sources-header-row">
+                  <th>Image</th>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Gen</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pokemonSources?.length ? (
+                  renderSourceRows()
+                ) : (
+                  <tr className="empty-row source-data-row">
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                )}
+              </tbody>
+            </table>{' '}
+            {activePokemon ? (
+              <button
+                onClick={() => setIsEditMode(true)}
+                className="new-source-button"
+              >
+                Add new
+              </button>
+            ) : null}
+          </>
+        )}
       </div>
     </div>
   )

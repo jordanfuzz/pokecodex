@@ -50,10 +50,14 @@
   image-rendering: pixelated;
 }
 
-.sources-list-table {
-  width: 750px;
+.sources-list-container {
   margin-top: 42px;
   margin-left: 80px;
+}
+
+.sources-list-table {
+  margin-top: 55px;
+  width: 750px;
 }
 
 .sources-header-row {
@@ -81,4 +85,10 @@
 .source-image {
   width: 100px;
   image-rendering: pixelated;
+}
+
+.new-source-button {
+  margin-top: 8px;
+  font-size: 20px;
+  float: right;
 }

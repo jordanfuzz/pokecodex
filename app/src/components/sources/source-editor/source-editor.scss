@@ -1,0 +1,60 @@
+.editor-label {
+  font-size: 24px;
+  color: lightgray;
+  margin-right: 5px;
+}
+
+.editor-container {
+  width: 300px;
+  display: flex;
+  margin-top: 5px;
+}
+
+.editor-input {
+  font-size: 20px;
+  width: 180px;
+  border-radius: 5px;
+  border: none;
+}
+
+.description-editor-label {
+  font-size: 24px;
+  color: lightgray;
+  margin-right: 5px;
+}
+
+.description-editor-container {
+  margin-top: 5px;
+}
+
+.editor-description-field {
+  display: block;
+  border-radius: 5px;
+  border: none;
+}
+
+.image-preview-container {
+  display: inline-block;
+  background-color: #8b8a95;
+  margin-top: 20px;
+  width: 200px;
+  height: 200px;
+  border-radius: 6px;
+}
+
+.image-preview {
+  width: 200px;
+  image-rendering: pixelated;
+}
+
+.source-editor-container {
+  display: flex;
+  margin-top: 55px;
+}
+
+.editor-button {
+  height: 30px;
+  align-self: flex-end;
+  font-size: 20px;
+  margin-left: 10px;
+}
