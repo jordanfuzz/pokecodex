@@ -24,3 +24,8 @@ services:
     volumes:
       - ./api:/app
     env_file: .env
+  adhoc:
+    build: ./adhoc
+    volumes:
+      - ./adhoc:/app
+    env_file: .env

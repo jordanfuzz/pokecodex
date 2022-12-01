@@ -6,10 +6,6 @@ COPY package.json package-lock.json ./
 
 RUN npm install --quiet
 
-RUN npm install -g nodemon
-
 COPY . .
 
-EXPOSE 3002
-
-CMD ["node", "./src"]
+ENTRYPOINT ["tail", "-f", "/dev/null"]

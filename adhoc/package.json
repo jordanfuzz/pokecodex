@@ -1,17 +1,14 @@
 {
-  "name": "picker-api",
+  "name": "picker-adhoc",
   "version": "0.1.0",
-  "description": "API service for the Pokemon Picker site",
+  "description": "Adhoc service for the Pokemon Picker site",
   "main": "src/index.js",
   "type": "module",
   "author": "jordan@cooperplanet.com",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.21.1",
-    "camelize": "^1.0.0",
-    "cookie-parser": "^1.4.5",
     "dotenv": "^10.0.0",
-    "express": "^4.17.1",
     "pg": "^8.4.1"
   }
 }
