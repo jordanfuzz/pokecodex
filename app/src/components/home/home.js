@@ -24,39 +24,14 @@ const Home = () => {
     }
   }
 
-  const renderNoImageSources = () => {
-    if (
-      !activePokemonSources ||
-      activePokemonSources[0]?.pokemonId !== openDrawerIndex
-    )
-      return
-
-    return activePokemonSources
-      .filter(x => !x.image)
-      .map(source => {
-        return (
-          <div>
-            <span className="active-source-checkbox">⬜</span>
-            <span className="active-source-name">{source.name}</span>
-          </div>
-        )
-      })
-  }
-
-  const renderImageSources = () => {
-    if (!activePokemonSources) return
-
-    return activePokemonSources
-      .filter(x => !!x.image)
-      .map(source => {
-        return (
-          <div>
-            <span className="active-source-checkbox">⬜</span>
-            <span className="active-source-name">{source.name}</span>
-            <img className="active-source-image" src={source.image} />
-          </div>
-        )
-      })
+  const renderSources = () => {
+    return activePokemonSources.map((source, i) => {
+      return (
+        <span key={i} className="locked-source-pill">
+          {source.name}
+        </span>
+      )
+    })
   }
 
   const renderListRows = () => {
@@ -87,13 +62,24 @@ const Home = () => {
           </td>
         </tr>
         {openDrawerIndex === mon.id ? (
-          <tr className={`data-row drawer-${mon.type1}`}>
-            <td colspan="5">
-              <div className="pokemon-sources-container">
-                <span className="no-image-sources">
-                  {renderNoImageSources()}
+          <tr className={`data-row-drawer drawer-${mon.type1}`}>
+            <td className="drawer-column" colspan="5">
+              <div className="pokemon-sources-container">{renderSources()}</div>
+              <div className="drawer-button-container">
+                <span className="log-catch-button">
+                  Log new catch
+                  <img
+                    src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rule-book.png"
+                    className="button-icon"
+                  />
                 </span>
-                <span className="image-sources">{renderImageSources()}</span>
+                <span className="show-catches-button">
+                  Show catches
+                  <img
+                    src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
+                    className="button-icon"
+                  />
+                </span>
               </div>
             </td>
           </tr>

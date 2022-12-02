@@ -90,40 +90,55 @@ td {
   font-size: 26px;
 }
 
+.drawer-column {
+  padding: 0;
+}
+
 .pokemon-sources-container {
   display: flex;
   flex-wrap: wrap;
-  margin-bottom: 10px;
-  margin-top: 10px;
-}
-
-.no-image-sources {
   padding: 5px;
-  text-align: left;
-  min-width: 25%;
+  margin-bottom: 25px;
 }
 
-.image-sources {
+.drawer-button-container {
   display: flex;
-  width: 55%;
-  justify-content: space-around;
-  text-align: center;
-  margin-left: 40px;
+  justify-content: space-evenly;
+  height: 70px;
 }
 
-.active-source-image {
-  display: block;
+.button-icon {
+  vertical-align: bottom;
   image-rendering: pixelated;
-  background-color: #1e1e1e;
-  border-radius: 5px;
 }
 
-.active-source-checkbox {
-  font-size: 18px;
-  vertical-align: top;
-  margin-right: 2px;
+.log-catch-button {
+  background-color: rgba(0, 0, 0, 0.4);
+  color: white;
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  cursor: pointer;
 }
 
-.solo-left {
-  margin-left: -5px;
+.show-catches-button {
+  color: white;
+  width: 100%;
+  background-color: black;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  cursor: pointer;
+}
+
+.locked-source-pill {
+  padding: 5px 9px;
+  opacity: 0.4;
+  background-color: black;
+  color: white;
+  margin: 5px;
+  cursor: default;
 }
