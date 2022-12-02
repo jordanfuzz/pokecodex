@@ -1,0 +1,56 @@
+[
+  {
+    "id": 25,
+    "identifier": "stadium",
+    "generation_id": 1,
+    "is_spinoff": true
+  },
+  {
+    "id": 26,
+    "identifier": "stadium-2",
+    "generation_id": 2,
+    "is_spinoff": true
+  },
+  {
+    "id": 27,
+    "identifier": "channel",
+    "generation_id": 3,
+    "is_spinoff": true
+  },
+  {
+    "id": 28,
+    "identifier": "box",
+    "generation_id": 3,
+    "is_spinoff": true
+  },
+  {
+    "id": 29,
+    "identifier": "ranch",
+    "generation_id": 4,
+    "is_spinoff": true
+  },
+  {
+    "id": 30,
+    "identifier": "ranger",
+    "generation_id": 4,
+    "is_spinoff": true
+  },
+  {
+    "id": 31,
+    "identifier": "ranger-shadows-of-almia",
+    "generation_id": 4,
+    "is_spinoff": true
+  },
+  {
+    "id": 32,
+    "identifier": "ranger-guardian-signs",
+    "generation_id": 4,
+    "is_spinoff": true
+  },
+  {
+    "id": 33,
+    "identifier": "battle-revolution",
+    "generation_id": 4,
+    "is_spinoff": true
+  }
+]

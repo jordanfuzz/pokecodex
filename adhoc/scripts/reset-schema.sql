@@ -3,6 +3,7 @@ drop table if exists users;
 drop table if exists sources;
 drop table if exists users_pokemon;
 drop table if exists users_pokemon_sources;
+drop table if exists game_versions;
 
 drop type if exists source_type;
 drop type if exists pokemon_type;
@@ -11,7 +12,7 @@ create type pokemon_type as enum ('normal', 'fighting', 'flying', 'poison', 'gro
 
 create table users (
   id uuid primary key,
-  avatar text
+  avatar_pokemon integer
 );
 
 -- create table pokemon (
@@ -38,10 +39,17 @@ create table sources (
   source source_type
 );
 
+-- create table user_overrides (
+--   id uuid primary key,
+--   source_id uuid not null,
+--   is_required boolean not null
+-- );
+
 create table users_pokemon (
   id uuid primary key,
   pokemon_id integer not null,
   notes text,
+  game_id integer,
   caught_at timestamp without time zone
 );
 
@@ -49,4 +57,12 @@ create table users_pokemon_sources (
   id uuid primary key,
   users_pokemon_id uuid not null,
   source_id uuid not null
+);
+
+create table game_versions (
+  id serial primary key,
+  name text not null,
+  generation_id integer not null,
+  order integer,
+  is_spinoff boolean not null default 'false'
 );

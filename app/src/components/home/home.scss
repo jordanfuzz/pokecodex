@@ -27,6 +27,10 @@ $type-colors: (
   .drawer-#{$type} {
     background-color: $hex !important;
   }
+
+  .active-#{$type} {
+    background-color: $hex !important;
+  }
 }
 
 .home-container {
@@ -41,6 +45,11 @@ $type-colors: (
 
 .name {
   user-select: none;
+}
+
+.name-link:hover {
+  text-decoration: underline;
+  text-decoration-color: white;
 }
 
 .list-icon {
@@ -79,4 +88,42 @@ tr {
 
 td {
   font-size: 26px;
+}
+
+.pokemon-sources-container {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+
+.no-image-sources {
+  padding: 5px;
+  text-align: left;
+  min-width: 25%;
+}
+
+.image-sources {
+  display: flex;
+  width: 55%;
+  justify-content: space-around;
+  text-align: center;
+  margin-left: 40px;
+}
+
+.active-source-image {
+  display: block;
+  image-rendering: pixelated;
+  background-color: #1e1e1e;
+  border-radius: 5px;
+}
+
+.active-source-checkbox {
+  font-size: 18px;
+  vertical-align: top;
+  margin-right: 2px;
+}
+
+.solo-left {
+  margin-left: -5px;
 }

@@ -5,6 +5,7 @@ import typeImages from '../../media/types.js'
 
 const Home = () => {
   const [pokemon, setPokemon] = useState([])
+  const [activePokemonSources, setActivePokemonSources] = useState([])
   const [openDrawerIndex, setOpenDrawerIndex] = useState(null)
 
   useEffect(async () => {
@@ -12,16 +13,59 @@ const Home = () => {
     setPokemon(response.data.pokemon)
   }, [])
 
-  const handleOpenDrawer = pokemonId => {
+  const handleOpenDrawer = async pokemonId => {
     if (openDrawerIndex === pokemonId) setOpenDrawerIndex(null)
-    else setOpenDrawerIndex(pokemonId)
+    else {
+      setOpenDrawerIndex(pokemonId)
+      const pokemonSources = await axios.get(
+        `/api/sources?pokemonId=${pokemonId}`
+      )
+      setActivePokemonSources(pokemonSources.data.sources)
+    }
+  }
+
+  const renderNoImageSources = () => {
+    if (
+      !activePokemonSources ||
+      activePokemonSources[0]?.pokemonId !== openDrawerIndex
+    )
+      return
+
+    return activePokemonSources
+      .filter(x => !x.image)
+      .map(source => {
+        return (
+          <div>
+            <span className="active-source-checkbox">⬜</span>
+            <span className="active-source-name">{source.name}</span>
+          </div>
+        )
+      })
+  }
+
+  const renderImageSources = () => {
+    if (!activePokemonSources) return
+
+    return activePokemonSources
+      .filter(x => !!x.image)
+      .map(source => {
+        return (
+          <div>
+            <span className="active-source-checkbox">⬜</span>
+            <span className="active-source-name">{source.name}</span>
+            <img className="active-source-image" src={source.image} />
+          </div>
+        )
+      })
   }
 
   const renderListRows = () => {
     return pokemon.map((mon, i) => (
       <>
         <tr
-          className={`data-row hover-${mon.type1}`}
+          className={`data-row hover-${mon.type1} ${
+            openDrawerIndex === mon.id ? `active-${mon.type1}` : ''
+          }`}
           key={i}
           onClick={() => handleOpenDrawer(mon.id)}
         >
@@ -44,7 +88,14 @@ const Home = () => {
         </tr>
         {openDrawerIndex === mon.id ? (
           <tr className={`data-row drawer-${mon.type1}`}>
-            <td colspan="5">Test</td>
+            <td colspan="5">
+              <div className="pokemon-sources-container">
+                <span className="no-image-sources">
+                  {renderNoImageSources()}
+                </span>
+                <span className="image-sources">{renderImageSources()}</span>
+              </div>
+            </td>
           </tr>
         ) : null}
       </>
