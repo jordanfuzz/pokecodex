@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import './home.scss'
 import typeImages from '../../media/types.js'
+import SourcesList from './sources-list/sources-list'
+import Catch from './catch/catch'
 
 const Home = () => {
   const [pokemon, setPokemon] = useState([])
   const [activePokemonSources, setActivePokemonSources] = useState([])
   const [openDrawerIndex, setOpenDrawerIndex] = useState(null)
+  const [drawerMode, setDrawerMode] = useState('sources')
 
   useEffect(async () => {
     const response = await axios.get('/api/pokemon')
@@ -17,31 +20,48 @@ const Home = () => {
     if (openDrawerIndex === pokemonId) setOpenDrawerIndex(null)
     else {
       setOpenDrawerIndex(pokemonId)
-      const pokemonSources = await axios.get(
-        `/api/sources?pokemonId=${pokemonId}`
-      )
+      const pokemonSources = await axios.get(`/api/sources?pokemonId=${pokemonId}`)
       setActivePokemonSources(pokemonSources.data.sources)
     }
+    setDrawerMode('sources')
   }
 
-  const renderSources = () => {
-    return activePokemonSources.map((source, i) => {
-      return (
-        <span key={i} className="locked-source-pill">
-          {source.name}
-        </span>
-      )
-    })
+  const renderDrawer = activePokemon => {
+    let drawerContents
+
+    switch (drawerMode) {
+      case 'sources':
+        drawerContents = (
+          <SourcesList
+            activePokemonSources={activePokemonSources}
+            setDrawerMode={setDrawerMode}
+          />
+        )
+        break
+      case 'catch':
+        drawerContents = <Catch activePokemonSources={activePokemonSources} />
+        break
+      default:
+        drawerContents = null
+        break
+    }
+
+    return (
+      <tr className={`data-row-drawer drawer-${activePokemon.type1}`}>
+        <td className="drawer-column" colSpan="5">
+          {drawerContents}
+        </td>
+      </tr>
+    )
   }
 
   const renderListRows = () => {
     return pokemon.map((mon, i) => (
-      <>
+      <React.Fragment key={i}>
         <tr
           className={`data-row hover-${mon.type1} ${
             openDrawerIndex === mon.id ? `active-${mon.type1}` : ''
           }`}
-          key={i}
           onClick={() => handleOpenDrawer(mon.id)}
         >
           <td className="master-checkbox">⬜</td>
@@ -56,35 +76,11 @@ const Home = () => {
           </td>
           <td className="type">
             <img src={typeImages[mon.type1]} className="type-icon" />
-            {mon.type2 ? (
-              <img src={typeImages[mon.type2]} className="type-icon" />
-            ) : null}
+            {mon.type2 ? <img src={typeImages[mon.type2]} className="type-icon" /> : null}
           </td>
         </tr>
-        {openDrawerIndex === mon.id ? (
-          <tr className={`data-row-drawer drawer-${mon.type1}`}>
-            <td className="drawer-column" colspan="5">
-              <div className="pokemon-sources-container">{renderSources()}</div>
-              <div className="drawer-button-container">
-                <span className="log-catch-button">
-                  Log new catch
-                  <img
-                    src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rule-book.png"
-                    className="button-icon"
-                  />
-                </span>
-                <span className="show-catches-button">
-                  Show catches
-                  <img
-                    src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
-                    className="button-icon"
-                  />
-                </span>
-              </div>
-            </td>
-          </tr>
-        ) : null}
-      </>
+        {openDrawerIndex === mon.id ? renderDrawer(mon) : null}
+      </React.Fragment>
     ))
   }
 

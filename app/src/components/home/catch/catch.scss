@@ -1,0 +1,32 @@
+.dropdown-container {
+  height: 130px;
+}
+
+.main-dropdown {
+  margin-left: 15px;
+  margin-top: 15px;
+  width: 400px;
+}
+
+.catch-confirm-button {
+  width: 100%;
+  background-color: black;
+  color: white;
+  cursor: pointer;
+  height: 70px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+.option-image {
+  width: 55px;
+  background-color: #131418;
+  margin: 5px;
+}
+
+.option-container {
+  display: flex;
+  align-items: center;
+}

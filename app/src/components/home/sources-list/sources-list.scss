@@ -1,0 +1,47 @@
+.locked-source-pill {
+  padding: 5px 9px;
+  background-color: rgba(0, 0, 0, 0.4);
+  color: rgba(255, 255, 255, 0.6);
+  margin: 5px;
+  cursor: default;
+}
+
+.pokemon-sources-container {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 5px;
+  margin-bottom: 25px;
+}
+
+.drawer-button-container {
+  display: flex;
+  justify-content: space-evenly;
+  height: 70px;
+}
+
+.button-icon {
+  vertical-align: bottom;
+  image-rendering: pixelated;
+}
+
+.log-catch-button {
+  background-color: rgba(0, 0, 0, 0.4);
+  color: white;
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  cursor: pointer;
+}
+
+.show-catches-button {
+  color: white;
+  width: 100%;
+  background-color: black;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  cursor: pointer;
+}
