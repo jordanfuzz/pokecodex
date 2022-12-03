@@ -1,19 +1,22 @@
-drop table if exists users;
+-- drop table if exists users;
 -- drop table if exists pokemon;
 drop table if exists sources;
 drop table if exists users_pokemon;
 drop table if exists users_pokemon_sources;
-drop table if exists game_versions;
+-- drop table if exists game_versions;
+drop table if exists pokeballs;
 
 drop type if exists source_type;
 drop type if exists pokemon_type;
 create type source_type as enum ('male', 'female', 'npc-trade', 'side-game', 'regional', 'special', 'shiny', 'wild', 'original', 'mega', 'gmax', 'battle-only', 'variant');
 create type pokemon_type as enum ('normal', 'fighting', 'flying', 'poison', 'ground', 'rock', 'bug', 'ghost', 'steel', 'fire', 'water', 'grass', 'electric', 'psychic', 'ice', 'dragon', 'dark', 'fairy',);
 
-create table users (
-  id uuid primary key,
-  avatar_pokemon integer
-);
+
+-- a0af5822-5822-4281-add6-f6c9de34a083
+-- create table users (
+--   id uuid primary key,
+--   avatar_pokemon integer
+-- );
 
 -- create table pokemon (
 --   id integer primary key,
@@ -47,6 +50,7 @@ create table sources (
 
 create table users_pokemon (
   id uuid primary key,
+  user_id uuid not null,
   pokemon_id integer not null,
   notes text,
   game_id integer,
@@ -59,10 +63,17 @@ create table users_pokemon_sources (
   source_id uuid not null
 );
 
-create table game_versions (
+-- create table game_versions (
+--   id serial primary key,
+--   game_order integer,
+--   name text not null,
+--   pokeapi_id integer,
+--   generation_id integer not null,
+--   is_spinoff boolean not null default 'false'
+-- );
+
+create table pokeballs (
   id serial primary key,
   name text not null,
-  generation_id integer not null,
-  order integer,
-  is_spinoff boolean not null default 'false'
+  image text not null
 );

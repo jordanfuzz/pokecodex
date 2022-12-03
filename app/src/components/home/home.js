@@ -8,11 +8,13 @@ import Catch from './catch/catch'
 const Home = () => {
   const [pokemon, setPokemon] = useState([])
   const [activePokemonSources, setActivePokemonSources] = useState([])
+  const [usersPokemon, setUsersPokemon] = useState([])
+  const [catchData, setCatchData] = useState(null)
   const [openDrawerIndex, setOpenDrawerIndex] = useState(null)
   const [drawerMode, setDrawerMode] = useState('sources')
 
   useEffect(async () => {
-    const response = await axios.get('/api/pokemon')
+    const response = await axios.get('/api/all-pokemon')
     setPokemon(response.data.pokemon)
   }, [])
 
@@ -21,7 +23,15 @@ const Home = () => {
     else {
       setOpenDrawerIndex(pokemonId)
       const pokemonSources = await axios.get(`/api/sources?pokemonId=${pokemonId}`)
+      const usersPokemonData = await axios.get(
+        `/api/sources?userId=a0af5822-5822-4281-add6-f6c9de34a083&pokemonId=${pokemonId}`
+      )
       setActivePokemonSources(pokemonSources.data.sources)
+      setUsersPokemon(usersPokemonData.data.usersPokemon)
+      setCatchData({
+        pokeballs: usersPokemonData.data.pokeballs,
+        gameVersions: usersPokemonData.data.gameVersions,
+      })
     }
     setDrawerMode('sources')
   }
@@ -39,7 +49,13 @@ const Home = () => {
         )
         break
       case 'catch':
-        drawerContents = <Catch activePokemonSources={activePokemonSources} />
+        drawerContents = (
+          <Catch
+            activePokemonSources={activePokemonSources}
+            usersPokemon={usersPokemon}
+            catchData={catchData}
+          />
+        )
         break
       default:
         drawerContents = null

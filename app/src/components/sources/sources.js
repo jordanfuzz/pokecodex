@@ -15,16 +15,14 @@ const Sources = () => {
   const [isEditMode, setIsEditMode] = useState(false)
 
   useEffect(async () => {
-    const response = await axios.get('/api/pokemon')
+    const response = await axios.get('/api/all-pokemon')
     setPokemon(response.data.pokemon)
   }, [])
 
   useEffect(async () => {
     if (!activePokemon) return
 
-    const response = await axios.get(
-      `/api/sources?pokemonId=${activePokemon.id}`
-    )
+    const response = await axios.get(`/api/sources?pokemonId=${activePokemon.id}`)
     setPokemonSources(response.data.sources)
   }, [activePokemon])
 
@@ -65,11 +63,7 @@ const Sources = () => {
     return pokemonSources.map((source, i) => (
       <tr className={`source-data-row hover-${activePokemon.type1}`} key={i}>
         <td>
-          {source.image ? (
-            <img src={source.image} className="source-image" />
-          ) : (
-            'X'
-          )}
+          {source.image ? <img src={source.image} className="source-image" /> : 'X'}
         </td>
         <td>{source.name}</td>
         <td>{source.source}</td>
@@ -132,10 +126,7 @@ const Sources = () => {
               </tbody>
             </table>{' '}
             {activePokemon ? (
-              <button
-                onClick={() => setIsEditMode(true)}
-                className="new-source-button"
-              >
+              <button onClick={() => setIsEditMode(true)} className="new-source-button">
                 Add new
               </button>
             ) : null}

@@ -1,0 +1,370 @@
+[
+  {
+    "id": 1,
+    "game_order": 1,
+    "name": "Red",
+    "pokeapi_id": 1,
+    "generation_id": 1,
+    "is_spinoff": false
+  },
+  {
+    "id": 2,
+    "game_order": 2,
+    "name": "Blue",
+    "pokeapi_id": 1,
+    "generation_id": 1,
+    "is_spinoff": false
+  },
+  {
+    "id": 3,
+    "game_order": 3,
+    "name": "Yellow",
+    "pokeapi_id": 2,
+    "generation_id": 1,
+    "is_spinoff": false
+  },
+  {
+    "id": 4,
+    "game_order": 4,
+    "name": "Gold",
+    "pokeapi_id": 3,
+    "generation_id": 2,
+    "is_spinoff": false
+  },
+  {
+    "id": 5,
+    "game_order": 5,
+    "name": "Silver",
+    "pokeapi_id": 3,
+    "generation_id": 2,
+    "is_spinoff": false
+  },
+  {
+    "id": 6,
+    "game_order": 6,
+    "name": "Crystal",
+    "pokeapi_id": 4,
+    "generation_id": 2,
+    "is_spinoff": false
+  },
+  {
+    "id": 7,
+    "game_order": 7,
+    "name": "Ruby",
+    "pokeapi_id": 5,
+    "generation_id": 3,
+    "is_spinoff": false
+  },
+  {
+    "id": 8,
+    "game_order": 8,
+    "name": "Sapphire",
+    "pokeapi_id": 5,
+    "generation_id": 3,
+    "is_spinoff": false
+  },
+  {
+    "id": 9,
+    "game_order": 9,
+    "name": "Emerald",
+    "pokeapi_id": 6,
+    "generation_id": 3,
+    "is_spinoff": false
+  },
+  {
+    "id": 10,
+    "game_order": 10,
+    "name": "Colosseum",
+    "pokeapi_id": 12,
+    "generation_id": 3,
+    "is_spinoff": false
+  },
+  {
+    "id": 11,
+    "game_order": 11,
+    "name": "XD",
+    "pokeapi_id": 13,
+    "generation_id": 3,
+    "is_spinoff": false
+  },
+  {
+    "id": 12,
+    "game_order": 12,
+    "name": "Fire Red",
+    "pokeapi_id": 7,
+    "generation_id": 3,
+    "is_spinoff": false
+  },
+  {
+    "id": 13,
+    "game_order": 13,
+    "name": "Leaf Green",
+    "pokeapi_id": 7,
+    "generation_id": 3,
+    "is_spinoff": false
+  },
+  {
+    "id": 14,
+    "game_order": 14,
+    "name": "Diamond",
+    "pokeapi_id": 8,
+    "generation_id": 4,
+    "is_spinoff": false
+  },
+  {
+    "id": 15,
+    "game_order": 15,
+    "name": "Pearl",
+    "pokeapi_id": 8,
+    "generation_id": 4,
+    "is_spinoff": false
+  },
+  {
+    "id": 16,
+    "game_order": 16,
+    "name": "Platinum",
+    "pokeapi_id": 9,
+    "generation_id": 4,
+    "is_spinoff": false
+  },
+  {
+    "id": 17,
+    "game_order": 17,
+    "name": "Heart Gold",
+    "pokeapi_id": 10,
+    "generation_id": 4,
+    "is_spinoff": false
+  },
+  {
+    "id": 18,
+    "game_order": 18,
+    "name": "Soul Silver",
+    "pokeapi_id": 10,
+    "generation_id": 4,
+    "is_spinoff": false
+  },
+  {
+    "id": 19,
+    "game_order": 19,
+    "name": "Black",
+    "pokeapi_id": 11,
+    "generation_id": 5,
+    "is_spinoff": false
+  },
+  {
+    "id": 20,
+    "game_order": 20,
+    "name": "White",
+    "pokeapi_id": 11,
+    "generation_id": 5,
+    "is_spinoff": false
+  },
+  {
+    "id": 21,
+    "game_order": 21,
+    "name": "Black 2",
+    "pokeapi_id": 14,
+    "generation_id": 5,
+    "is_spinoff": false
+  },
+  {
+    "id": 22,
+    "game_order": 22,
+    "name": "White 2",
+    "pokeapi_id": 14,
+    "generation_id": 5,
+    "is_spinoff": false
+  },
+  {
+    "id": 23,
+    "game_order": 23,
+    "name": "X",
+    "pokeapi_id": 15,
+    "generation_id": 6,
+    "is_spinoff": false
+  },
+  {
+    "id": 24,
+    "game_order": 24,
+    "name": "Y",
+    "pokeapi_id": 15,
+    "generation_id": 6,
+    "is_spinoff": false
+  },
+  {
+    "id": 25,
+    "game_order": 25,
+    "name": "Omega Ruby",
+    "pokeapi_id": 16,
+    "generation_id": 6,
+    "is_spinoff": false
+  },
+  {
+    "id": 26,
+    "game_order": 26,
+    "name": "Alpha Sapphire",
+    "pokeapi_id": 16,
+    "generation_id": 6,
+    "is_spinoff": false
+  },
+  {
+    "id": 27,
+    "game_order": 27,
+    "name": "Sun",
+    "pokeapi_id": 17,
+    "generation_id": 7,
+    "is_spinoff": false
+  },
+  {
+    "id": 28,
+    "game_order": 28,
+    "name": "Moon",
+    "pokeapi_id": 17,
+    "generation_id": 7,
+    "is_spinoff": false
+  },
+  {
+    "id": 29,
+    "game_order": 29,
+    "name": "Ultra Sun",
+    "pokeapi_id": 18,
+    "generation_id": 7,
+    "is_spinoff": false
+  },
+  {
+    "id": 30,
+    "game_order": 30,
+    "name": "Ultra Moon",
+    "pokeapi_id": 18,
+    "generation_id": 7,
+    "is_spinoff": false
+  },
+  {
+    "id": 31,
+    "game_order": 31,
+    "name": "Let's Go Pikachu",
+    "pokeapi_id": 19,
+    "generation_id": 7,
+    "is_spinoff": false
+  },
+  {
+    "id": 32,
+    "game_order": 32,
+    "name": "Let's Go Eevee",
+    "pokeapi_id": 19,
+    "generation_id": 7,
+    "is_spinoff": false
+  },
+  {
+    "id": 33,
+    "game_order": 33,
+    "name": "Sword",
+    "pokeapi_id": 20,
+    "generation_id": 8,
+    "is_spinoff": false
+  },
+  {
+    "id": 34,
+    "game_order": 34,
+    "name": "Shield",
+    "pokeapi_id": 20,
+    "generation_id": 8,
+    "is_spinoff": false
+  },
+  {
+    "id": 35,
+    "game_order": 35,
+    "name": "Brilliant Diamond",
+    "pokeapi_id": 23,
+    "generation_id": 8,
+    "is_spinoff": false
+  },
+  {
+    "id": 36,
+    "game_order": 36,
+    "name": "Shining Pearl",
+    "pokeapi_id": 23,
+    "generation_id": 8,
+    "is_spinoff": false
+  },
+  {
+    "id": 37,
+    "game_order": 37,
+    "name": "Legends Arceus",
+    "pokeapi_id": 24,
+    "generation_id": 8,
+    "is_spinoff": false
+  },
+  {
+    "id": 38,
+    "game_order": null,
+    "name": "Stadium",
+    "pokeapi_id": null,
+    "generation_id": 1,
+    "is_spinoff": true
+  },
+  {
+    "id": 39,
+    "game_order": null,
+    "name": "Stadium 2",
+    "pokeapi_id": null,
+    "generation_id": 2,
+    "is_spinoff": true
+  },
+  {
+    "id": 40,
+    "game_order": null,
+    "name": "Channel",
+    "pokeapi_id": null,
+    "generation_id": 3,
+    "is_spinoff": true
+  },
+  {
+    "id": 41,
+    "game_order": null,
+    "name": "Box",
+    "pokeapi_id": null,
+    "generation_id": 3,
+    "is_spinoff": true
+  },
+  {
+    "id": 42,
+    "game_order": null,
+    "name": "Ranch",
+    "pokeapi_id": null,
+    "generation_id": 4,
+    "is_spinoff": true
+  },
+  {
+    "id": 43,
+    "game_order": null,
+    "name": "Ranger",
+    "pokeapi_id": null,
+    "generation_id": 4,
+    "is_spinoff": true
+  },
+  {
+    "id": 44,
+    "game_order": null,
+    "name": "Ranger 2",
+    "pokeapi_id": null,
+    "generation_id": 4,
+    "is_spinoff": true
+  },
+  {
+    "id": 45,
+    "game_order": null,
+    "name": "Ranger 3",
+    "pokeapi_id": null,
+    "generation_id": 4,
+    "is_spinoff": true
+  },
+  {
+    "id": 46,
+    "game_order": null,
+    "name": "Battle Revolution",
+    "pokeapi_id": null,
+    "generation_id": 4,
+    "is_spinoff": true
+  }
+]
