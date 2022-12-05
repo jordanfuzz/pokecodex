@@ -11,11 +11,39 @@ body {
 }
 
 button,
-input, textarea {
+input,
+textarea {
   font-family: 'Share Tech Mono', monospace;
 }
 
 a {
   color: #ffffff;
   text-decoration: none;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+table td,
+th {
+  border: 2px solid black;
+}
+
+table tr:first-child td,
+th {
+  border-top: 0;
+}
+table tr td:first-child,
+th:first-child {
+  border-left: 0;
+}
+
+table tr:last-child td {
+  border-bottom: 0;
+}
+
+table tr td:last-child,
+th:last-child {
+  border-right: 0;
 }

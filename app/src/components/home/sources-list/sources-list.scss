@@ -58,3 +58,68 @@
   width: 20px;
   margin-right: 7px;
 }
+
+.catch-list-table {
+  min-width: 900px;
+}
+
+.catch-list-header-row {
+  background-color: white;
+  color: black;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: normal;
+  font-size: 20px;
+}
+
+.catch-list-header {
+  font-size: 34px;
+  color: white;
+}
+
+.empty-row td {
+  color: black;
+}
+
+.pokemon-data-row {
+  background-color: #8b8a95;
+  color: black;
+  cursor: pointer;
+}
+
+.pokemon-data-row td {
+  user-select: none;
+}
+
+.catch-tag {
+  padding: 4px 6px;
+  font-size: 16px;
+  background-color: black;
+  color: white;
+  cursor: default;
+  margin-right: 5px;
+}
+
+.tag-container {
+  text-align: left;
+}
+
+.tags-column {
+  text-align: left;
+  padding-left: 10px;
+}
+
+.note-drawer-column {
+  text-align: left;
+  padding: 0;
+}
+
+.note-text {
+  color: black;
+  margin: 5px 10px;
+}
+
+.note-editor {
+  width: 99%;
+  font-size: 18px;
+  resize: none;
+}

@@ -124,7 +124,7 @@ const Sources = () => {
                   </tr>
                 )}
               </tbody>
-            </table>{' '}
+            </table>
             {activePokemon ? (
               <button onClick={() => setIsEditMode(true)} className="new-source-button">
                 Add new

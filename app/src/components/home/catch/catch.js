@@ -38,8 +38,8 @@ const Catch = props => {
     if (selectedSources.length && selectedGameVersion && selectedPokeball)
       props.logCatch({
         sources: selectedSources,
-        pokeball: selectedGameVersion,
-        gameVersion: selectedPokeball,
+        pokeball: selectedPokeball,
+        gameVersion: selectedGameVersion,
         pokemonId: props.activePokemon.id,
       })
   }

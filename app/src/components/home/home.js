@@ -58,6 +58,13 @@ const Home = () => {
     setPokemonState(usersPokemonData.data)
   }
 
+  const handleUpdatePokemonNote = async noteData => {
+    const usersPokemonData = await axios.put('/api/users-pokemon/note', noteData)
+    if (!usersPokemonData) return
+
+    setUsersPokemon(usersPokemonData.data?.usersPokemon)
+  }
+
   const renderDrawer = activePokemon => {
     let drawerContents
 
@@ -66,8 +73,12 @@ const Home = () => {
         drawerContents = (
           <SourcesList
             activePokemonSources={activePokemonSources}
+            activePokemon={activePokemon}
             setDrawerMode={setDrawerMode}
+            usersPokemon={usersPokemon}
+            catchData={catchData}
             usersPokemonSources={catchData?.usersPokemonSources}
+            handleUpdatePokemonNote={handleUpdatePokemonNote}
           />
         )
         break

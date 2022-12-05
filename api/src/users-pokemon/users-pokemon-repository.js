@@ -2,13 +2,26 @@ import pgPool from '../pg-pool.js'
 import camelize from 'camelize'
 import { randomUUID } from 'crypto'
 
+const selectQuery = `select up.id, up.notes, up.pokemon_id, up.pokeball, up.user_id, 
+up.caught_at, gv.name as "gameVersion", gv.generation_id as "gen" 
+from users_pokemon up
+join game_versions gv on gv.id = up.game_id 
+where user_id = $1 and pokemon_id = $2;`
+
 export const getAllForUserAndPokemon = (userId, pokemonId) => {
+  return pgPool.query(selectQuery, [userId, pokemonId]).then(res => camelize(res.rows))
+}
+
+export const updateNoteForUsersPokemon = noteData => {
+  const { note, userId, pokemonId, usersPokemonId } = noteData
+
   return pgPool
-    .query('select * from users_pokemon where user_id = $1 and pokemon_id = $2;', [
-      userId,
-      pokemonId,
-    ])
-    .then(res => camelize(res.rows))
+    .query(`update users_pokemon set notes = $1 where id = $2;`, [note, usersPokemonId])
+    .then(() => {
+      return pgPool
+        .query(selectQuery, [userId, pokemonId])
+        .then(res => camelize(res.rows))
+    })
 }
 
 export const addPokemonForUser = pokemonData => {
@@ -34,10 +47,7 @@ export const addPokemonForUser = pokemonData => {
         })
       ).then(() => {
         return pgPool
-          .query('select * from users_pokemon where user_id = $1 and pokemon_id = $2;', [
-            userId,
-            pokemonId,
-          ])
+          .query(selectQuery, [userId, pokemonId])
           .then(res => camelize(res.rows))
       })
     })

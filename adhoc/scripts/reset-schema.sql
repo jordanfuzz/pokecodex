@@ -15,7 +15,8 @@ create type pokemon_type as enum ('normal', 'fighting', 'flying', 'poison', 'gro
 -- a0af5822-5822-4281-add6-f6c9de34a083
 -- create table users (
 --   id uuid primary key,
---   avatar_pokemon integer
+--   avatar_pokemon integer,
+--   time_format integer default 0
 -- );
 
 -- create table pokemon (
@@ -54,7 +55,7 @@ create table users_pokemon (
   pokemon_id integer not null,
   notes text,
   game_id integer,
-  pokeball integer,
+  pokeball integer default 1,
   caught_at timestamp without time zone
 );
 
