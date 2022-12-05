@@ -1,11 +1,45 @@
+$type-colors: (
+  'bug': #adbd21,
+  'dark': #735a4a,
+  'dragon': #7b63e7,
+  'electric': #ffc631,
+  'fairy': #f7b5f7,
+  'fighting': #a55239,
+  'fire': #f75231,
+  'flying': #9cadf7,
+  'ghost': #6363b5,
+  'grass': #7bce52,
+  'ground': #d6b55a,
+  'ice': #5acee7,
+  'normal': #ada594,
+  'poison': #b55aa5,
+  'psychic': #ff73a5,
+  'rock': #bda55a,
+  'steel': #adadc6,
+  'water': #399cff,
+);
+
 .dropdown-container {
   height: 130px;
+  display: flex;
 }
 
 .main-dropdown {
   margin-left: 15px;
   margin-top: 15px;
   width: 400px;
+}
+
+.pokeball-dropdown {
+  margin-left: 25px;
+  margin-top: 15px;
+  width: 100px;
+}
+
+.game-version-dropdown {
+  margin-left: 25px;
+  margin-top: 15px;
+  width: 200px;
 }
 
 .catch-confirm-button {
@@ -20,10 +54,28 @@
   user-select: none;
 }
 
-.option-image {
+@each $type, $hex in $type-colors {
+  .button-color-#{$type}:hover {
+    color: $hex !important;
+  }
+}
+
+.source-option-image {
   width: 55px;
   background-color: #131418;
   margin: 5px;
+}
+
+.pokeball-option-image {
+  width: 40px;
+  margin-top: 5px;
+  image-rendering: pixelated;
+}
+
+.pokeball-placeholder {
+  margin-top: 1px;
+  width: 45px;
+  image-rendering: pixelated;
 }
 
 .option-container {

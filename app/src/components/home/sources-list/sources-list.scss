@@ -1,3 +1,11 @@
+.unlocked-source-pill {
+  padding: 5px 9px;
+  background-color: black;
+  color: white;
+  margin: 5px;
+  cursor: default;
+}
+
 .locked-source-pill {
   padding: 5px 9px;
   background-color: rgba(0, 0, 0, 0.4);
@@ -44,4 +52,9 @@
   justify-content: center;
   user-select: none;
   cursor: pointer;
+}
+
+.check-icon {
+  width: 20px;
+  margin-right: 7px;
 }

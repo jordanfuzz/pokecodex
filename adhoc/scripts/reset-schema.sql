@@ -54,6 +54,7 @@ create table users_pokemon (
   pokemon_id integer not null,
   notes text,
   game_id integer,
+  pokeball integer,
   caught_at timestamp without time zone
 );
 

@@ -22,18 +22,40 @@ const Home = () => {
     if (openDrawerIndex === pokemonId) setOpenDrawerIndex(null)
     else {
       setOpenDrawerIndex(pokemonId)
-      const pokemonSources = await axios.get(`/api/sources?pokemonId=${pokemonId}`)
       const usersPokemonData = await axios.get(
-        `/api/sources?userId=a0af5822-5822-4281-add6-f6c9de34a083&pokemonId=${pokemonId}`
+        `/api/pokemon?userId=a0af5822-5822-4281-add6-f6c9de34a083&pokemonId=${pokemonId}`
       )
-      setActivePokemonSources(pokemonSources.data.sources)
-      setUsersPokemon(usersPokemonData.data.usersPokemon)
-      setCatchData({
-        pokeballs: usersPokemonData.data.pokeballs,
-        gameVersions: usersPokemonData.data.gameVersions,
-      })
+      if (!usersPokemonData.data) return
+
+      setPokemonState(usersPokemonData.data)
     }
     setDrawerMode('sources')
+  }
+
+  const setPokemonState = usersPokemonData => {
+    const { sources, usersPokemon, usersPokemonSources, pokeballs, gameVersions } =
+      usersPokemonData
+
+    setActivePokemonSources(sources)
+    setUsersPokemon(usersPokemon)
+    setCatchData({
+      usersPokemonSources,
+      pokeballs,
+      gameVersions,
+    })
+  }
+
+  const handleSubmitNewPokemon = async pokemonData => {
+    setDrawerMode('sources')
+    const newPokemonData = {
+      ...pokemonData,
+      userId: 'a0af5822-5822-4281-add6-f6c9de34a083',
+    }
+
+    const usersPokemonData = await axios.post('/api/pokemon', newPokemonData)
+    if (!usersPokemonData) return
+
+    setPokemonState(usersPokemonData.data)
   }
 
   const renderDrawer = activePokemon => {
@@ -45,6 +67,7 @@ const Home = () => {
           <SourcesList
             activePokemonSources={activePokemonSources}
             setDrawerMode={setDrawerMode}
+            usersPokemonSources={catchData?.usersPokemonSources}
           />
         )
         break
@@ -54,6 +77,8 @@ const Home = () => {
             activePokemonSources={activePokemonSources}
             usersPokemon={usersPokemon}
             catchData={catchData}
+            activePokemon={activePokemon}
+            logCatch={handleSubmitNewPokemon}
           />
         )
         break
