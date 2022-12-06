@@ -82,3 +82,32 @@ $type-colors: (
   display: flex;
   align-items: center;
 }
+
+.edit-date-container {
+  text-align: left;
+  display: flex;
+  margin-bottom: 15px;
+}
+
+.edit-date-label {
+  margin-left: 15px;
+  color: black;
+}
+
+.edit-date-input {
+  background-color: white;
+  border: none;
+  vertical-align: center;
+  width: 200px;
+}
+
+.edit-date-button {
+  border: none;
+  border-radius: 0%;
+  margin-left: 5px;
+}
+
+.edit-date-error {
+  color: red;
+  margin-left: 10px;
+}

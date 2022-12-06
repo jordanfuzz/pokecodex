@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import Modal from 'react-modal'
 import { uniq, uniqBy } from 'ramda'
+import Catch from '../catch/catch'
 import './sources-list.scss'
 import checkIcon from '../../../media/check-icon.svg'
 
@@ -51,12 +52,17 @@ const SourcesList = props => {
     if (!noteText) return
 
     const noteData = {
-      userId: 'a0af5822-5822-4281-add6-f6c9de34a083',
       pokemonId: pokemon.pokemonId,
       usersPokemonId: pokemon.id,
       note: noteText,
     }
     props.handleUpdatePokemonNote(noteData)
+    setDrawerMode('log')
+    setOpenDrawerIndex(null)
+  }
+
+  const handleUpdateUsersPokemon = pokemonData => {
+    props.handleUpdateUsersPokemon(pokemonData)
     setDrawerMode('log')
     setOpenDrawerIndex(null)
   }
@@ -131,6 +137,24 @@ const SourcesList = props => {
               >
                 Update note
               </span>
+            </div>
+          </td>
+        )
+        break
+      case 'edit':
+        drawerContents = (
+          <td className="drawer-column" colSpan="6">
+            <div className="edit-fields-container">
+              <Catch
+                activePokemonSources={props.activePokemonSources}
+                usersPokemon={props.usersPokemon}
+                catchData={props.catchData}
+                activePokemon={props.activePokemon}
+                activeUsersPokemon={pokemon}
+                isEditMode={true}
+                handleCancel={() => setDrawerMode('log')}
+                handleSubmit={handleUpdateUsersPokemon}
+              />
             </div>
           </td>
         )

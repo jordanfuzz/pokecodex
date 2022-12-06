@@ -59,10 +59,26 @@ const Home = () => {
   }
 
   const handleUpdatePokemonNote = async noteData => {
-    const usersPokemonData = await axios.put('/api/users-pokemon/note', noteData)
+    const newNoteData = { ...noteData, userId: 'a0af5822-5822-4281-add6-f6c9de34a083' }
+    const usersPokemonData = await axios.put('/api/users-pokemon/note', newNoteData)
     if (!usersPokemonData) return
 
     setUsersPokemon(usersPokemonData.data?.usersPokemon)
+  }
+
+  const handleUpdateUsersPokemon = async pokemonData => {
+    const newPokemonData = {
+      ...pokemonData,
+      userId: 'a0af5822-5822-4281-add6-f6c9de34a083',
+    }
+    const usersPokemonData = await axios.put('/api/users-pokemon', newPokemonData)
+    if (!usersPokemonData) return
+
+    setUsersPokemon(usersPokemonData.data?.usersPokemon)
+    const newCatchData = Object.assign({}, catchData, {
+      usersPokemonSources: usersPokemonData.data?.usersPokemonSources,
+    })
+    setCatchData(newCatchData)
   }
 
   const renderDrawer = activePokemon => {
@@ -79,6 +95,7 @@ const Home = () => {
             catchData={catchData}
             usersPokemonSources={catchData?.usersPokemonSources}
             handleUpdatePokemonNote={handleUpdatePokemonNote}
+            handleUpdateUsersPokemon={handleUpdateUsersPokemon}
           />
         )
         break
@@ -89,7 +106,7 @@ const Home = () => {
             usersPokemon={usersPokemon}
             catchData={catchData}
             activePokemon={activePokemon}
-            logCatch={handleSubmitNewPokemon}
+            handleSubmit={handleSubmitNewPokemon}
           />
         )
         break

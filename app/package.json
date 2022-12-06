@@ -33,6 +33,7 @@
     "react-modal": "^3.16.1",
     "react-router-dom": "^5.2.0",
     "react-select": "^5.7.0",
-    "sass": "^1.27.0"
+    "sass": "^1.27.0",
+    "validator": "^13.7.0"
   }
 }
