@@ -105,39 +105,50 @@ const Catch = props => {
         </div>
       </div>
       {props.isEditMode ? (
-        <div className="edit-date-container">
-          <span className="edit-date-label">Date:</span>
-          <input
-            className="edit-date-input"
-            placeholder={props.activeUsersPokemon?.caughtAt}
-            value={updatedDate}
-            disabled={!isEditDateMode}
-            onChange={e => setUpdatedDate(e.target.value)}
-          />
-          {isEditDateMode ? (
-            <button className="edit-date-button" onClick={() => setIsEditDateMode(false)}>
-              Save
-            </button>
-          ) : (
-            <button className="edit-date-button" onClick={() => setIsEditDateMode(true)}>
-              Edit
-            </button>
-          )}
-          {isDateError ? <span className="edit-date-error">Date is invalid!</span> : null}
-        </div>
-      ) : null}
-      {props.isEditMode ? (
-        <div className="drawer-button-container">
-          {/* Add hover effect to buttons */}
-          {/* Rename class */}
-          <span className="show-catches-button" onClick={props.handleCancel}>
-            Cancel
+        <>
+          <span className="edit-date-container">
+            <span className="edit-date-label">Date:</span>
+            <input
+              className="edit-date-input"
+              placeholder={props.activeUsersPokemon?.caughtAt}
+              value={updatedDate}
+              disabled={!isEditDateMode}
+              onChange={e => setUpdatedDate(e.target.value)}
+            />
+            {isEditDateMode ? (
+              <button
+                className="edit-date-button"
+                onClick={() => setIsEditDateMode(false)}
+              >
+                Save
+              </button>
+            ) : (
+              <button
+                className="edit-date-button"
+                onClick={() => setIsEditDateMode(true)}
+              >
+                Edit
+              </button>
+            )}
+            {isDateError ? (
+              <span className="edit-date-error">Date is invalid!</span>
+            ) : null}
           </span>
-          {/* Rename class */}
-          <span className="log-catch-button" onClick={handleSubmitClick}>
-            Update pokemon
+          <span className="delete-button-container">
+            <button className="delete-pokemon-button">Delete Pokemon</button>
           </span>
-        </div>
+          <div className="drawer-button-container">
+            {/* Add hover effect to buttons */}
+            {/* Rename class */}
+            <span className="show-catches-button" onClick={props.handleCancel}>
+              Cancel
+            </span>
+            {/* Rename class */}
+            <span className="log-catch-button" onClick={handleSubmitClick}>
+              Update pokemon
+            </span>
+          </div>
+        </>
       ) : (
         <div
           className={`catch-confirm-button button-color-${props.activePokemon.type1}`}
