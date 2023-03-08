@@ -81,6 +81,19 @@ const Home = () => {
     setCatchData(newCatchData)
   }
 
+  const handleDeleteUsersPokemon = async pokemonData => {
+    const newPokemonData = {
+      ...pokemonData,
+      userId: 'a0af5822-5822-4281-add6-f6c9de34a083',
+    }
+    const usersPokemonData = await axios.delete('/api/users-pokemon', {
+      data: newPokemonData,
+    })
+    if (!usersPokemonData) return
+
+    setUsersPokemon(usersPokemonData.data?.usersPokemon)
+  }
+
   const renderDrawer = activePokemon => {
     let drawerContents
 
@@ -96,6 +109,7 @@ const Home = () => {
             usersPokemonSources={catchData?.usersPokemonSources}
             handleUpdatePokemonNote={handleUpdatePokemonNote}
             handleUpdateUsersPokemon={handleUpdateUsersPokemon}
+            handleDeleteUsersPokemon={handleDeleteUsersPokemon}
           />
         )
         break

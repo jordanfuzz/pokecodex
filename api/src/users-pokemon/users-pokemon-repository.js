@@ -94,3 +94,20 @@ export const addPokemonForUser = pokemonData => {
         .then(res => camelize(res.rows))
     })
 }
+
+export const deleteUsersPokemon = pokemonData => {
+  const { userId, pokemonId, usersPokemonId } = pokemonData
+
+  return pgPool
+    .query(`delete from users_pokemon_sources where users_pokemon_id = $1;`, [
+      usersPokemonId,
+    ])
+    .then(() => {
+      return pgPool.query(`delete from users_pokemon where id = $1;`, [usersPokemonId])
+    })
+    .then(() => {
+      return pgPool
+        .query(selectQuery, [userId, pokemonId])
+        .then(res => camelize(res.rows))
+    })
+}

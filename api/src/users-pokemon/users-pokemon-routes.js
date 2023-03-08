@@ -1,6 +1,7 @@
 import express from 'express'
 const router = express.Router()
 import {
+  deleteUsersPokemon,
   getAllForUserAndPokemon,
   updateNoteForUsersPokemon,
   updateUsersPokemon,
@@ -24,6 +25,13 @@ router.put('/users-pokemon', async (req, res) => {
       req.body.userId,
       req.body.pokemonId
     ),
+  }
+  res.status(200).send(response)
+})
+
+router.delete('/users-pokemon', async (req, res) => {
+  const response = {
+    usersPokemon: await deleteUsersPokemon(req.body),
   }
   res.status(200).send(response)
 })

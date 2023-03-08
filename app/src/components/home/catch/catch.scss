@@ -111,3 +111,44 @@ $type-colors: (
   color: red;
   margin-left: 10px;
 }
+
+.delete-button-container {
+  float: right;
+  text-align: left;
+  display: inline-flex;
+  margin-bottom: 15px;
+  margin-right: 20px;
+}
+
+.delete-pokemon-button {
+  border: none;
+  border-radius: 0%;
+  margin-left: 5px;
+  height: 27px;
+}
+
+.deletion-warning {
+  color: black;
+  margin-top: 30px;
+}
+
+.delete-mode-container {
+  height: 244px;
+  padding-top: 50px;
+  box-sizing: border-box;
+}
+
+.confirm-delete-container {
+  display: flex;
+  margin: 0 auto;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirm-delete-button {
+  border: none;
+  border-radius: 0%;
+  margin: 20px;
+  font-size: 30px;
+  padding: 3px;
+}

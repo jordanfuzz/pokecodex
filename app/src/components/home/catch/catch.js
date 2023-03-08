@@ -11,6 +11,7 @@ const Catch = props => {
   const [isEditDateMode, setIsEditDateMode] = useState(false)
   const [updatedDate, setUpdatedDate] = useState('')
   const [isDateError, setIsDateError] = useState(false)
+  const [isFlaggedForDeletion, setIsFlaggedForDeletion] = useState(false)
 
   if (!props.activePokemonSources || !props.catchData) return null
 
@@ -69,7 +70,41 @@ const Catch = props => {
     props.handleSubmit(pokemonData)
   }
 
-  return (
+  const handleConfirmDelete = () => {
+    const pokemonData = {
+      usersPokemonId: props.activeUsersPokemon.id,
+      pokemonId: props.activePokemon.id,
+    }
+    props.handleDelete(pokemonData)
+    setIsFlaggedForDeletion(false)
+  }
+
+  const renderDeleteConfirmation = () => {
+    return (
+      <div className="delete-mode-container">
+        <span className="deletion-warning">
+          Are you sure you want to delete this catch?
+        </span>
+        <span className="confirm-delete-container">
+          <button className="confirm-delete-button" onClick={handleConfirmDelete}>
+            Yes
+          </button>
+          <button
+            className="confirm-delete-button"
+            onClick={() => {
+              setIsFlaggedForDeletion(false)
+            }}
+          >
+            No
+          </button>
+        </span>
+      </div>
+    )
+  }
+
+  return isFlaggedForDeletion ? (
+    renderDeleteConfirmation()
+  ) : (
     <div className="catch-mode-container">
       <div className="dropdown-container">
         <div className="main-dropdown">
@@ -135,7 +170,12 @@ const Catch = props => {
             ) : null}
           </span>
           <span className="delete-button-container">
-            <button className="delete-pokemon-button">Delete Pokemon</button>
+            <button
+              className="delete-pokemon-button"
+              onClick={() => setIsFlaggedForDeletion(true)}
+            >
+              Delete Pokemon
+            </button>
           </span>
           <div className="drawer-button-container">
             {/* Add hover effect to buttons */}

@@ -67,6 +67,12 @@ const SourcesList = props => {
     setOpenDrawerIndex(null)
   }
 
+  const handleDeleteUsersPokmemon = pokemonData => {
+    props.handleDeleteUsersPokemon(pokemonData)
+    setDrawerMode('log')
+    setOpenDrawerIndex(null)
+  }
+
   const renderSources = () => {
     const uniqueUsersSourceIds = uniq(props.usersPokemonSources.map(x => x.id))
     const unachievedSources = props.activePokemonSources
@@ -154,6 +160,7 @@ const SourcesList = props => {
                 isEditMode={true}
                 handleCancel={() => setDrawerMode('log')}
                 handleSubmit={handleUpdateUsersPokemon}
+                handleDelete={handleDeleteUsersPokmemon}
               />
             </div>
           </td>
