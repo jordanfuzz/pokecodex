@@ -16,7 +16,8 @@ create type pokemon_type as enum ('normal', 'fighting', 'flying', 'poison', 'gro
 -- create table users (
 --   id uuid primary key,
 --   avatar_pokemon integer,
---   time_format integer default 0
+--   time_format integer default 0,
+--   user_rules jsonb
 -- );
 
 -- create table pokemon (

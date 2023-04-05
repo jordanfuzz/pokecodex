@@ -4,18 +4,25 @@ import './home.scss'
 import typeImages from '../../media/types.js'
 import SourcesList from './sources-list/sources-list'
 import Catch from './catch/catch'
+import Rules from './rules/rules'
 
 const Home = () => {
   const [pokemon, setPokemon] = useState([])
   const [activePokemonSources, setActivePokemonSources] = useState([])
   const [usersPokemon, setUsersPokemon] = useState([])
+  const [usersRules, setUsersRules] = useState(null)
   const [catchData, setCatchData] = useState(null)
   const [openDrawerIndex, setOpenDrawerIndex] = useState(null)
   const [drawerMode, setDrawerMode] = useState('sources')
 
   useEffect(async () => {
-    const response = await axios.get('/api/all-pokemon')
-    setPokemon(response.data.pokemon)
+    const pokemonResults = await axios.get('/api/all-pokemon')
+    const rulesResponse = await axios.get(
+      '/api/user/rules?userId=a0af5822-5822-4281-add6-f6c9de34a083'
+    )
+    setPokemon(pokemonResults.data.pokemon)
+    setUsersRules(rulesResponse.data.rules)
+    // TODO: filter/update records to show complete based on rules
   }, [])
 
   const handleOpenDrawer = async pokemonId => {
@@ -94,6 +101,15 @@ const Home = () => {
     setUsersPokemon(usersPokemonData.data?.usersPokemon)
   }
 
+  const handleUpdateUsersRules = async newRules => {
+    const newRulesData = {
+      rules: newRules,
+      userId: 'a0af5822-5822-4281-add6-f6c9de34a083',
+    }
+    const usersRulesData = await axios.put('/api/user/rules', newRulesData)
+    setUsersRules(usersRulesData.data?.rules)
+  }
+
   const renderDrawer = activePokemon => {
     let drawerContents
 
@@ -169,19 +185,22 @@ const Home = () => {
 
   return (
     <div className="home-container">
-      <h1 className="list-header">Pokemon List</h1>
-      <table className="list-table">
-        <thead>
-          <tr className="header-row">
-            <th>✅</th>
-            <th>#</th>
-            <th>Icon</th>
-            <th>Name</th>
-            <th>Type</th>
-          </tr>
-        </thead>
-        <tbody>{renderListRows()}</tbody>
-      </table>
+      <div className="list-container">
+        <h1 className="list-header">Pokemon List</h1>
+        <table className="list-table">
+          <thead>
+            <tr className="header-row">
+              <th>✅</th>
+              <th>#</th>
+              <th>Icon</th>
+              <th>Name</th>
+              <th>Type</th>
+            </tr>
+          </thead>
+          <tbody>{renderListRows()}</tbody>
+        </table>
+      </div>
+      <Rules usersRules={usersRules} updateUsersRules={handleUpdateUsersRules} />
     </div>
   )
 }

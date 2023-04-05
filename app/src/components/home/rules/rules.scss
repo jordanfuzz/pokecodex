@@ -1,0 +1,30 @@
+.rules-container {
+  margin-left: 100px;
+}
+
+.rules-list-header {
+  margin-top: 40px;
+  font-size: 34px;
+  color: white;
+  display: inline-block;
+}
+
+.single-rule {
+  margin-bottom: 5px;
+}
+
+.single-rule > label {
+  color: white;
+  font-size: 18px;
+  margin-left: 5px;
+}
+
+.edit-rules-button {
+  border: none;
+  border-radius: 0%;
+  margin-left: 20px;
+  font-size: 18px;
+  height: 30px;
+  padding-top: 3px;
+  vertical-align: text-bottom;
+}
