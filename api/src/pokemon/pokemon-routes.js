@@ -1,6 +1,6 @@
 import express from 'express'
 const router = express.Router()
-import { getAll } from './pokemon-repository.js'
+import { getAllForUser } from './pokemon-repository.js'
 import {
   getAllForUserAndPokemon,
   addPokemonForUser,
@@ -12,8 +12,10 @@ import {
 } from '../sources/sources-repository.js'
 
 router.get('/all-pokemon', async (req, res) => {
+  if (!req.query.userId) res.status(400).send({ message: 'No userId provided' })
+
   const response = {
-    pokemon: await getAll(),
+    pokemon: await getAllForUser(req.query.userId),
   }
   res.status(200).send(response)
 })

@@ -16,7 +16,9 @@ const Home = () => {
   const [drawerMode, setDrawerMode] = useState('sources')
 
   useEffect(async () => {
-    const pokemonResults = await axios.get('/api/all-pokemon')
+    const pokemonResults = await axios.get(
+      '/api/all-pokemon?userId=a0af5822-5822-4281-add6-f6c9de34a083'
+    )
     const rulesResponse = await axios.get(
       '/api/user/rules?userId=a0af5822-5822-4281-add6-f6c9de34a083'
     )
