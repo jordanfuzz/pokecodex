@@ -16,15 +16,11 @@ const Home = () => {
   const [drawerMode, setDrawerMode] = useState('sources')
 
   useEffect(async () => {
-    const pokemonResults = await axios.get(
-      '/api/all-pokemon?userId=a0af5822-5822-4281-add6-f6c9de34a083'
-    )
+    refreshPokemonList()
     const rulesResponse = await axios.get(
       '/api/user/rules?userId=a0af5822-5822-4281-add6-f6c9de34a083'
     )
-    setPokemon(pokemonResults.data.pokemon)
     setUsersRules(rulesResponse.data.rules)
-    // TODO: filter/update records to show complete based on rules
   }, [])
 
   const handleOpenDrawer = async pokemonId => {
@@ -54,6 +50,13 @@ const Home = () => {
     })
   }
 
+  const refreshPokemonList = async () => {
+    const newPokemonResults = await axios.get(
+      '/api/all-pokemon?userId=a0af5822-5822-4281-add6-f6c9de34a083'
+    )
+    setPokemon(newPokemonResults.data.pokemon)
+  }
+
   const handleSubmitNewPokemon = async pokemonData => {
     setDrawerMode('sources')
     const newPokemonData = {
@@ -65,6 +68,7 @@ const Home = () => {
     if (!usersPokemonData) return
 
     setPokemonState(usersPokemonData.data)
+    refreshPokemonList()
   }
 
   const handleUpdatePokemonNote = async noteData => {
@@ -88,6 +92,7 @@ const Home = () => {
       usersPokemonSources: usersPokemonData.data?.usersPokemonSources,
     })
     setCatchData(newCatchData)
+    refreshPokemonList()
   }
 
   const handleDeleteUsersPokemon = async pokemonData => {
@@ -101,6 +106,7 @@ const Home = () => {
     if (!usersPokemonData) return
 
     setUsersPokemon(usersPokemonData.data?.usersPokemon)
+    refreshPokemonList()
   }
 
   const handleUpdateUsersRules = async newRules => {
@@ -110,6 +116,7 @@ const Home = () => {
     }
     const usersRulesData = await axios.put('/api/user/rules', newRulesData)
     setUsersRules(usersRulesData.data?.rules)
+    refreshPokemonList()
   }
 
   const renderDrawer = activePokemon => {
