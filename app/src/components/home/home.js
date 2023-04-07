@@ -165,7 +165,7 @@ const Home = () => {
           }`}
           onClick={() => handleOpenDrawer(mon.id)}
         >
-          <td className="master-checkbox">⬜</td>
+          <td className="master-checkbox">{mon.isComplete ? '✅' : '⬜'}</td>
           <td className="id-number">{mon.id}</td>
           <td>
             <img src={mon.defaultImage} className="list-icon" />

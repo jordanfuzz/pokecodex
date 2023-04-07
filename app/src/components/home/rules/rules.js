@@ -45,7 +45,7 @@ const Rules = ({ usersRules, updateUsersRules }) => {
           id="gender"
           value="gender"
           onChange={e => handleRuleCheck(e)}
-          defaultChecked={ruleState && ruleState['gender']}
+          checked={ruleState && ruleState['gender']}
         />
         <label className="rule-label" htmlFor="gender">
           Gender differences
@@ -58,7 +58,7 @@ const Rules = ({ usersRules, updateUsersRules }) => {
           id="npc-trade"
           value="npc-trade"
           onChange={e => handleRuleCheck(e)}
-          defaultChecked={ruleState && ruleState['npc-trade']}
+          checked={ruleState && ruleState['npc-trade']}
         />
         <label htmlFor="npc-trade">In-game trades</label>
       </div>
@@ -69,7 +69,7 @@ const Rules = ({ usersRules, updateUsersRules }) => {
           id="side-game"
           value="side-game"
           onChange={e => handleRuleCheck(e)}
-          defaultChecked={ruleState && ruleState['side-game']}
+          checked={ruleState && ruleState['side-game']}
         />
         <label htmlFor="side-game">Trades from side games</label>
       </div>
@@ -80,7 +80,7 @@ const Rules = ({ usersRules, updateUsersRules }) => {
           id="regional"
           value="regional"
           onChange={e => handleRuleCheck(e)}
-          defaultChecked={ruleState && ruleState['regional']}
+          checked={ruleState && ruleState['regional']}
         />
         <label htmlFor="regional">Regional forms</label>
       </div>
@@ -91,7 +91,7 @@ const Rules = ({ usersRules, updateUsersRules }) => {
           id="variant"
           value="variant"
           onChange={e => handleRuleCheck(e)}
-          defaultChecked={ruleState && ruleState['variant']}
+          checked={ruleState && ruleState['variant']}
         />
         <label htmlFor="variant">Variant forms</label>
       </div>
@@ -102,7 +102,7 @@ const Rules = ({ usersRules, updateUsersRules }) => {
           id="special"
           value="special"
           onChange={e => handleRuleCheck(e)}
-          defaultChecked={ruleState && ruleState['special']}
+          checked={ruleState && ruleState['special']}
         />
         <label htmlFor="special">Unique sources</label>
       </div>
@@ -113,7 +113,7 @@ const Rules = ({ usersRules, updateUsersRules }) => {
           id="original"
           value="original"
           onChange={e => handleRuleCheck(e)}
-          defaultChecked={ruleState && ruleState['original']}
+          checked={ruleState && ruleState['original']}
         />
         <label htmlFor="original">From original region</label>
       </div>
@@ -124,7 +124,7 @@ const Rules = ({ usersRules, updateUsersRules }) => {
           id="shiny"
           value="shiny"
           onChange={e => handleRuleCheck(e)}
-          defaultChecked={ruleState && ruleState['shiny']}
+          checked={ruleState && ruleState['shiny']}
         />
         <label htmlFor="shiny">Shiny</label>
       </div>

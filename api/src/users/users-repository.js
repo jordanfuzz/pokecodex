@@ -1,10 +1,10 @@
 import pgPool from '../pg-pool.js'
-import camelize from 'camelize'
+// Do not camelize
 
 export const getRulesForUser = userId => {
   return pgPool
     .query('select user_rules from users where id = $1;', [userId])
-    .then(res => camelize(res.rows[0]).userRules)
+    .then(res => res.rows[0].user_rules)
 }
 
 export const updateRulesForUser = (rules, userId) => {
@@ -14,5 +14,5 @@ export const updateRulesForUser = (rules, userId) => {
       where id = $2 returning *;`,
       [rules, userId]
     )
-    .then(res => camelize(res.rows[0]).userRules)
+    .then(res => res.rows[0].user_rules)
 }
