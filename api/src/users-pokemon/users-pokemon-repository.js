@@ -7,7 +7,8 @@ select up.id, up.notes, up.pokemon_id, up.pokeball, up.user_id,
 up.caught_at, gv.name as "gameVersion", gv.generation_id as "gen" 
 from users_pokemon up
 join game_versions gv on gv.id = up.game_id 
-where user_id = $1 and pokemon_id = $2;`
+where user_id = $1 and pokemon_id = $2
+order by gv.generation_id, up.caught_at;`
 
 export const getAllForUserAndPokemon = (userId, pokemonId) => {
   return pgPool.query(selectQuery, [userId, pokemonId]).then(res => camelize(res.rows))

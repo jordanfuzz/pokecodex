@@ -32,6 +32,10 @@ router.put('/users-pokemon', async (req, res) => {
 router.delete('/users-pokemon', async (req, res) => {
   const response = {
     usersPokemon: await deleteUsersPokemon(req.body),
+    usersPokemonSources: await getUsersPokemonSources(
+      req.body.userId,
+      req.body.pokemonId
+    ),
   }
   res.status(200).send(response)
 })

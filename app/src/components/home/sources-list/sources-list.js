@@ -74,25 +74,42 @@ const SourcesList = props => {
   }
 
   const renderSources = () => {
-    const uniqueUsersSourceIds = uniq(props.usersPokemonSources.map(x => x.id))
-    const unachievedSources = props.activePokemonSources
-      .filter(x => !uniqueUsersSourceIds.includes(x.id))
-      .map((source, i) => {
-        return (
-          <span key={i} className="locked-source-pill">
-            {source.name}
-          </span>
-        )
-      })
+    const sortSources = sourceArray => {
+      let staticSources = []
 
-    const achievedSources = uniqBy(source => source.id, props.usersPokemonSources).map(
-      (source, i) => (
-        <span key={i} className="unlocked-source-pill">
-          <img src={checkIcon} className="check-icon" />
+      const wildSource = sourceArray.find(x => x.source === 'wild')
+      const maleSource = sourceArray.find(x => x.source === 'male')
+      const femaleSource = sourceArray.find(x => x.source === 'female')
+      if (wildSource) staticSources.push(Object.assign({}, wildSource))
+      if (maleSource) staticSources.push(Object.assign({}, maleSource))
+      if (femaleSource) staticSources.push(Object.assign({}, femaleSource))
+      const sortedSources = sourceArray
+        .filter(x => !['wild', 'male', 'female'].includes(x.source))
+        .sort()
+      return staticSources.concat(sortedSources)
+    }
+
+    const uniqueUsersSourceIds = uniq(props.usersPokemonSources.map(x => x.id))
+
+    const unachievedSources = sortSources(
+      props.activePokemonSources.filter(x => !uniqueUsersSourceIds.includes(x.id))
+    ).map((source, i) => {
+      return (
+        <span key={i} className="locked-source-pill">
           {source.name}
         </span>
       )
-    )
+    })
+
+    const achievedSources = sortSources(
+      uniqBy(source => source.id, props.usersPokemonSources)
+    ).map((source, i) => (
+      <span key={i} className="unlocked-source-pill">
+        <img src={checkIcon} className="check-icon" />
+        {source.name}
+      </span>
+    ))
+
     return [achievedSources, unachievedSources]
   }
 

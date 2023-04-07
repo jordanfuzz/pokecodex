@@ -105,7 +105,12 @@ const Home = () => {
     })
     if (!usersPokemonData) return
 
+    const newCatchData = Object.assign({}, catchData, {
+      usersPokemonSources: usersPokemonData.data?.usersPokemonSources,
+    })
+
     setUsersPokemon(usersPokemonData.data?.usersPokemon)
+    setCatchData(newCatchData)
     refreshPokemonList()
   }
 
