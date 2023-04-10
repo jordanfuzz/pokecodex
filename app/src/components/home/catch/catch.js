@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Select from 'react-select'
 import { isDate } from 'validator'
 import { multiSelectStyles, singleSelectStyles } from './catch.logic'
@@ -15,9 +15,25 @@ const Catch = props => {
 
   if (!props.activePokemonSources || !props.catchData) return null
 
-  const sourceOptions = props.activePokemonSources.map(x => {
+  useEffect(() => {
+    if (!props.isEditMode) return
+
+    setSelectedSources(
+      props.usersPokemonSources
+        .filter(x => x.pokemonId === props.activeUsersPokemon.id)
+        .map(x => x.id)
+    )
+    setSelectedGameVersion(
+      props.catchData.gameVersions.find(
+        x => x.name === props.activeUsersPokemon.gameVersion
+      ).id
+    )
+    setSelectedPokeball(props.activeUsersPokemon.pokeball)
+  }, [])
+
+  const sourceOptions = props.activePokemonSources.map((x, i) => {
     const label = (
-      <span className="option-container">
+      <span className="option-container" key={i}>
         <img
           src={x.image ? x.image : props.activePokemon.defaultImage}
           className="source-option-image"
@@ -114,6 +130,7 @@ const Catch = props => {
             isSearchable={false}
             isMulti={true}
             onChange={options => setSelectedSources(options.map(x => x.value))}
+            value={sourceOptions.filter(x => selectedSources?.includes(x.value))}
           />
         </div>
         <div className="game-version-dropdown">
@@ -122,6 +139,7 @@ const Catch = props => {
             styles={singleSelectStyles}
             isSearchable={false}
             onChange={option => setSelectedGameVersion(option?.value)}
+            value={gameVersionOptions.filter(x => selectedGameVersion === x.value)}
           />
         </div>
         <div className="pokeball-dropdown">
@@ -129,13 +147,8 @@ const Catch = props => {
             options={pokeballOptions}
             styles={singleSelectStyles}
             isSearchable={false}
-            placeholder={
-              <img
-                className="pokeball-placeholder"
-                src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
-              />
-            }
             onChange={option => setSelectedPokeball(option?.value)}
+            value={pokeballOptions.filter(x => selectedPokeball === x.value)}
           />
         </div>
       </div>
@@ -178,13 +191,16 @@ const Catch = props => {
             </button>
           </span>
           <div className="drawer-button-container">
-            {/* Add hover effect to buttons */}
-            {/* Rename class */}
-            <span className="show-catches-button" onClick={props.handleCancel}>
+            <span
+              className={`show-catches-button button-color-${props.activePokemon.type1}`}
+              onClick={props.handleCancel}
+            >
               Cancel
             </span>
-            {/* Rename class */}
-            <span className="log-catch-button" onClick={handleSubmitClick}>
+            <span
+              className={`log-catch-button button-color-${props.activePokemon.type1}`}
+              onClick={handleSubmitClick}
+            >
               Update pokemon
             </span>
           </div>

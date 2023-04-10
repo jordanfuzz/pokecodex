@@ -85,7 +85,7 @@ const SourcesList = props => {
       if (femaleSource) staticSources.push(Object.assign({}, femaleSource))
       const sortedSources = sourceArray
         .filter(x => !['wild', 'male', 'female'].includes(x.source))
-        .sort()
+        .sort((a, b) => (a.name > b.name ? 1 : b.name > a.name ? -1 : 0))
       return staticSources.concat(sortedSources)
     }
 
@@ -127,12 +127,15 @@ const SourcesList = props => {
             }
             <div className="drawer-button-container">
               <span
-                className="show-catches-button"
+                className={`show-catches-button button-color-${props.activePokemon.type1}`}
                 onClick={() => handleNoteClick(pokemon.notes || '')}
               >
                 Edit note
               </span>
-              <span className="log-catch-button" onClick={() => setDrawerMode('edit')}>
+              <span
+                className={`log-catch-button button-color-${props.activePokemon.type1}`}
+                onClick={() => setDrawerMode('edit')}
+              >
                 Edit catch data
               </span>
             </div>
@@ -148,14 +151,14 @@ const SourcesList = props => {
               onChange={e => setNoteText(e.target.value)}
             />
             <div className="drawer-button-container">
-              {/* Add hover effect to buttons */}
-              {/* Rename class */}
-              <span className="show-catches-button" onClick={() => setDrawerMode('log')}>
+              <span
+                className={`show-catches-button button-color-${props.activePokemon.type1}`}
+                onClick={() => setDrawerMode('log')}
+              >
                 Cancel
               </span>
-              {/* Rename class */}
               <span
-                className="log-catch-button"
+                className={`log-catch-button button-color-${props.activePokemon.type1}`}
                 onClick={() => handleUpdateNote(pokemon)}
               >
                 Update note
@@ -171,6 +174,7 @@ const SourcesList = props => {
               <Catch
                 activePokemonSources={props.activePokemonSources}
                 usersPokemon={props.usersPokemon}
+                usersPokemonSources={props.usersPokemonSources}
                 catchData={props.catchData}
                 activePokemon={props.activePokemon}
                 activeUsersPokemon={pokemon}
@@ -243,14 +247,20 @@ const SourcesList = props => {
     <>
       <div className="pokemon-sources-container">{renderSources()}</div>
       <div className="drawer-button-container">
-        <span className="show-catches-button" onClick={handleOpenModal}>
+        <span
+          className={`show-catches-button button-color-${props.activePokemon.type1}`}
+          onClick={handleOpenModal}
+        >
           Show catches
           <img
             src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
             className="button-icon"
           />
         </span>
-        <span className="log-catch-button" onClick={() => props.setDrawerMode('catch')}>
+        <span
+          className={`log-catch-button button-color-${props.activePokemon.type1}`}
+          onClick={() => props.setDrawerMode('catch')}
+        >
           Log new catch
           <img
             src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rule-book.png"
