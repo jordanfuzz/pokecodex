@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import Select from 'react-select'
 import { isDate } from 'validator'
+import { DateTime } from 'luxon'
+import { DateTimePicker } from '@mui/x-date-pickers'
 import { multiSelectStyles, singleSelectStyles } from './catch.logic'
 import './catch.scss'
 
@@ -59,8 +61,10 @@ const Catch = props => {
     if (!selectedSources.length || !selectedGameVersion || !selectedPokeball) return
 
     let date
+
     if (props.isEditMode) {
       if (updatedDate) {
+        console.log(updatedDate)
         if (!isDate(updatedDate)) {
           setIsDateError(true)
           return
@@ -156,13 +160,26 @@ const Catch = props => {
         <>
           <span className="edit-date-container">
             <span className="edit-date-label">Date:</span>
-            <input
+            <DateTimePicker
+              className="edit-date-picker"
+              sx={{ color: 'red' }}
+              slotProps={{
+                textField: {
+                  className: 'edit-date-input',
+                },
+              }}
+            />
+            {/* <input
               className="edit-date-input"
-              placeholder={props.activeUsersPokemon?.caughtAt}
+              placeholder={
+                props.activeUsersPokemon
+                  ? DateTime.fromISO(props.activeUsersPokemon.caughtAt).toFormat('D t')
+                  : null
+              }
               value={updatedDate}
               disabled={!isEditDateMode}
               onChange={e => setUpdatedDate(e.target.value)}
-            />
+            /> */}
             {isEditDateMode ? (
               <button
                 className="edit-date-button"

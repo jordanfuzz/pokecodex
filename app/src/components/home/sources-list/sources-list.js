@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import Modal from 'react-modal'
 import { uniq, uniqBy } from 'ramda'
+import { DateTime } from 'luxon'
 import Catch from '../catch/catch'
 import './sources-list.scss'
 import checkIcon from '../../../media/check-icon.svg'
@@ -232,7 +233,7 @@ const SourcesList = props => {
                 className="catch-table-pokeball"
               />
             </td>
-            <td>{new Date(pokemon.caughtAt).toLocaleString().replace(',', '')}</td>
+            <td>{DateTime.fromISO(pokemon.caughtAt).toFormat('D t')}</td>
             <td className="tags-column">
               <span className="tag-container">{renderTags(pokemon)}</span>
             </td>

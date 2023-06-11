@@ -94,11 +94,20 @@ $type-colors: (
   color: black;
 }
 
-.edit-date-input {
+.edit-date-picker {
   background-color: white;
-  border: none;
   vertical-align: center;
-  width: 200px;
+  width: 280px;
+}
+
+// .edit-date-input {
+//   background-color: red;
+//   border: none;
+//   color: red;
+// }
+
+.edit-date-input:hover {
+  border: none;
 }
 
 .edit-date-button {
