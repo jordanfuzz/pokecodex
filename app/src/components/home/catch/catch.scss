@@ -97,14 +97,11 @@ $type-colors: (
 .edit-date-picker {
   background-color: white;
   vertical-align: center;
-  width: 280px;
 }
 
-// .edit-date-input {
-//   background-color: red;
-//   border: none;
-//   color: red;
-// }
+.no-border .MuiInput-underline:before {
+  border-bottom: none;
+}
 
 .edit-date-input:hover {
   border: none;

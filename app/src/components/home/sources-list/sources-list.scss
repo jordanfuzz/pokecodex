@@ -101,6 +101,8 @@
 
 .tag-container {
   text-align: left;
+  display: flex;
+  flex-wrap: wrap;
 }
 
 .tags-column {

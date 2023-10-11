@@ -10,34 +10,44 @@ const Catch = props => {
   const [selectedSources, setSelectedSources] = useState([])
   const [selectedGameVersion, setSelectedGameVersion] = useState(null)
   const [selectedPokeball, setSelectedPokeball] = useState(1)
-  const [isEditDateMode, setIsEditDateMode] = useState(false)
-  const [updatedDate, setUpdatedDate] = useState('')
+  const [updatedDate, setUpdatedDate] = useState(null)
   const [isDateError, setIsDateError] = useState(false)
   const [isFlaggedForDeletion, setIsFlaggedForDeletion] = useState(false)
 
-  if (!props.activePokemonSources || !props.catchData) return null
+  const {
+    activePokemon,
+    activePokemonSources,
+    usersPokemonSources,
+    isEditMode,
+    catchData,
+    activeUsersPokemon,
+    handleSubmit,
+    handleDelete,
+    handleCancel,
+  } = props
+
+  if (!activePokemonSources || !catchData) return null
 
   useEffect(() => {
-    if (!props.isEditMode) return
+    if (!isEditMode) return
 
     setSelectedSources(
-      props.usersPokemonSources
-        .filter(x => x.pokemonId === props.activeUsersPokemon.id)
+      usersPokemonSources
+        .filter(x => x.pokemonId === activeUsersPokemon.id)
         .map(x => x.id)
     )
     setSelectedGameVersion(
-      props.catchData.gameVersions.find(
-        x => x.name === props.activeUsersPokemon.gameVersion
-      ).id
+      catchData.gameVersions.find(x => x.name === activeUsersPokemon.gameVersion).id
     )
-    setSelectedPokeball(props.activeUsersPokemon.pokeball)
+    setSelectedPokeball(activeUsersPokemon.pokeball)
+    setUpdatedDate(activeUsersPokemon.caughtAt)
   }, [])
 
-  const sourceOptions = props.activePokemonSources.map((x, i) => {
+  const sourceOptions = activePokemonSources.map((x, i) => {
     const label = (
       <span className="option-container" key={i}>
         <img
-          src={x.image ? x.image : props.activePokemon.defaultImage}
+          src={x.image ? x.image : activePokemon.defaultImage}
           className="source-option-image"
         />
         {x.name}
@@ -46,13 +56,13 @@ const Catch = props => {
     return { value: x.id, label }
   })
 
-  const pokeballOptions = props.catchData.pokeballs.map(x => {
+  const pokeballOptions = catchData.pokeballs.map(x => {
     const label = <img src={x.image} className="pokeball-option-image" />
 
     return { value: x.id, label }
   })
 
-  const gameVersionOptions = props.catchData.gameVersions.map(x => ({
+  const gameVersionOptions = catchData.gameVersions.map(x => ({
     value: x.id,
     label: x.name,
   }))
@@ -62,10 +72,10 @@ const Catch = props => {
 
     let date
 
-    if (props.isEditMode) {
+    if (isEditMode) {
       if (updatedDate) {
-        console.log(updatedDate)
-        if (!isDate(updatedDate)) {
+        const isValidDate = DateTime.fromISO(updatedDate).isValid
+        if (!isValidDate) {
           setIsDateError(true)
           return
         } else {
@@ -73,7 +83,7 @@ const Catch = props => {
           date = updatedDate ? new Date(updatedDate) : null
         }
       } else {
-        date = props.activeUsersPokemon.caughtAt
+        date = activeUsersPokemon.caughtAt
       }
     }
 
@@ -81,21 +91,21 @@ const Catch = props => {
       sources: selectedSources,
       pokeball: selectedPokeball,
       gameVersion: selectedGameVersion,
-      pokemonId: props.activePokemon.id,
+      pokemonId: activePokemon.id,
     }
-    if (props.isEditMode) {
-      pokemonData.usersPokemonId = props.activeUsersPokemon.id
+    if (isEditMode) {
+      pokemonData.usersPokemonId = activeUsersPokemon.id
       pokemonData.caughtAt = date
     }
-    props.handleSubmit(pokemonData)
+    handleSubmit(pokemonData)
   }
 
   const handleConfirmDelete = () => {
     const pokemonData = {
-      usersPokemonId: props.activeUsersPokemon.id,
-      pokemonId: props.activePokemon.id,
+      usersPokemonId: activeUsersPokemon.id,
+      pokemonId: activePokemon.id,
     }
-    props.handleDelete(pokemonData)
+    handleDelete(pokemonData)
     setIsFlaggedForDeletion(false)
   }
 
@@ -156,45 +166,22 @@ const Catch = props => {
           />
         </div>
       </div>
-      {props.isEditMode ? (
+      {isEditMode ? (
         <>
           <span className="edit-date-container">
             <span className="edit-date-label">Date:</span>
             <DateTimePicker
               className="edit-date-picker"
-              sx={{ color: 'red' }}
               slotProps={{
                 textField: {
-                  className: 'edit-date-input',
+                  className: 'no-border',
+                  style: { padding: '0 10px 0 15px', maxWidth: '205px' },
+                  variant: 'standard',
                 },
               }}
+              value={updatedDate ? DateTime.fromISO(updatedDate) : null}
+              onChange={newDate => setUpdatedDate(newDate.toISO())}
             />
-            {/* <input
-              className="edit-date-input"
-              placeholder={
-                props.activeUsersPokemon
-                  ? DateTime.fromISO(props.activeUsersPokemon.caughtAt).toFormat('D t')
-                  : null
-              }
-              value={updatedDate}
-              disabled={!isEditDateMode}
-              onChange={e => setUpdatedDate(e.target.value)}
-            /> */}
-            {isEditDateMode ? (
-              <button
-                className="edit-date-button"
-                onClick={() => setIsEditDateMode(false)}
-              >
-                Save
-              </button>
-            ) : (
-              <button
-                className="edit-date-button"
-                onClick={() => setIsEditDateMode(true)}
-              >
-                Edit
-              </button>
-            )}
             {isDateError ? (
               <span className="edit-date-error">Date is invalid!</span>
             ) : null}
@@ -209,13 +196,13 @@ const Catch = props => {
           </span>
           <div className="drawer-button-container">
             <span
-              className={`show-catches-button button-color-${props.activePokemon.type1}`}
-              onClick={props.handleCancel}
+              className={`show-catches-button button-color-${activePokemon.type1}`}
+              onClick={handleCancel}
             >
               Cancel
             </span>
             <span
-              className={`log-catch-button button-color-${props.activePokemon.type1}`}
+              className={`log-catch-button button-color-${activePokemon.type1}`}
               onClick={handleSubmitClick}
             >
               Update pokemon
