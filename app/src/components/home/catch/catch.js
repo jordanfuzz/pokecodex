@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react'
 import Select from 'react-select'
-import { isDate } from 'validator'
 import { DateTime } from 'luxon'
+import { ThemeProvider, createTheme } from '@mui/material/styles'
 import { DateTimePicker } from '@mui/x-date-pickers'
 import { multiSelectStyles, singleSelectStyles } from './catch.logic'
 import './catch.scss'
+
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+  },
+})
 
 const Catch = props => {
   const [selectedSources, setSelectedSources] = useState([])
@@ -170,18 +176,24 @@ const Catch = props => {
         <>
           <span className="edit-date-container">
             <span className="edit-date-label">Date:</span>
-            <DateTimePicker
-              className="edit-date-picker"
-              slotProps={{
-                textField: {
-                  className: 'no-border',
-                  style: { padding: '0 10px 0 15px', maxWidth: '205px' },
-                  variant: 'standard',
-                },
-              }}
-              value={updatedDate ? DateTime.fromISO(updatedDate) : null}
-              onChange={newDate => setUpdatedDate(newDate.toISO())}
-            />
+            <ThemeProvider theme={darkTheme}>
+              <DateTimePicker
+                className="edit-date-picker"
+                slotProps={{
+                  textField: {
+                    className: 'no-border',
+                    style: {
+                      padding: '0 10px 0 15px',
+                      maxWidth: '205px',
+                      color: 'black',
+                    },
+                    variant: 'standard',
+                  },
+                }}
+                value={updatedDate ? DateTime.fromISO(updatedDate) : null}
+                onChange={newDate => setUpdatedDate(newDate.toISO())}
+              />
+            </ThemeProvider>
             {isDateError ? (
               <span className="edit-date-error">Date is invalid!</span>
             ) : null}

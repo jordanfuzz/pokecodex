@@ -99,6 +99,14 @@ $type-colors: (
   vertical-align: center;
 }
 
+.edit-date-picker input {
+  color: black;
+}
+
+.edit-date-picker svg {
+  color: gray;
+}
+
 .no-border .MuiInput-underline:before {
   border-bottom: none;
 }
