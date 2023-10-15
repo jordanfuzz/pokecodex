@@ -14,4 +14,11 @@ export default {
   },
   isDevelopment,
   port: 3002,
+  cookieOptions: {
+    maxAge: 1000 * 60 * 60 * 24 * 7,
+  },
+  clientId: e.CLIENT_ID,
+  clientSecret: e.CLIENT_SECRET,
+  sessionSecret: e.SESSION_SECRET,
+  appUrl: isDevelopment ? 'http://localhost:3000' : 'https://pokecodex.com',
 }

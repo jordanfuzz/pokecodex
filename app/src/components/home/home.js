@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
+import { Redirect } from 'react-router-dom'
 import './home.scss'
 import typeImages from '../../media/types.js'
 import SourcesList from './sources-list/sources-list'
@@ -7,6 +8,7 @@ import Catch from './catch/catch'
 import Rules from './rules/rules'
 
 const Home = () => {
+  const [userData, setUserData] = useState(null)
   const [pokemon, setPokemon] = useState([])
   const [activePokemonSources, setActivePokemonSources] = useState([])
   const [usersPokemon, setUsersPokemon] = useState([])
@@ -14,21 +16,37 @@ const Home = () => {
   const [catchData, setCatchData] = useState(null)
   const [openDrawerIndex, setOpenDrawerIndex] = useState(null)
   const [drawerMode, setDrawerMode] = useState('sources')
+  const [shouldRedirect, setShouldRedirect] = useState(false)
 
   useEffect(async () => {
-    refreshPokemonList()
-    const rulesResponse = await axios.get(
-      '/api/user/rules?userId=a0af5822-5822-4281-add6-f6c9de34a083'
-    )
-    setUsersRules(rulesResponse.data.rules)
+    try {
+      const response = await axios.get('/api/auth/login', {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Credentials': true,
+        },
+      })
+      if (response?.data?.id) setUserData(response.data)
+      else setShouldRedirect(true)
+    } catch (error) {
+      setShouldRedirect(true)
+    }
   }, [])
+
+  useEffect(async () => {
+    if (!userData?.id) return
+    refreshPokemonList()
+    const rulesResponse = await axios.get(`/api/user/rules?userId=${userData.id}`)
+    setUsersRules(rulesResponse.data.rules)
+  }, [userData])
 
   const handleOpenDrawer = async pokemonId => {
     if (openDrawerIndex === pokemonId) setOpenDrawerIndex(null)
     else {
       setOpenDrawerIndex(pokemonId)
       const usersPokemonData = await axios.get(
-        `/api/pokemon?userId=a0af5822-5822-4281-add6-f6c9de34a083&pokemonId=${pokemonId}`
+        `/api/pokemon?userId=${userData.id}&pokemonId=${pokemonId}`
       )
       if (!usersPokemonData.data) return
 
@@ -51,9 +69,7 @@ const Home = () => {
   }
 
   const refreshPokemonList = async () => {
-    const newPokemonResults = await axios.get(
-      '/api/all-pokemon?userId=a0af5822-5822-4281-add6-f6c9de34a083'
-    )
+    const newPokemonResults = await axios.get(`/api/all-pokemon?userId=${userData?.id}`)
     setPokemon(newPokemonResults.data.pokemon)
   }
 
@@ -61,7 +77,7 @@ const Home = () => {
     setDrawerMode('sources')
     const newPokemonData = {
       ...pokemonData,
-      userId: 'a0af5822-5822-4281-add6-f6c9de34a083',
+      userId: userData?.id,
     }
 
     const usersPokemonData = await axios.post('/api/pokemon', newPokemonData)
@@ -72,7 +88,7 @@ const Home = () => {
   }
 
   const handleUpdatePokemonNote = async noteData => {
-    const newNoteData = { ...noteData, userId: 'a0af5822-5822-4281-add6-f6c9de34a083' }
+    const newNoteData = { ...noteData, userId: userData.id }
     const usersPokemonData = await axios.put('/api/users-pokemon/note', newNoteData)
     if (!usersPokemonData) return
 
@@ -82,7 +98,7 @@ const Home = () => {
   const handleUpdateUsersPokemon = async pokemonData => {
     const newPokemonData = {
       ...pokemonData,
-      userId: 'a0af5822-5822-4281-add6-f6c9de34a083',
+      userId: userData.id,
     }
     const usersPokemonData = await axios.put('/api/users-pokemon', newPokemonData)
     if (!usersPokemonData) return
@@ -98,7 +114,7 @@ const Home = () => {
   const handleDeleteUsersPokemon = async pokemonData => {
     const newPokemonData = {
       ...pokemonData,
-      userId: 'a0af5822-5822-4281-add6-f6c9de34a083',
+      userId: userData.id,
     }
     const usersPokemonData = await axios.delete('/api/users-pokemon', {
       data: newPokemonData,
@@ -117,7 +133,7 @@ const Home = () => {
   const handleUpdateUsersRules = async newRules => {
     const newRulesData = {
       rules: newRules,
-      userId: 'a0af5822-5822-4281-add6-f6c9de34a083',
+      userId: userData.id,
     }
     const usersRulesData = await axios.put('/api/user/rules', newRulesData)
     setUsersRules(usersRulesData.data?.rules)
@@ -197,8 +213,13 @@ const Home = () => {
     ))
   }
 
-  return (
+  return shouldRedirect ? (
+    <Redirect to="/login" />
+  ) : (
     <div className="home-container">
+      <a className="logout" href="/api/auth/logout">
+        Logout
+      </a>
       <div className="list-container">
         <h1 className="list-header">Pokemon List</h1>
         <table className="list-table">

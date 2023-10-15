@@ -15,10 +15,13 @@ create type pokemon_type as enum ('normal', 'fighting', 'flying', 'poison', 'gro
 -- a0af5822-5822-4281-add6-f6c9de34a083
 -- create table users (
 --   id uuid primary key,
---   avatar_pokemon integer,
+--   discord_id text not null,
+--   discord_username text,
+--   last_seen_at timestamp without time zone,
 --   time_format integer default 0,
 --   user_rules jsonb
 -- );
+-- avatar_pokemon integer,
 
 -- create table pokemon (
 --   id integer primary key,
