@@ -6,6 +6,7 @@ import typeImages from '../../media/types.js'
 import SourcesList from './sources-list/sources-list'
 import Catch from './catch/catch'
 import Rules from './rules/rules'
+import Filters from './filters/filters'
 
 const Home = () => {
   const [userData, setUserData] = useState(null)
@@ -17,6 +18,7 @@ const Home = () => {
   const [openDrawerIndex, setOpenDrawerIndex] = useState(null)
   const [drawerMode, setDrawerMode] = useState('sources')
   const [shouldRedirect, setShouldRedirect] = useState(false)
+  const [filterRange, setFilterRange] = useState('')
 
   useEffect(async () => {
     try {
@@ -185,7 +187,13 @@ const Home = () => {
   }
 
   const renderListRows = () => {
-    return pokemon.map((mon, i) => (
+    const lowerLimit = filterRange.split(',')[0]
+    const upperLimit = filterRange.split(',')[1]
+    const pokemonToRender = filterRange
+      ? pokemon.filter(x => x.id >= lowerLimit && x.id <= upperLimit)
+      : pokemon
+
+    return pokemonToRender.map((mon, i) => (
       <React.Fragment key={i}>
         <tr
           className={`data-row hover-${mon.type1} ${
@@ -221,7 +229,10 @@ const Home = () => {
         Logout
       </a>
       <div className="list-container">
-        <h1 className="list-header">Pokemon List</h1>
+        <div className="list-header-container">
+          <h1 className="list-header">Pokemon List</h1>
+          <Filters filterRange={filterRange} setFilterRange={setFilterRange} />
+        </div>
         <table className="list-table">
           <thead>
             <tr className="header-row">

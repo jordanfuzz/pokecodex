@@ -42,6 +42,12 @@ $type-colors: (
   margin-top: 40px;
   font-size: 34px;
   color: white;
+  display: inline-block;
+}
+
+.list-header-container {
+  display: flex;
+  align-items: center;
 }
 
 .name {
