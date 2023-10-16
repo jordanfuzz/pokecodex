@@ -10,14 +10,14 @@ const Filters = ({ filterRange, setFilterRange, filterComplete, setFilterComplet
         onChange={e => setFilterRange(e.target.value)}
       >
         <option value={''}>All gens</option>
-        <option value="1,151">1</option>
-        <option value="152,251">2</option>
-        <option value="252,386">3</option>
-        <option value="387,494">4</option>
-        <option value="495,649">5</option>
-        <option value="650,721">6</option>
-        <option value="722,809">7</option>
-        <option value="810,898">8</option>
+        <option value="1,151">Gen 1</option>
+        <option value="152,251">Gen 2</option>
+        <option value="252,386">Gen 3</option>
+        <option value="387,494">Gen 4</option>
+        <option value="495,649">Gen 5</option>
+        <option value="650,721">Gen 6</option>
+        <option value="722,809">Gen 7</option>
+        <option value="810,898">Gen 8</option>
       </select>
       <input
         type="checkbox"
