@@ -19,6 +19,7 @@ const Home = () => {
   const [drawerMode, setDrawerMode] = useState('sources')
   const [shouldRedirect, setShouldRedirect] = useState(false)
   const [filterRange, setFilterRange] = useState('')
+  const [filterComplete, setFilterComplete] = useState(false)
 
   useEffect(async () => {
     try {
@@ -189,11 +190,15 @@ const Home = () => {
   const renderListRows = () => {
     const lowerLimit = filterRange.split(',')[0]
     const upperLimit = filterRange.split(',')[1]
-    const pokemonToRender = filterRange
+    const pokemonFilteredByGen = filterRange
       ? pokemon.filter(x => x.id >= lowerLimit && x.id <= upperLimit)
       : pokemon
 
-    return pokemonToRender.map((mon, i) => (
+    const filteredPokemon = filterComplete
+      ? pokemonFilteredByGen.filter(x => !x.isComplete)
+      : pokemonFilteredByGen
+
+    return filteredPokemon.map((mon, i) => (
       <React.Fragment key={i}>
         <tr
           className={`data-row hover-${mon.type1} ${
@@ -231,7 +236,12 @@ const Home = () => {
       <div className="list-container">
         <div className="list-header-container">
           <h1 className="list-header">Pokemon List</h1>
-          <Filters filterRange={filterRange} setFilterRange={setFilterRange} />
+          <Filters
+            filterRange={filterRange}
+            setFilterRange={setFilterRange}
+            filterComplete={filterComplete}
+            setFilterComplete={setFilterComplete}
+          />
         </div>
         <table className="list-table">
           <thead>

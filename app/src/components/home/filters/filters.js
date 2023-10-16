@@ -1,7 +1,7 @@
 import React from 'react'
 import './filters.scss'
 
-const Filters = ({ filterRange, setFilterRange }) => {
+const Filters = ({ filterRange, setFilterRange, filterComplete, setFilterComplete }) => {
   return (
     <div className="filters-container">
       <select
@@ -19,6 +19,12 @@ const Filters = ({ filterRange, setFilterRange }) => {
         <option value="722,809">7</option>
         <option value="810,898">8</option>
       </select>
+      <input
+        type="checkbox"
+        checked={filterComplete}
+        onChange={() => setFilterComplete(!filterComplete)}
+      />
+      <label className="filter-checkbox-text">Hide completed</label>
     </div>
   )
 }
