@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import { Redirect } from 'react-router-dom'
+import { Link, Redirect } from 'react-router-dom'
 import './home.scss'
 import typeImages from '../../media/types.js'
 import SourcesList from './sources-list/sources-list'
 import Catch from './catch/catch'
-import Rules from './rules/rules'
+import Rules from '../common/rules/rules'
 import Filters from './filters/filters'
 
 const Home = () => {
@@ -229,19 +229,24 @@ const Home = () => {
   return shouldRedirect ? (
     <Redirect to="/login" />
   ) : (
-    <div className="home-container">
+    <div className="home-page">
       <a className="logout" href="/api/auth/logout">
         Logout
       </a>
       <div className="list-container">
         <div className="list-header-container">
           <h1 className="list-header">Pokemon List</h1>
-          <Filters
-            filterRange={filterRange}
-            setFilterRange={setFilterRange}
-            filterComplete={filterComplete}
-            setFilterComplete={setFilterComplete}
-          />
+          <div className="list-options-container">
+            <Filters
+              filterRange={filterRange}
+              setFilterRange={setFilterRange}
+              filterComplete={filterComplete}
+              setFilterComplete={setFilterComplete}
+            />
+            <Link to="/box-view">
+              <span className="box-view-link">Box View</span>
+            </Link>
+          </div>
         </div>
         <table className="list-table">
           <thead>

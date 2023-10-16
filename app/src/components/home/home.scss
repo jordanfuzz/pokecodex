@@ -33,8 +33,13 @@ $type-colors: (
   }
 }
 
-.home-container {
+.home-page {
   padding-left: 50px;
+  display: flex;
+}
+
+.list-header-container {
+  width: 100%;
   display: flex;
 }
 
@@ -45,9 +50,26 @@ $type-colors: (
   display: inline-block;
 }
 
-.list-header-container {
-  display: flex;
+.list-options-container {
+  padding-top: 15px;
+  display: inline-flex;
   align-items: center;
+  justify-content: space-between;
+  flex-grow: 1;
+}
+
+.box-view-link {
+  border: none;
+  border-radius: 0%;
+  font-size: 18px;
+  padding: 8px 10px;
+  vertical-align: text-bottom;
+  background-color: lightgray;
+  color: black;
+
+  &:hover {
+    background-color: white;
+  }
 }
 
 .name {

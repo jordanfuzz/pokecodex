@@ -1,0 +1,36 @@
+.box-view-page {
+  padding-left: 50px;
+  display: flex;
+}
+
+.box-view-container {
+  width: 900px;
+}
+
+.box-view-header {
+  margin-top: 40px;
+  font-size: 34px;
+  color: white;
+  display: inline-block;
+}
+
+.box-view-header-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.list-view-link {
+  border: none;
+  border-radius: 0%;
+  font-size: 18px;
+  padding: 8px 10px;
+  vertical-align: text-bottom;
+  background-color: lightgray;
+  color: black;
+
+  &:hover {
+    background-color: white;
+  }
+}

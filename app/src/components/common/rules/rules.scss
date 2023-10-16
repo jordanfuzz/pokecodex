@@ -25,6 +25,12 @@
   margin-left: 20px;
   font-size: 18px;
   height: 30px;
-  padding-top: 3px;
+  padding: 3px 5px;
   vertical-align: text-bottom;
+  cursor: pointer;
+  background-color: lightgray;
+
+  &:hover {
+    background-color: white;
+  }
 }
