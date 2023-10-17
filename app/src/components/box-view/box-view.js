@@ -3,6 +3,7 @@ import axios from 'axios'
 import { Link, Redirect } from 'react-router-dom'
 import Rules from '../common/rules/rules'
 import './box-view.scss'
+import { wallpapers } from './box-view.logic'
 
 const BoxView = () => {
   const [usersRules, setUsersRules] = useState(null)
@@ -54,6 +55,12 @@ const BoxView = () => {
           <Link to="/">
             <span className="list-view-link">List View</span>
           </Link>
+        </div>
+        <div className="box-container">
+          <span className="box-header"></span>
+          <div className="box">
+            <img className="box-image" src={wallpapers[0]} />
+          </div>
         </div>
       </div>
       <Rules usersRules={usersRules} updateUsersRules={handleUpdateUsersRules} />
