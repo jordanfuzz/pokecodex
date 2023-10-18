@@ -1,23 +1,4 @@
-$type-colors: (
-  'bug': #adbd21,
-  'dark': #735a4a,
-  'dragon': #7b63e7,
-  'electric': #ffc631,
-  'fairy': #f7b5f7,
-  'fighting': #a55239,
-  'fire': #f75231,
-  'flying': #9cadf7,
-  'ghost': #6363b5,
-  'grass': #7bce52,
-  'ground': #d6b55a,
-  'ice': #5acee7,
-  'normal': #ada594,
-  'poison': #b55aa5,
-  'psychic': #ff73a5,
-  'rock': #bda55a,
-  'steel': #adadc6,
-  'water': #399cff,
-);
+@import '../../styles/colors';
 
 @each $type, $hex in $type-colors {
   .hover-#{$type}:hover {
@@ -111,11 +92,11 @@ $type-colors: (
   cursor: pointer;
 }
 
-tr {
+.list-table tr {
   text-align: center;
 }
 
-td {
+.list-table td {
   font-size: 26px;
 }
 

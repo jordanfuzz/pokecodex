@@ -15,3 +15,34 @@
   font-size: 28px;
   color: white;
 }
+
+.box {
+  position: relative;
+}
+
+.box-flex-container-small {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-gap: 10px;
+  padding: 35px 30px;
+}
+
+.box-flex-container-large {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-row-gap: 3px;
+  grid-column-gap: 7px;
+  padding: 25px;
+}
+
+.box-pokemon-large img {
+  width: 85px;
+  // border: 1px solid blue;
+  box-sizing: border-box;
+}

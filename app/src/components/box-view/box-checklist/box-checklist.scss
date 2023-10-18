@@ -1,0 +1,46 @@
+@import '../../../styles/colors';
+
+.checklist-table {
+  margin-top: 35px;
+  margin-left: 70px;
+  display: inline-block;
+  width: 400px;
+  table-layout: fixed;
+}
+
+.checklist-header-row {
+  background-color: lightgray;
+  color: black;
+  font-weight: 100;
+  font-size: 18px;
+}
+
+.checklist-header-row th {
+  padding: 0 5px;
+}
+
+.header-row-pokeball {
+  margin-top: 5px;
+}
+
+.checklist-row {
+  background-color: #8b8a95;
+  color: black;
+  font-size: 18px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.checklist-slot {
+  width: 55px;
+}
+
+.checklist-name {
+  width: 100px;
+}
+
+@each $type, $hex in $type-colors {
+  .hover-#{$type}:hover {
+    background-color: $hex;
+  }
+}

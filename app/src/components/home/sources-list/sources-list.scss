@@ -126,8 +126,10 @@
   resize: none;
 }
 
-// leaving this disabled for now, doesn't seem to do anything
+.catch-list-table tr {
+  text-align: center;
+}
 
-// .edit-fields-container {
-//   min-height: 200px;
-// }
+.catch-list-table td {
+  font-size: 26px;
+}
