@@ -65,3 +65,136 @@ export const wallpapers = [
   legendPlatinum,
   galacticPlatinum,
 ]
+
+export const gameData = [
+  [
+    'Gen 1',
+    {
+      boxSize: 20,
+      maxBoxes: 12,
+      ignoreGender: true,
+    },
+  ],
+  [
+    'Gen 2',
+    {
+      boxSize: 20,
+      maxBoxes: 12,
+    },
+  ],
+  [
+    'Gen 3',
+    {
+      boxSize: 30,
+      maxBoxes: 14,
+    },
+  ],
+  [
+    'Gen 4',
+    {
+      boxSize: 30,
+      maxBoxes: 18,
+    },
+  ],
+  [
+    'Gen 5',
+    {
+      boxSize: 30,
+      maxBoxes: 24,
+    },
+  ],
+  [
+    'Gen 6',
+    {
+      boxSize: 30,
+      maxBoxes: 31,
+    },
+  ],
+  [
+    'Gen 7',
+    {
+      boxSize: 30,
+      maxBoxes: 32,
+    },
+  ],
+  [
+    'Gen 8',
+    {
+      boxSize: 30,
+      maxBoxes: 32,
+    },
+  ],
+  [
+    'Gen 9',
+    {
+      boxSize: 30,
+      maxBoxes: 32,
+    },
+  ],
+  [
+    'Pokemon Stadium',
+    {
+      boxSize: 20,
+      maxBoxes: 12,
+    },
+  ],
+  [
+    'Pokemon Stadium 2',
+    {
+      boxSize: 20,
+      maxBoxes: 14,
+    },
+  ],
+  [
+    'Pokemon Box',
+    {
+      boxSize: 60,
+      maxBoxes: 25,
+    },
+  ],
+  [
+    'Pokemon Colosseum',
+    {
+      boxSize: 30,
+      maxBoxes: 3,
+      isIsolated: true,
+    },
+  ],
+  [
+    'Pokemon XD',
+    {
+      boxSize: 30,
+      maxBoxes: 8,
+      isIsolated: true,
+    },
+  ],
+  [
+    'Pokemon Ranch',
+    {
+      boxSize: 30,
+      maxBoxes: 34,
+      ignoreRules: true,
+    },
+  ],
+  [
+    "Let's Go",
+    {
+      boxSize: 30,
+      maxBoxes: 34,
+    },
+  ],
+  [
+    'BD/SP',
+    {
+      boxSize: 30,
+      maxBoxes: 40,
+    },
+  ],
+  [
+    'Legends Arceus',
+    {
+      boxSize: 30,
+      maxBoxes: 32,
+    },
+  ],
+]

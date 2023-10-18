@@ -1,0 +1,17 @@
+.box-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  margin-top: 15px;
+}
+
+.box-footer img {
+  cursor: pointer;
+}
+
+.box-number {
+  text-align: center;
+  display: inline-block;
+  font-size: 28px;
+  color: white;
+}

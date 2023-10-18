@@ -3,12 +3,15 @@ import axios from 'axios'
 import { Link, Redirect } from 'react-router-dom'
 import Rules from '../common/rules/rules'
 import './box-view.scss'
-import { wallpapers } from './box-view.logic'
+import { gameData } from './box-view.logic'
+import Box from './box/box'
 
 const BoxView = () => {
   const [usersRules, setUsersRules] = useState(null)
   const [userData, setUserData] = useState(null)
   const [shouldRedirect, setShouldRedirect] = useState(false)
+  const [selectedVersion, setSelectedVersion] = useState(gameData[0][1])
+  const [selectedBox, setSelectedBox] = useState(1)
 
   useEffect(async () => {
     try {
@@ -39,7 +42,16 @@ const BoxView = () => {
     }
     const usersRulesData = await axios.put('/api/user/rules', newRulesData)
     setUsersRules(usersRulesData.data?.rules)
-    refreshPokemonList()
+    // refreshPokemonList()
+  }
+
+  const handleVersionChange = version => {
+    const versionData = gameData.find(([key, value]) => key === version)
+    setSelectedVersion(versionData[1])
+  }
+
+  const handleBoxChange = box => {
+    setSelectedBox(box)
   }
 
   return shouldRedirect ? (
@@ -52,16 +64,25 @@ const BoxView = () => {
       <div className="box-view-container">
         <div className="box-view-header-container">
           <h1 className="box-view-header">Box View</h1>
+          <select
+            className="filter-dropdown"
+            onChange={e => handleVersionChange(e.target.value)}
+          >
+            {gameData.map(([key, value], i) => (
+              <option key={i} value={key}>
+                {key}
+              </option>
+            ))}
+          </select>
           <Link to="/">
             <span className="list-view-link">List View</span>
           </Link>
         </div>
-        <div className="box-container">
-          <span className="box-header"></span>
-          <div className="box">
-            <img className="box-image" src={wallpapers[0]} />
-          </div>
-        </div>
+        <Box
+          selectedVersion={selectedVersion}
+          selectedBox={selectedBox}
+          handleBoxChange={handleBoxChange}
+        />
       </div>
       <Rules usersRules={usersRules} updateUsersRules={handleUpdateUsersRules} />
     </div>
