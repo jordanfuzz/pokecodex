@@ -39,6 +39,10 @@
   width: 100px;
 }
 
+.checklist-checkbox {
+  font-size: 12px;
+}
+
 @each $type, $hex in $type-colors {
   .hover-#{$type}:hover {
     background-color: $hex;

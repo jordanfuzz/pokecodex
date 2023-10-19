@@ -81,6 +81,11 @@ const BoxView = () => {
     const shouldAddRegionVariants = false
     const shouldAddFormVariants = usersRules?.variant
 
+    // first, mark isCaught for all pokemon that a user has one of,
+    // even if it isn't the right source
+
+    // then worry about refactoring to deal with sources
+
     const pokemonWithSources = filteredPokemon
       .map(mon => {
         let newEntries = []
@@ -124,6 +129,8 @@ const BoxView = () => {
   const handleBoxChange = box => {
     setSelectedBox(box)
   }
+
+  console.log('pokemon', pokemon)
 
   return shouldRedirect ? (
     <Redirect to="/login" />

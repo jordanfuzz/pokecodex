@@ -14,8 +14,8 @@ const BoxChecklist = ({ filteredPokemon, selectedVersion, selectedBox }) => {
           {/* TODO: What should this be? ID or Slot or count? */}
           <td className="checklist-slot">{pokemon.id}</td>
           <td className="checklist-name">{pokemon.name}</td>
-          <td className="checklist-caught">✅</td>
-          <td className="checklist-in-box">✅</td>
+          <td className="checklist-checkbox">{pokemon.isCaught ? '✅' : '⬜'}</td>
+          <td className="checklist-checkbox">{pokemon.isInBox ? '✅' : '⬜'}</td>
           <td className="checklist-variant">
             {pokemon.variant ? pokemon.variant : ' - '}
           </td>
