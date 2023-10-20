@@ -4,12 +4,14 @@ import { getAllForUser } from './pokemon-repository.js'
 import {
   getAllForUserAndPokemon,
   addPokemonForUser,
+  getBoxDataForUser,
 } from '../users-pokemon/users-pokemon-repository.js'
 import { getAllPokeballs, getAllGameVersions } from '../game-data/game-data-repository.js'
 import {
   getSourcesForPokemon,
   getUsersPokemonSources,
 } from '../sources/sources-repository.js'
+import { formatGamesForBoxView } from './pokemon-utils.js'
 
 router.get('/all-pokemon', async (req, res) => {
   if (!req.query.userId) res.status(400).send({ message: 'No userId provided' })
@@ -49,6 +51,16 @@ router.post('/pokemon', async (req, res) => {
     gameVersions: await getAllGameVersions(),
   }
 
+  res.status(200).send(response)
+})
+
+router.get('/pokemon/box-data', async (req, res) => {
+  if (!req.query.userId) res.status(400).send({ message: 'No userId provided' })
+
+  const response = {
+    usersBoxData: await getBoxDataForUser(req.query.userId),
+    gameVersions: formatGamesForBoxView(await getAllGameVersions()),
+  }
   res.status(200).send(response)
 })
 

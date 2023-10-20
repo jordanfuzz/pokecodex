@@ -71,3 +71,33 @@ export const getNeededRules = rules => {
     neededRules.splice(neededRules.indexOf('gender'), 1, 'male', 'female')
   return neededRules
 }
+
+export const formatGamesForBoxView = gameVersions => {
+  // ['Box Option', gameVersionId]
+  const boxViewOptions = [
+    ['Gen 1', 3],
+    ['Gen 2', 6],
+    ['Gen 3', 9],
+    ['Gen 4', 16],
+    ['Gen 5', 22],
+    ['Gen 6', 26],
+    ['Gen 7', 30],
+    ['Gen 8', 34],
+    ['Gen 9', 48],
+    ['Stadium', 38],
+    ['Stadium 2', 39],
+    ['Pokemon Box', 41],
+    ['Colosseum', 10],
+    ['XD', 11],
+    ['Pokemon Ranch', 42],
+    ["Let's Go", 32],
+    ['BD/SP', 36],
+    ['Legends Arceus', 37],
+  ]
+
+  return boxViewOptions.map(option => {
+    const [name, id] = option
+    const game = gameVersions.find(game => game.id === id)
+    return [name, game]
+  })
+}

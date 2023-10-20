@@ -76,8 +76,25 @@ create table users_pokemon_sources (
 --   name text not null,
 --   pokeapi_id integer,
 --   generation_id integer not null,
---   is_spinoff boolean not null default 'false'
+--   is_spinoff boolean not null default 'false',
+--   box_size integer,
+--   max_boxes integer,
+--   dex_limit integer,
+--   ignore_gender boolean not null default 'false', 
+--   ignore_regional_variants boolean not null default 'false',
+--   ignore_rules boolean not null default 'false',
+--   include_meltan_line boolean not null default 'false',
+--   is_isolated boolean not null default 'false',
+--   limited_dex jsonb
 -- );
+
+create table users_box_data (
+  id uuid primary key,
+  user_id uuid not null,
+  game_id integer not null,
+  box_number integer not null,
+  complete_records jsonb
+);
 
 create table pokeballs (
   id serial primary key,

@@ -5,15 +5,16 @@ import Box from './box/box'
 import BoxChecklist from './box-checklist/box-checklist'
 import Rules from '../common/rules/rules'
 import './box-view.scss'
-import { gameData } from './box-view.logic'
 
 const BoxView = () => {
   const [usersRules, setUsersRules] = useState(null)
   const [userData, setUserData] = useState(null)
   const [pokemon, setPokemon] = useState([])
+  const [usersBoxData, setUsersBoxData] = useState(null)
+  const [gameData, setGameData] = useState(null)
   const [filteredPokemon, setFilteredPokemon] = useState([])
   const [shouldRedirect, setShouldRedirect] = useState(false)
-  const [selectedVersion, setSelectedVersion] = useState(gameData[0][1])
+  const [selectedVersion, setSelectedVersion] = useState(null)
   const [selectedBox, setSelectedBox] = useState(1)
 
   useEffect(async () => {
@@ -37,11 +38,18 @@ const BoxView = () => {
     refreshPokemonList()
     const rulesResponse = await axios.get(`/api/user/rules?userId=${userData.id}`)
     setUsersRules(rulesResponse.data.rules)
+    const boxDataResponse = await axios.get(`/api/pokemon/box-data?userId=${userData.id}`)
+    setUsersBoxData(boxDataResponse.data.usersBoxData)
+    setGameData(boxDataResponse.data.gameVersions)
   }, [userData])
 
   useEffect(async () => {
-    handleFilterPokemon(pokemon)
+    if (selectedVersion) handleFilterPokemon(pokemon)
   }, [selectedVersion, pokemon])
+
+  useEffect(async () => {
+    setSelectedVersion(gameData?.[0]?.[1])
+  }, [gameData])
 
   const handleUpdateUsersRules = async newRules => {
     const newRulesData = {
@@ -88,7 +96,9 @@ const BoxView = () => {
               if (shouldAddGenderVariants) {
                 const isCaught =
                   mon.usersSourcesByGen && mon.usersSourcesByGen.male
-                    ? mon.usersSourcesByGen.male.some(gen => gen <= selectedVersion.gen)
+                    ? mon.usersSourcesByGen.male.some(
+                        gen => gen <= selectedVersion.generationId
+                      )
                     : false
                 newEntries.push({
                   ...mon,
@@ -106,7 +116,9 @@ const BoxView = () => {
               if (shouldAddGenderVariants) {
                 const isCaught =
                   mon.usersSourcesByGen && mon.usersSourcesByGen.female
-                    ? mon.usersSourcesByGen.female.some(gen => gen <= selectedVersion.gen)
+                    ? mon.usersSourcesByGen.female.some(
+                        gen => gen <= selectedVersion.generationId
+                      )
                     : false
                 newEntries.push({
                   ...mon,
@@ -125,7 +137,7 @@ const BoxView = () => {
                 if (!mon.sourcesByType || !mon.sourcesByType.variant) return
                 mon.sourcesByType.variant.forEach(variant => {
                   const [variantName, variantGen] = variant
-                  if (variantGen > selectedVersion.gen) return
+                  if (variantGen > selectedVersion.generationId) return
 
                   const userHasVariantSources =
                     mon.usersSourcesByGen && mon.usersSourcesByGen.variant
@@ -135,7 +147,7 @@ const BoxView = () => {
                     mon.usersSourcesByGen.variant.some(
                       ([usersSourceName, gens]) =>
                         usersSourceName === variantName &&
-                        gens.some(gen => gen <= selectedVersion.gen)
+                        gens.some(gen => gen <= selectedVersion.generationId)
                     )
                   newEntries.push({
                     ...mon,
@@ -155,7 +167,7 @@ const BoxView = () => {
                 if (!mon.sourcesByType || !mon.sourcesByType.regional) return
                 mon.sourcesByType.regional.forEach(regionalSource => {
                   const [sourceName, sourceGen] = regionalSource
-                  if (sourceGen > selectedVersion.gen) return
+                  if (sourceGen > selectedVersion.generationId) return
 
                   const userHasRegionalSources =
                     mon.usersSourcesByGen && mon.usersSourcesByGen.regional
@@ -165,7 +177,7 @@ const BoxView = () => {
                     mon.usersSourcesByGen.regional.some(
                       ([usersSourceName, gens]) =>
                         usersSourceName === sourceName &&
-                        gens.some(gen => gen <= selectedVersion.gen)
+                        gens.some(gen => gen <= selectedVersion.generationId)
                     )
                   newEntries.push({
                     ...mon,
@@ -185,7 +197,7 @@ const BoxView = () => {
 
         const isCaught =
           mon.usersSourcesByGen && mon.usersSourcesByGen.all
-            ? mon.usersSourcesByGen.all.some(gen => gen <= selectedVersion.gen)
+            ? mon.usersSourcesByGen.all.some(gen => gen <= selectedVersion.generationId)
             : false
         return replacedDefault
           ? newEntries
@@ -204,6 +216,8 @@ const BoxView = () => {
   const handleBoxChange = box => {
     setSelectedBox(box)
   }
+
+  if (!gameData || !selectedVersion) return null
 
   return shouldRedirect ? (
     <Redirect to="/login" />

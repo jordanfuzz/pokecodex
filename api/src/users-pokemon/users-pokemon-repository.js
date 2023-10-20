@@ -112,3 +112,8 @@ export const deleteUsersPokemon = pokemonData => {
         .then(res => camelize(res.rows))
     })
 }
+
+export const getBoxDataForUser = userId => {
+  const boxDataQuery = 'select * from users_box_data where user_id = $1;'
+  return pgPool.query(boxDataQuery, [userId]).then(res => camelize(res.rows))
+}
