@@ -152,11 +152,29 @@ const BoxView = () => {
               return
             case 'regional':
               if (shouldAddRegionVariants) {
-                if (!mon.usersSourcesByGen || !mon.usersSourcesByGen.regional) return
-                mon.usersSourcesByGen.regional.forEach(variant => {
-                  const [variantName, variantGen] = variant
-                  const isCaught = variantGen <= selectedVersion.gen
-                  newEntries.push({ ...mon, variant: variantName, isCaught })
+                if (!mon.sourcesByType || !mon.sourcesByType.regional) return
+                mon.sourcesByType.regional.forEach(regionalSource => {
+                  const [sourceName, sourceGen] = regionalSource
+                  if (sourceGen > selectedVersion.gen) return
+
+                  const userHasRegionalSources =
+                    mon.usersSourcesByGen && mon.usersSourcesByGen.regional
+
+                  const isCaught =
+                    userHasRegionalSources &&
+                    mon.usersSourcesByGen.regional.some(
+                      ([usersSourceName, gens]) =>
+                        usersSourceName === sourceName &&
+                        gens.some(gen => gen <= selectedVersion.gen)
+                    )
+                  newEntries.push({
+                    ...mon,
+                    variant: sourceName,
+                    isCaught,
+                    image:
+                      mon.imagesBySource.find(x => x[0] === sourceName)?.[1] ||
+                      mon.defaultImage,
+                  })
                 })
               }
               return

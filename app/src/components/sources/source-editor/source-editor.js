@@ -46,6 +46,7 @@ const SourceEditor = props => {
             <option value="npc-trade">NPC Trade</option>
             <option value="side-game">Side game</option>
             <option value="special">Special</option>
+            <option value="regional">Regional</option>
           </select>
         </div>
         <div className="editor-container">

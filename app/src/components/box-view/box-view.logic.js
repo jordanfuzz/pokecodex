@@ -337,7 +337,7 @@ export const gameData = [
       dexLimit: 151,
       addMeltanLine: true,
       gen: 7,
-      ignoreGender: true,
+      ignoreRegionalVariants: true,
     },
   ],
   [
