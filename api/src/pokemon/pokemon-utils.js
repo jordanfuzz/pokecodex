@@ -1,3 +1,5 @@
+const repeatableSourceTypes = ['variant', 'regional', 'special', 'npc-trade', 'side-game']
+
 export const checkIfUserHasCompletedRecord = (mon, neededRules) => {
   const newRules = neededRules.filter(rule => mon.sources.includes(rule))
   let userHasCompletedRecord = false
@@ -28,13 +30,6 @@ export const getUsersSourcesByGen = mon => {
         return
       }
       if (!usersSourcesByGen[sourceType]) usersSourcesByGen[sourceType] = []
-      const repeatableSourceTypes = [
-        'variant',
-        'regional',
-        'special',
-        'npc-trade',
-        'side-game',
-      ]
       if (repeatableSourceTypes.includes(sourceType)) {
         const index = usersSourcesByGen[sourceType].findIndex(x => x[0] === name)
         if (index === -1) usersSourcesByGen[sourceType].push([name, [Number(gen)]])
@@ -53,9 +48,13 @@ export const getSourcesByType = mon => {
   const imagesBySource = []
   let defaultSource
   mon.sourcesByType.forEach(source => {
-    const { type, name, image, replaceDefault } = source
+    const { type, name, image, replaceDefault, firstGen } = source
+    // types
     if (!sourcesByType[type]) sourcesByType[type] = []
-    sourcesByType[type].push(name)
+    if (repeatableSourceTypes.includes(type)) sourcesByType[type].push([name, firstGen])
+    else sourcesByType[type].push(name, firstGen)
+
+    //images
     if (image) imagesBySource.push([name, image])
     if (replaceDefault) defaultSource = name
   })

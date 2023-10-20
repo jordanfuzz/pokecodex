@@ -124,26 +124,29 @@ const BoxView = () => {
               if (shouldAddFormVariants) {
                 if (!mon.sourcesByType || !mon.sourcesByType.variant) return
                 mon.sourcesByType.variant.forEach(variant => {
+                  const [variantName, variantGen] = variant
+                  if (variantGen > selectedVersion.gen) return
+
                   const userHasVariantSources =
                     mon.usersSourcesByGen && mon.usersSourcesByGen.variant
 
                   const isCaught =
                     userHasVariantSources &&
                     mon.usersSourcesByGen.variant.some(
-                      ([sourceName, gens]) =>
-                        sourceName === variant &&
+                      ([usersSourceName, gens]) =>
+                        usersSourceName === variantName &&
                         gens.some(gen => gen <= selectedVersion.gen)
                     )
                   newEntries.push({
                     ...mon,
-                    variant,
+                    variant: variantName,
                     isCaught,
                     image:
-                      mon.imagesBySource.find(x => x[0] === variant)?.[1] ||
+                      mon.imagesBySource.find(x => x[0] === variantName)?.[1] ||
                       mon.defaultImage,
                   })
                   if (!replacedDefault)
-                    replacedDefault = mon.sourcesByType.defaultSource === variant
+                    replacedDefault = mon.sourcesByType.defaultSource === variantName
                 })
               }
               return
