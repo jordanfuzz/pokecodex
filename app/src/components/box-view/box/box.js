@@ -32,9 +32,10 @@ const Box = ({ pokemon, selectedVersion, selectedBox, handleBoxChange }) => {
     return (
       <div className={`box-flex-container-${boxSize}`}>
         {pokemon.slice(firstSlot, lastSlot).map((mon, i) => {
+          const transparent = mon.isCaught ? '' : 'transparent'
           return (
-            <div key={i} className={`box-pokemon-${boxSize}`}>
-              <img src={mon.defaultImage} />
+            <div key={i} className={`box-pokemon-${boxSize} ${transparent}`}>
+              <img src={mon.image} />
             </div>
           )
         })}

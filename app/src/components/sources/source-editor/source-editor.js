@@ -3,10 +3,11 @@ import './source-editor.scss'
 
 const SourceEditor = props => {
   const [nameText, setNameText] = useState('')
-  const [sourceType, setSourceType] = useState('Variant')
+  const [sourceType, setSourceType] = useState('variant')
   const [sourceGen, setSourceGen] = useState(0)
   const [imageText, setImageText] = useState('')
   const [descriptionText, setDescriptionText] = useState('')
+  const [replaceDefault, setReplaceDefault] = useState(false)
 
   const handleSubmit = () => {
     if (!nameText || !props.pokemonId) return
@@ -17,6 +18,7 @@ const SourceEditor = props => {
       gen: sourceGen,
       image: imageText || null,
       description: descriptionText || null,
+      replaceDefault,
     }
 
     props.handleAddSource(source)
@@ -71,6 +73,15 @@ const SourceEditor = props => {
             value={imageText}
             onChange={e => setImageText(e.target.value)}
           />
+        </div>
+        <div className="editor-container">
+          <input
+            className="editor-checkbox"
+            type="checkbox"
+            checked={replaceDefault}
+            onChange={e => setReplaceDefault(e.target.checked)}
+          />
+          <span className="editor-checkbox-label">Replace default</span>
         </div>
         <div className="description-editor-container">
           <span className="description-editor-label">Description</span>

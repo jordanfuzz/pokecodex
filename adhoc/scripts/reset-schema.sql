@@ -44,7 +44,8 @@ create table sources (
   description text,
   image text,
   gen integer not null, --0 is all
-  source source_type
+  source source_type,
+  replace_default boolean not null default 'false',
 );
 
 -- create table user_overrides (

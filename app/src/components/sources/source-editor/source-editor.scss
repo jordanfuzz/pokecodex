@@ -4,6 +4,21 @@
   margin-right: 5px;
 }
 
+.editor-checkbox {
+  width: 15px;
+  height: 15px;
+  margin-left: 0px;
+  border-radius: 5px;
+  border: 1px solid lightgray;
+  cursor: pointer;
+}
+
+.editor-checkbox-label {
+  font-size: 20px;
+  color: lightgray;
+  margin-left: 5px;
+}
+
 .editor-container {
   width: 300px;
   display: flex;

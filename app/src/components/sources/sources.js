@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
+import { Redirect } from 'react-router-dom'
 import SourceEditor from './source-editor/source-editor'
 import './sources.scss'
 
@@ -9,15 +10,34 @@ import './sources.scss'
 
 const Sources = () => {
   const [pokemon, setPokemon] = useState([])
+  const [userData, setUserData] = useState(null)
+  const [shouldRedirect, setShouldRedirect] = useState(false)
   const [activePokemon, setActivePokemon] = useState(null)
   const [searchText, setSearchText] = useState('')
   const [pokemonSources, setPokemonSources] = useState([])
   const [isEditMode, setIsEditMode] = useState(false)
 
   useEffect(async () => {
-    const response = await axios.get('/api/all-pokemon')
-    setPokemon(response.data.pokemon)
+    try {
+      const response = await axios.get('/api/auth/login', {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Credentials': true,
+        },
+      })
+      if (response?.data?.id) setUserData(response.data)
+      else setShouldRedirect(true)
+    } catch (error) {
+      setShouldRedirect(true)
+    }
   }, [])
+
+  useEffect(async () => {
+    if (!userData?.id) return
+    const response = await axios.get(`/api/all-pokemon?userId=${userData?.id}`)
+    setPokemon(response.data.pokemon)
+  }, [userData])
 
   useEffect(async () => {
     if (!activePokemon) return
@@ -73,7 +93,9 @@ const Sources = () => {
     ))
   }
 
-  return (
+  return shouldRedirect ? (
+    <Redirect to="/login" />
+  ) : (
     <div className="sources-container">
       <div className="pokemon-search-display">
         <h1 className="sources-header">Source editor</h1>
@@ -100,7 +122,7 @@ const Sources = () => {
             pokemonId={activePokemon?.id}
           />
         ) : (
-          <>
+          <div className="sources-table-container">
             <table className="sources-list-table">
               <thead>
                 <tr className="sources-header-row">
@@ -125,13 +147,13 @@ const Sources = () => {
                 )}
               </tbody>
             </table>
-            {activePokemon ? (
-              <button onClick={() => setIsEditMode(true)} className="new-source-button">
-                Add new
-              </button>
-            ) : null}
-          </>
+          </div>
         )}
+        {activePokemon && !isEditMode ? (
+          <button onClick={() => setIsEditMode(true)} className="new-source-button">
+            Add new
+          </button>
+        ) : null}
       </div>
     </div>
   )

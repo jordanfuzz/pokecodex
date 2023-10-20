@@ -1,18 +1,25 @@
 import pgPool from '../pg-pool.js'
 import camelize from 'camelize'
+import {
+  checkIfUserHasCompletedRecord,
+  getUsersSourcesByGen,
+  getSourcesByType,
+  getNeededRules,
+} from './pokemon-utils.js'
 
-// TODO: sources_by_game might not work for specific sources(unown m), and is instead checking for source type (male)
-// might need to get sourceId instead of s.source
 const pokemonWithSourcesQuery = `
-select p.id, p."name", p.type1, p.type2, p.icon, p.default_image, p.female_image, p.shiny_image, p.bulbapedia_link, p.has_gender_differences, p.original_gen, 
-JSON_AGG(distinct(s.source)) users_sources, JSON_AGG(distinct(s2.source)) sources, JSON_AGG(distinct(s.source || ':' || gv.generation_id)) sources_by_game
+select p.id, p."name", p.type1, p.type2, p.icon, p.default_image, p.bulbapedia_link, p.has_gender_differences, p.original_gen, 
+json_agg(distinct(s.source)) users_sources, 
+json_agg(distinct(s2.source)) sources, 
+json_agg(distinct(jsonb_build_object('type', s2.source, 'name', s2.name, 'image', s2.image, 'replace_default', s2.replace_default))) sources_by_type,
+json_agg(distinct(jsonb_build_object('source', s.source, 'name', s.name, 'gen', gv.generation_id))) users_sources_by_gen
 from pokemon p
 left join users_pokemon up on up.pokemon_id = p.id and up.user_id = $1
 left join users_pokemon_sources ups on ups.users_pokemon_id = up.id
 left join sources s on s.id = ups.source_id and ups.users_pokemon_id = up.id
 left join sources s2 on s2.pokemon_id = p.id
 left join game_versions gv on gv.id = up.game_id
-group by p.id, p."name", p.type1, p.type2, p.icon, p.default_image, p.female_image, p.shiny_image, p.bulbapedia_link, p.has_gender_differences, p.original_gen
+group by p.id, p."name", p.type1, p.type2, p.icon, p.default_image, p.bulbapedia_link, p.has_gender_differences, p.original_gen
 order by p.id;`
 
 export const getAllForUser = userId => {
@@ -22,45 +29,19 @@ export const getAllForUser = userId => {
       .then(rulesRes => {
         const pokemon = camelize(res.rows)
         const rules = camelize(rulesRes.rows[0]).userRules
-
-        let neededRules = []
-        for (const [key, value] of Object.entries(rules)) {
-          if (value) neededRules.push(key)
-        }
-
-        if (neededRules.includes('gender'))
-          neededRules.splice(neededRules.indexOf('gender'), 1, 'male', 'female')
+        const neededRules = getNeededRules(rules)
 
         return pokemon.map(mon => {
-          let userHasCompletedRecord = false
-          const newRules = neededRules.filter(rule => mon.sources.includes(rule))
-
-          if (!newRules.length) {
-            if (mon.usersSources[0]) userHasCompletedRecord = true
-          } else
-            userHasCompletedRecord = newRules.every(rule =>
-              mon.usersSources.includes(rule)
-            )
-
-          let sourceGens = {
-            all: [],
-          }
-
-          if (!mon.sourcesByGame || !mon.sourcesByGame.length || !mon.sourcesByGame[0]) {
-            sourceGens = null
-          } else {
-            mon.sourcesByGame.forEach(source => {
-              const [sourceName, gen] = source.split(':')
-              if (!sourceGens[sourceName]) sourceGens[sourceName] = []
-
-              sourceGens[sourceName].push(gen)
-              sourceGens.all.push(gen)
-            })
-          }
+          // might need to change this to userHasCompletedRecordByGen
+          const userHasCompletedRecord = checkIfUserHasCompletedRecord(mon, neededRules)
+          const [sourcesByType, imagesBySource] = getSourcesByType(mon)
+          const usersSourcesByGen = getUsersSourcesByGen(mon)
 
           return Object.assign({}, mon, {
             isComplete: userHasCompletedRecord,
-            sourceGens,
+            sourcesByType,
+            usersSourcesByGen,
+            imagesBySource,
           })
         })
       })

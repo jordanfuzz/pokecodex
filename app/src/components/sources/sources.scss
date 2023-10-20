@@ -55,6 +55,12 @@
   margin-left: 80px;
 }
 
+.sources-table-container {
+  max-height: 600px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 .sources-list-table {
   margin-top: 55px;
   width: 750px;

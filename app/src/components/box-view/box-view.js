@@ -73,48 +73,102 @@ const BoxView = () => {
       filteredPokemon = [...filteredPokemon, meltan, melmetal]
     }
 
-    // const shouldAddGenderVariants = !selectedVersion.ignoreGender && userRules.gender
-    // const shouldAddRegionVariants = !selectedVersion.ignoreRegionalVariants && userRules.regional
-
-    // temporarily ignore gender and regional variants
-    const shouldAddGenderVariants = false
-    const shouldAddRegionVariants = false
+    const shouldAddGenderVariants = !selectedVersion.ignoreGender && usersRules.gender
+    const shouldAddRegionVariants =
+      !selectedVersion.ignoreRegionalVariants && usersRules.regional
     const shouldAddFormVariants = usersRules?.variant
-
-    // first, mark isCaught for all pokemon that a user has one of,
-    // even if it isn't the right source
-
-    // then worry about refactoring to deal with sources
 
     const pokemonWithSources = filteredPokemon
       .map(mon => {
         let newEntries = []
-        let addedGenderVariant = false
+        let replacedDefault = false
         mon.sources.forEach(source => {
           switch (source) {
             case 'male':
               if (shouldAddGenderVariants) {
-                newEntries.push({ ...mon, variant: source })
-                addedGenderVariant = true
+                const isCaught =
+                  mon.usersSourcesByGen && mon.usersSourcesByGen.male
+                    ? mon.usersSourcesByGen.male.some(gen => gen <= selectedVersion.gen)
+                    : false
+                newEntries.push({
+                  ...mon,
+                  variant: source,
+                  isCaught,
+                  image:
+                    mon.imagesBySource.find(x => x[0] === 'Male')?.[1] ||
+                    mon.defaultImage,
+                })
+                if (!replacedDefault)
+                  replacedDefault = mon.sourcesByType.defaultSource === 'Male'
               }
               return
             case 'female':
               if (shouldAddGenderVariants) {
-                newEntries.push({ ...mon, variant: source })
-                addedGenderVariant = true
+                const isCaught =
+                  mon.usersSourcesByGen && mon.usersSourcesByGen.female
+                    ? mon.usersSourcesByGen.female.some(gen => gen <= selectedVersion.gen)
+                    : false
+                newEntries.push({
+                  ...mon,
+                  variant: source,
+                  isCaught,
+                  image:
+                    mon.imagesBySource.find(x => x[0] === 'Female')?.[1] ||
+                    mon.defaultImage,
+                })
+                if (!replacedDefault)
+                  replacedDefault = mon.sourcesByType.defaultSource === 'Female'
               }
               return
             case 'variant':
-              if (shouldAddFormVariants) newEntries.push({ ...mon, variant: source })
+              if (shouldAddFormVariants) {
+                if (!mon.sourcesByType || !mon.sourcesByType.variant) return
+                mon.sourcesByType.variant.forEach(variant => {
+                  const userHasVariantSources =
+                    mon.usersSourcesByGen && mon.usersSourcesByGen.variant
+
+                  const isCaught =
+                    userHasVariantSources &&
+                    mon.usersSourcesByGen.variant.some(
+                      ([sourceName, gens]) =>
+                        sourceName === variant &&
+                        gens.some(gen => gen <= selectedVersion.gen)
+                    )
+                  newEntries.push({
+                    ...mon,
+                    variant,
+                    isCaught,
+                    image:
+                      mon.imagesBySource.find(x => x[0] === variant)?.[1] ||
+                      mon.defaultImage,
+                  })
+                  if (!replacedDefault)
+                    replacedDefault = mon.sourcesByType.defaultSource === variant
+                })
+              }
               return
             case 'regional':
-              if (shouldAddRegionVariants) newEntries.push({ ...mon, variant: source })
+              if (shouldAddRegionVariants) {
+                if (!mon.usersSourcesByGen || !mon.usersSourcesByGen.regional) return
+                mon.usersSourcesByGen.regional.forEach(variant => {
+                  const [variantName, variantGen] = variant
+                  const isCaught = variantGen <= selectedVersion.gen
+                  newEntries.push({ ...mon, variant: variantName, isCaught })
+                })
+              }
               return
             default:
               return
           }
         })
-        return addedGenderVariant ? newEntries : [mon, ...newEntries]
+
+        const isCaught =
+          mon.usersSourcesByGen && mon.usersSourcesByGen.all
+            ? mon.usersSourcesByGen.all.some(gen => gen <= selectedVersion.gen)
+            : false
+        return replacedDefault
+          ? newEntries
+          : [Object.assign({}, mon, { isCaught, image: mon.defaultImage }), ...newEntries]
       })
       .flat()
 
@@ -129,8 +183,6 @@ const BoxView = () => {
   const handleBoxChange = box => {
     setSelectedBox(box)
   }
-
-  console.log('pokemon', pokemon)
 
   return shouldRedirect ? (
     <Redirect to="/login" />

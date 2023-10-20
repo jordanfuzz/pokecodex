@@ -9,13 +9,13 @@ export const getSourcesForPokemon = pokemonId => {
 }
 
 export const addSourceForPokemon = (sourceData, pokemonId) => {
-  const { name, source, gen, image, description } = sourceData
+  const { name, source, gen, image, description, replaceDefault } = sourceData
 
   return pgPool
     .query(
-      `insert into sources(id, pokemon_id, name, description, image, gen, source)
-    values($1, $2, $3, $4, $5, $6, $7);`,
-      [randomUUID(), pokemonId, name, description, image, gen, source]
+      `insert into sources(id, pokemon_id, name, description, image, gen, source, replace_default)
+    values($1, $2, $3, $4, $5, $6, $7, $8);`,
+      [randomUUID(), pokemonId, name, description, image, gen, source, replaceDefault]
     )
     .then(() => {
       return pgPool

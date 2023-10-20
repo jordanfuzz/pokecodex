@@ -183,8 +183,9 @@ export const gameData = [
     {
       boxSize: 20,
       maxBoxes: 12,
-      ignoreGender: true,
       dexLimit: 151,
+      gen: 1,
+      ignoreGender: true,
     },
   ],
   [
@@ -193,6 +194,8 @@ export const gameData = [
       boxSize: 20,
       maxBoxes: 14,
       dexLimit: 251,
+      gen: 2,
+      ignoreGender: true,
     },
   ],
   [
@@ -201,6 +204,8 @@ export const gameData = [
       boxSize: 30,
       maxBoxes: 14,
       dexLimit: 386,
+      gen: 3,
+      ignoreGender: true,
     },
   ],
   [
@@ -209,6 +214,8 @@ export const gameData = [
       boxSize: 30,
       maxBoxes: 18,
       dexLimit: 493,
+      gen: 4,
+      ignoreGender: true,
     },
   ],
   [
@@ -217,6 +224,8 @@ export const gameData = [
       boxSize: 30,
       maxBoxes: 24,
       dexLimit: 649,
+      gen: 5,
+      ignoreGender: true,
     },
   ],
   [
@@ -225,6 +234,8 @@ export const gameData = [
       boxSize: 30,
       maxBoxes: 31,
       dexLimit: 721,
+      gen: 6,
+      ignoreGender: true,
     },
   ],
   [
@@ -233,6 +244,8 @@ export const gameData = [
       boxSize: 30,
       maxBoxes: 32,
       dexLimit: 809,
+      gen: 7,
+      ignoreGender: true,
     },
   ],
   [
@@ -241,6 +254,8 @@ export const gameData = [
       boxSize: 30,
       maxBoxes: 32,
       limitedDex: swordAndShieldDex,
+      gen: 8,
+      ignoreGender: true,
     },
   ],
   [
@@ -249,6 +264,8 @@ export const gameData = [
       boxSize: 30,
       maxBoxes: 32,
       limitedDex: scarletAndVioletDex,
+      gen: 9,
+      ignoreGender: true,
     },
   ],
   [
@@ -257,6 +274,8 @@ export const gameData = [
       boxSize: 20,
       maxBoxes: 12,
       dexLimit: 151,
+      gen: 1,
+      ignoreGender: true,
     },
   ],
   [
@@ -265,6 +284,8 @@ export const gameData = [
       boxSize: 20,
       maxBoxes: 14,
       dexLimit: 251,
+      gen: 2,
+      ignoreGender: true,
     },
   ],
   [
@@ -273,6 +294,8 @@ export const gameData = [
       boxSize: 60,
       maxBoxes: 25,
       dexLimit: 386,
+      gen: 3,
+      ignoreGender: true,
     },
   ],
   [
@@ -282,6 +305,8 @@ export const gameData = [
       maxBoxes: 3,
       isIsolated: true,
       limitedDex: colosseumDex,
+      gen: 3,
+      ignoreGender: true,
     },
   ],
   [
@@ -291,6 +316,8 @@ export const gameData = [
       maxBoxes: 8,
       isIsolated: true,
       limitedDex: xdDex,
+      gen: 3,
+      ignoreGender: true,
     },
   ],
   [
@@ -299,6 +326,7 @@ export const gameData = [
       boxSize: 30,
       maxBoxes: 34,
       ignoreRules: true,
+      gen: 4,
     },
   ],
   [
@@ -308,6 +336,8 @@ export const gameData = [
       maxBoxes: 34,
       dexLimit: 151,
       addMeltanLine: true,
+      gen: 7,
+      ignoreGender: true,
     },
   ],
   [
@@ -317,6 +347,7 @@ export const gameData = [
       maxBoxes: 40,
       dexLimit: 493,
       ignoreRegionalVariants: true,
+      gen: 8,
     },
   ],
   [
@@ -325,6 +356,7 @@ export const gameData = [
       boxSize: 30,
       maxBoxes: 32,
       limitedDex: legendsArceusDex,
+      gen: 8,
     },
   ],
 ]

@@ -45,4 +45,13 @@
   width: 85px;
   // border: 1px solid blue;
   box-sizing: border-box;
+  image-rendering: pixelated;
+}
+
+.box-pokemon-small img {
+  image-rendering: pixelated;
+}
+
+.transparent {
+  opacity: 0.3;
 }
