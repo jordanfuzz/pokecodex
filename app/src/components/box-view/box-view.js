@@ -73,9 +73,9 @@ const BoxView = () => {
       filteredPokemon = [...filteredPokemon, meltan, melmetal]
     }
 
-    const shouldAddGenderVariants = !selectedVersion.ignoreGender && usersRules.gender
+    const shouldAddGenderVariants = !selectedVersion.ignoreGender && usersRules?.gender
     const shouldAddRegionVariants =
-      !selectedVersion.ignoreRegionalVariants && usersRules.regional
+      !selectedVersion.ignoreRegionalVariants && usersRules?.regional
     const shouldAddFormVariants = usersRules?.variant
 
     const pokemonWithSources = filteredPokemon
