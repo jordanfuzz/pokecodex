@@ -78,14 +78,18 @@ const SourcesList = props => {
     const sortSources = sourceArray => {
       let staticSources = []
 
+      const starterSource = sourceArray.find(x => x.source === 'starter')
       const wildSource = sourceArray.find(x => x.source === 'wild')
+      const hatchSource = sourceArray.find(x => x.source === 'hatch')
       const maleSource = sourceArray.find(x => x.source === 'male')
       const femaleSource = sourceArray.find(x => x.source === 'female')
+      if (starterSource) staticSources.push(Object.assign({}, starterSource))
       if (wildSource) staticSources.push(Object.assign({}, wildSource))
+      if (hatchSource) staticSources.push(Object.assign({}, hatchSource))
       if (maleSource) staticSources.push(Object.assign({}, maleSource))
       if (femaleSource) staticSources.push(Object.assign({}, femaleSource))
       const sortedSources = sourceArray
-        .filter(x => !['wild', 'male', 'female'].includes(x.source))
+        .filter(x => !['starter', 'wild', 'hatch', 'male', 'female'].includes(x.source))
         .sort((a, b) => (a.name > b.name ? 1 : b.name > a.name ? -1 : 0))
       return staticSources.concat(sortedSources)
     }
