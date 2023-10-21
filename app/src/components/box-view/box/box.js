@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { wallpapers } from '../box-view.logic'
 import './box.scss'
 
@@ -11,7 +11,10 @@ const Box = ({
   selectedBox,
   handleBoxChange,
   isChecklistEditMode,
+  usersBoxData,
 }) => {
+  const [completeRecords, setCompleteRecords] = useState([])
+
   const handleArrowClick = direction => {
     if (isChecklistEditMode) return
 
@@ -23,6 +26,16 @@ const Box = ({
       handleBoxChange(selectedBox + 1)
     }
   }
+
+  // TODO: This is duplicated between box and box-checklist. Refactor to be in one place.
+  useEffect(() => {
+    if (!usersBoxData) return
+
+    const boxDataForVersion = usersBoxData.find(
+      gameVersion => gameVersion.gameId === selectedVersion.id
+    )
+    setCompleteRecords(boxDataForVersion.completeRecords)
+  }, [usersBoxData, selectedVersion])
 
   const getWallpaper = () => {
     let wallpaperIndex = selectedBox
@@ -40,7 +53,10 @@ const Box = ({
     return (
       <div className={`box-flex-container-${boxSize}`}>
         {pokemon.slice(firstSlot, lastSlot).map((mon, i) => {
-          const transparent = mon.isCaught ? '' : 'transparent'
+          const recordIsCompleteInBox = mon.variant
+            ? completeRecords.includes(`${mon.id}:${mon.variant}`)
+            : completeRecords.includes(mon.id)
+          const transparent = recordIsCompleteInBox ? '' : 'transparent'
           return (
             <div key={i} className={`box-pokemon-${boxSize} ${transparent}`}>
               <img src={mon.image} />

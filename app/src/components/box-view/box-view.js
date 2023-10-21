@@ -3,7 +3,6 @@ import axios from 'axios'
 import { Link, Redirect } from 'react-router-dom'
 import Box from './box/box'
 import BoxChecklist from './box-checklist/box-checklist'
-import Rules from '../common/rules/rules'
 import './box-view.scss'
 
 const BoxView = () => {
@@ -256,6 +255,7 @@ const BoxView = () => {
           selectedBox={selectedBox}
           handleBoxChange={handleBoxChange}
           isChecklistEditMode={isChecklistEditMode}
+          usersBoxData={usersBoxData}
         />
       </div>
       <BoxChecklist

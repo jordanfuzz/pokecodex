@@ -14,6 +14,7 @@ const BoxChecklist = ({
 }) => {
   const [completeRecords, setCompleteRecords] = useState([])
 
+  // TODO: This is duplicated between box and box-checklist. Refactor to be in one place.
   useEffect(() => {
     if (!usersBoxData) return
 
@@ -64,19 +65,18 @@ const BoxChecklist = ({
     return filteredPokemon.slice(firstSlot, lastSlot).map((pokemon, i) => {
       return (
         <tr className={`checklist-row hover-${pokemon.type1}`} key={i}>
-          {/* <td className="checklist-slot">{i + 1}</td> */}
-          {/* TODO: What should this be? ID or Slot or count? */}
-          <td className="checklist-slot">{pokemon.id}</td>
+          <td className="checklist-slot">{i + 1}</td>
+          <td className="checklist-id">{pokemon.id}</td>
           <td className="checklist-name">{pokemon.name}</td>
           <td className="checklist-checkbox">{pokemon.isCaught ? '✅' : '⬜'}</td>
           {isEditMode ? (
             <td className="checklist-checkbox">
-              {/* Also don't display checked or green checkbox if it's not caught */}
               <input
                 type="checkbox"
                 onChange={e => handleRecordChange(e.target.checked, pokemon)}
+                disabled={!pokemon.isCaught}
                 checked={
-                  pokemon.variant
+                  pokemon.isCaught && pokemon.variant
                     ? completeRecords.includes(`${pokemon.id}:${pokemon.variant}`)
                     : completeRecords.includes(pokemon.id)
                 }
@@ -84,11 +84,14 @@ const BoxChecklist = ({
             </td>
           ) : pokemon.variant ? (
             <td className="checklist-checkbox">
-              {completeRecords.includes(`${pokemon.id}:${pokemon.variant}`) ? '✅' : '⬜'}
+              {pokemon.isCaught &&
+              completeRecords.includes(`${pokemon.id}:${pokemon.variant}`)
+                ? '✅'
+                : '⬜'}
             </td>
           ) : (
             <td className="checklist-checkbox">
-              {completeRecords.includes(pokemon.id) ? '✅' : '⬜'}
+              {pokemon.isCaught && completeRecords.includes(pokemon.id) ? '✅' : '⬜'}
             </td>
           )}
 
@@ -106,6 +109,7 @@ const BoxChecklist = ({
         <thead>
           <tr className="checklist-header-row">
             <th className="checklist-slot">Slot</th>
+            <th className="checklist-id">ID</th>
             <th className="checklist-name">Name</th>
             <th>
               <img className="header-row-pokeball" src={pokeball} />

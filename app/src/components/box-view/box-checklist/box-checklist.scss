@@ -20,10 +20,11 @@
 
 .checklist-header-row th {
   padding: 0 5px;
+  font-weight: 100;
 }
 
 .header-row-pokeball {
-  margin-top: 5px;
+  margin-bottom: -5px;
 }
 
 .checklist-row {
@@ -34,7 +35,7 @@
   cursor: pointer;
 }
 
-.checklist-slot {
+.checklist-id {
   width: 55px;
 }
 
