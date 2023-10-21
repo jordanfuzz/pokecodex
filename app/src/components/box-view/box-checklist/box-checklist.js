@@ -11,6 +11,7 @@ const BoxChecklist = ({
   isEditMode,
   setIsEditMode,
   handleUpdateUsersBoxData,
+  setHoveredPokemonIndex,
 }) => {
   const [completeRecords, setCompleteRecords] = useState([])
 
@@ -64,7 +65,12 @@ const BoxChecklist = ({
     const lastSlot = firstSlot + selectedVersion.boxSize
     return filteredPokemon.slice(firstSlot, lastSlot).map((pokemon, i) => {
       return (
-        <tr className={`checklist-row hover-${pokemon.type1}`} key={i}>
+        <tr
+          className={`checklist-row hover-${pokemon.type1}`}
+          key={i}
+          onMouseEnter={() => setHoveredPokemonIndex(i)}
+          onMouseLeave={() => setHoveredPokemonIndex(null)}
+        >
           <td className="checklist-slot">{i + 1}</td>
           <td className="checklist-id">{pokemon.id}</td>
           <td className="checklist-name">{pokemon.name}</td>

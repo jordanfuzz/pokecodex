@@ -16,6 +16,7 @@ const BoxView = () => {
   const [selectedVersion, setSelectedVersion] = useState(null)
   const [selectedBox, setSelectedBox] = useState(1)
   const [isChecklistEditMode, setIsChecklistEditMode] = useState(false)
+  const [hoveredPokemonIndex, setHoveredPokemonIndex] = useState(null)
 
   useEffect(async () => {
     try {
@@ -256,6 +257,7 @@ const BoxView = () => {
           handleBoxChange={handleBoxChange}
           isChecklistEditMode={isChecklistEditMode}
           usersBoxData={usersBoxData}
+          hoveredPokemonIndex={hoveredPokemonIndex}
         />
       </div>
       <BoxChecklist
@@ -266,6 +268,7 @@ const BoxView = () => {
         isEditMode={isChecklistEditMode}
         setIsEditMode={setIsChecklistEditMode}
         handleUpdateUsersBoxData={handleUpdateUsersBoxData}
+        setHoveredPokemonIndex={setHoveredPokemonIndex}
       />
     </div>
   )

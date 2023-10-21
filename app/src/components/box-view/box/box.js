@@ -12,6 +12,7 @@ const Box = ({
   handleBoxChange,
   isChecklistEditMode,
   usersBoxData,
+  hoveredPokemonIndex,
 }) => {
   const [completeRecords, setCompleteRecords] = useState([])
 
@@ -57,9 +58,10 @@ const Box = ({
             ? completeRecords.includes(`${mon.id}:${mon.variant}`)
             : completeRecords.includes(mon.id)
           const transparent = recordIsCompleteInBox ? '' : 'transparent'
+          const hovered = hoveredPokemonIndex === i ? 'hovered' : ''
           return (
-            <div key={i} className={`box-pokemon-${boxSize} ${transparent}`}>
-              <img src={mon.image} />
+            <div key={i} className={`box-pokemon-${boxSize} ${hovered}`}>
+              <img className={transparent} src={mon.image} />
             </div>
           )
         })}

@@ -1,3 +1,5 @@
+@import '../../../styles/colors';
+
 .box-footer {
   display: flex;
   align-items: center;
@@ -54,4 +56,9 @@
 
 .transparent {
   opacity: 0.3;
+}
+
+.hovered {
+  border-radius: 7px;
+  box-shadow: 0 0 0 5px rgba(0, 255, 255, 0.5) inset;
 }
