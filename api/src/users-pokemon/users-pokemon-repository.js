@@ -115,5 +115,53 @@ export const deleteUsersPokemon = pokemonData => {
 
 export const getBoxDataForUser = userId => {
   const boxDataQuery = 'select * from users_box_data where user_id = $1;'
-  return pgPool.query(boxDataQuery, [userId]).then(res => camelize(res.rows))
+  return pgPool
+    .query(boxDataQuery, [userId])
+    .then(res => (res.rows[0] ? camelize(res.rows) : null))
+}
+
+export const updateUsersBoxData = (completeRecords, userId, gameId) => {
+  const boxDataQuery = `
+  update users_box_data
+  set complete_records = $1
+  where user_id = $2 and game_id = $3
+  returning *;`
+
+  return pgPool
+    .query(boxDataQuery, [JSON.stringify(completeRecords), userId, gameId])
+    .then(res => getBoxDataForUser(userId))
+}
+
+export const setupBoxDataForUser = userId => {
+  const getGameVersionsQuery = `
+  select id from game_versions
+  where box_size is not null;`
+
+  return pgPool.query(getGameVersionsQuery).then(res => {
+    const setupBoxQuery = `
+    insert into users_box_data(id, user_id, game_id, complete_records)
+    values($1, $2, $3, $4)
+    returning *;`
+
+    const gameVersions = camelize(res.rows)
+    const boxData = gameVersions.map(game => {
+      return {
+        id: randomUUID(),
+        userId,
+        gameId: game.id,
+        completeRecords: [],
+      }
+    })
+
+    const promises = boxData.map(boxDataEntry => {
+      return pgPool.query(setupBoxQuery, [
+        boxDataEntry.id,
+        boxDataEntry.userId,
+        boxDataEntry.gameId,
+        JSON.stringify(boxDataEntry.completeRecords),
+      ])
+    })
+
+    return Promise.all(promises).then(res => camelize(res.map(r => r.rows[0])))
+  })
 }

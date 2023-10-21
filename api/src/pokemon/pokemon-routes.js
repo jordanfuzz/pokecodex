@@ -5,6 +5,8 @@ import {
   getAllForUserAndPokemon,
   addPokemonForUser,
   getBoxDataForUser,
+  setupBoxDataForUser,
+  updateUsersBoxData,
 } from '../users-pokemon/users-pokemon-repository.js'
 import { getAllPokeballs, getAllGameVersions } from '../game-data/game-data-repository.js'
 import {
@@ -60,6 +62,26 @@ router.get('/pokemon/box-data', async (req, res) => {
   const response = {
     usersBoxData: await getBoxDataForUser(req.query.userId),
     gameVersions: formatGamesForBoxView(await getAllGameVersions()),
+  }
+  res.status(200).send(response)
+})
+
+router.put('/pokemon/box-data', async (req, res) => {
+  if (!req.body) res.status(400).send({ message: 'No data was sent to the server' })
+  const { completeRecords, userId, gameId } = req.body
+
+  const response = {
+    usersBoxData: await updateUsersBoxData(completeRecords, userId, gameId),
+  }
+
+  res.status(200).send(response)
+})
+
+router.post('/pokemon/box-data/setup', async (req, res) => {
+  if (!req.query.userId) res.status(400).send({ message: 'No userId provided' })
+
+  const response = {
+    usersBoxData: await setupBoxDataForUser(req.query.userId),
   }
   res.status(200).send(response)
 })

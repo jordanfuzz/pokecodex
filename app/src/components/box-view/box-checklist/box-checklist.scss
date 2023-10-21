@@ -1,10 +1,13 @@
 @import '../../../styles/colors';
 
+.checklist-container {
+  display: flex;
+}
+
 .checklist-table {
   margin-top: 35px;
   margin-left: 70px;
   display: inline-block;
-  width: 400px;
   table-layout: fixed;
 }
 
@@ -43,8 +46,32 @@
   font-size: 12px;
 }
 
+.checklist-checkbox input {
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  cursor: pointer;
+}
+
 @each $type, $hex in $type-colors {
   .hover-#{$type}:hover {
     background-color: $hex;
+  }
+}
+
+.edit-checklist-button {
+  border: none;
+  border-radius: 0%;
+  margin-top: 35px;
+  margin-left: 20px;
+  font-size: 18px;
+  height: 30px;
+  padding: 3px 5px;
+  vertical-align: text-bottom;
+  cursor: pointer;
+  background-color: lightgray;
+
+  &:hover {
+    background-color: white;
   }
 }

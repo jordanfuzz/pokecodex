@@ -5,8 +5,16 @@ import './box.scss'
 import boxArrowLeft from '../../../media/box-arrow-left.png'
 import boxArrowRight from '../../../media/box-arrow-right.png'
 
-const Box = ({ pokemon, selectedVersion, selectedBox, handleBoxChange }) => {
+const Box = ({
+  pokemon,
+  selectedVersion,
+  selectedBox,
+  handleBoxChange,
+  isChecklistEditMode,
+}) => {
   const handleArrowClick = direction => {
+    if (isChecklistEditMode) return
+
     if (direction === 'left') {
       if (selectedBox === 1) return handleBoxChange(selectedVersion.maxBoxes)
       handleBoxChange(selectedBox - 1)

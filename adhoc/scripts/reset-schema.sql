@@ -92,7 +92,6 @@ create table users_box_data (
   id uuid primary key,
   user_id uuid not null,
   game_id integer not null,
-  box_number integer not null,
   complete_records jsonb
 );
 

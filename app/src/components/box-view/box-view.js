@@ -16,6 +16,7 @@ const BoxView = () => {
   const [shouldRedirect, setShouldRedirect] = useState(false)
   const [selectedVersion, setSelectedVersion] = useState(null)
   const [selectedBox, setSelectedBox] = useState(1)
+  const [isChecklistEditMode, setIsChecklistEditMode] = useState(false)
 
   useEffect(async () => {
     try {
@@ -39,8 +40,13 @@ const BoxView = () => {
     const rulesResponse = await axios.get(`/api/user/rules?userId=${userData.id}`)
     setUsersRules(rulesResponse.data.rules)
     const boxDataResponse = await axios.get(`/api/pokemon/box-data?userId=${userData.id}`)
-    setUsersBoxData(boxDataResponse.data.usersBoxData)
     setGameData(boxDataResponse.data.gameVersions)
+    if (!boxDataResponse.data.usersBoxData || !boxDataResponse.data.usersBoxData.length) {
+      const newUserBoxData = await axios.post(
+        `/api/pokemon/box-data/setup?userId=${userData.id}`
+      )
+      setUsersBoxData(newUserBoxData.data.usersBoxData)
+    } else setUsersBoxData(boxDataResponse.data.usersBoxData)
   }, [userData])
 
   useEffect(async () => {
@@ -51,14 +57,14 @@ const BoxView = () => {
     setSelectedVersion(gameData?.[0]?.[1])
   }, [gameData])
 
-  const handleUpdateUsersRules = async newRules => {
-    const newRulesData = {
-      rules: newRules,
+  const handleUpdateUsersBoxData = async completeRecords => {
+    const newUsersBoxData = {
+      completeRecords,
       userId: userData.id,
+      gameId: selectedVersion.id,
     }
-    const usersRulesData = await axios.put('/api/user/rules', newRulesData)
-    setUsersRules(usersRulesData.data?.rules)
-    refreshPokemonList()
+    const updatedUsersBoxData = await axios.put('/api/pokemon/box-data', newUsersBoxData)
+    setUsersBoxData(updatedUsersBoxData.data?.usersBoxData)
   }
 
   const refreshPokemonList = async () => {
@@ -232,6 +238,7 @@ const BoxView = () => {
           <select
             className="filter-dropdown"
             onChange={e => handleVersionChange(e.target.value)}
+            disabled={isChecklistEditMode}
           >
             {gameData.map(([key, value], i) => (
               <option key={i} value={key}>
@@ -248,14 +255,18 @@ const BoxView = () => {
           selectedVersion={selectedVersion}
           selectedBox={selectedBox}
           handleBoxChange={handleBoxChange}
+          isChecklistEditMode={isChecklistEditMode}
         />
       </div>
       <BoxChecklist
         filteredPokemon={filteredPokemon}
         selectedVersion={selectedVersion}
         selectedBox={selectedBox}
+        usersBoxData={usersBoxData}
+        isEditMode={isChecklistEditMode}
+        setIsEditMode={setIsChecklistEditMode}
+        handleUpdateUsersBoxData={handleUpdateUsersBoxData}
       />
-      <Rules usersRules={usersRules} updateUsersRules={handleUpdateUsersRules} />
     </div>
   )
 }
