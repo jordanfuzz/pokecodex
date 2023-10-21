@@ -30,6 +30,7 @@ import trioPlatinum from '../../media/box-wallpapers/trio-platinum.png'
 import pikapikaPlatinum from '../../media/box-wallpapers/pikapika-platinum.png'
 import legendPlatinum from '../../media/box-wallpapers/legend-platinum.png'
 import galacticPlatinum from '../../media/box-wallpapers/galactic-platinum.png'
+import pokemonBox from '../../media/box-wallpapers/pokemon-box.png'
 
 export const wallpapers = [
   forest,
@@ -65,3 +66,5 @@ export const wallpapers = [
   legendPlatinum,
   galacticPlatinum,
 ]
+
+export const largeWallpaper = pokemonBox

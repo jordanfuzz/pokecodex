@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { wallpapers } from '../box-view.logic'
+import { wallpapers, largeWallpaper } from '../box-view.logic'
 import './box.scss'
 
 import boxArrowLeft from '../../../media/box-arrow-left.png'
@@ -43,14 +43,15 @@ const Box = ({
     if (selectedBox > 32) wallpaperIndex -= 32
     if (selectedVersion.boxSize === 20) return wallpapers[wallpaperIndex]
     if (selectedVersion.boxSize === 30) return wallpapers[wallpaperIndex - 1]
-
-    // if (selectedVersion.boxSize === 60) return largeWallpapers[selectedBox - 1]
+    if (selectedVersion.boxSize === 60) return largeWallpaper
   }
 
   const renderPokemon = () => {
     const firstSlot = (selectedBox - 1) * selectedVersion.boxSize
     const lastSlot = firstSlot + selectedVersion.boxSize
-    const boxSize = selectedVersion.boxSize === 20 ? 'small' : 'large'
+    let boxSize = 'small'
+    if (selectedVersion.boxSize === 30) boxSize = 'medium'
+    else if (selectedVersion.boxSize === 60) boxSize = 'large'
     return (
       <div className={`box-flex-container-${boxSize}`}>
         {pokemon.slice(firstSlot, lastSlot).map((mon, i) => {
@@ -72,7 +73,11 @@ const Box = ({
   return (
     <div className="box-container">
       <div className="box">
-        <img className="box-image" src={getWallpaper()} />
+        {selectedVersion.boxSize === 60 ? (
+          <img className="large-box-image" src={largeWallpaper} />
+        ) : (
+          <img className="box-image" src={getWallpaper()} />
+        )}
         {renderPokemon()}
       </div>
       <div className="box-footer">
