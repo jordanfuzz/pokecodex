@@ -9,6 +9,7 @@
   "dependencies": {
     "axios": "^0.21.1",
     "dotenv": "^10.0.0",
-    "pg": "^8.4.1"
+    "pg": "^8.4.1",
+    "pokedex-promise-v2": "^4.1.1"
   }
 }
