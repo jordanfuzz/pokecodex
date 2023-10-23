@@ -8,8 +8,14 @@ export const getSourcesForPokemon = pokemonId => {
     .then(res => camelize(res.rows))
 }
 
-export const addSourceForPokemon = (sourceData, pokemonId) => {
+export const addSourceForPokemon = async (sourceData, pokemonId, userId) => {
   const { name, source, gen, image, description, replaceDefault } = sourceData
+
+  const userIsAdmin = await pgPool
+    .query('select is_admin from users where id = $1;', [userId])
+    .then(res => res.rows[0].is_admin)
+
+  if (!userIsAdmin) return null
 
   return pgPool
     .query(

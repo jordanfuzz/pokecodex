@@ -26,7 +26,8 @@ const Sources = () => {
           'Access-Control-Allow-Credentials': true,
         },
       })
-      if (response?.data?.id) setUserData(response.data)
+      const userIsAdmin = response?.data?.isAdmin
+      if (response?.data?.id && userIsAdmin) setUserData(response.data)
       else setShouldRedirect(true)
     } catch (error) {
       setShouldRedirect(true)
@@ -74,6 +75,7 @@ const Sources = () => {
     const response = await axios.post('/api/sources', {
       source: sourceData,
       pokemonId: activePokemon.id,
+      userId: userData.id,
     })
     setPokemonSources(response.data.sources)
     setIsEditMode(false)

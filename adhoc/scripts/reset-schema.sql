@@ -19,7 +19,8 @@ create type pokemon_type as enum ('normal', 'fighting', 'flying', 'poison', 'gro
 --   discord_username text,
 --   last_seen_at timestamp without time zone,
 --   time_format integer default 0,
---   user_rules jsonb
+--   user_rules jsonb,
+--   is_admin boolean not null default 'false'
 -- );
 -- avatar_pokemon integer,
 

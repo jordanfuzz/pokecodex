@@ -1,9 +1,6 @@
 import express from 'express'
 const router = express.Router()
-import {
-  getSourcesForPokemon,
-  addSourceForPokemon,
-} from './sources-repository.js'
+import { getSourcesForPokemon, addSourceForPokemon } from './sources-repository.js'
 
 router.get('/sources', async (req, res) => {
   const response = {
@@ -13,10 +10,18 @@ router.get('/sources', async (req, res) => {
 })
 
 router.post('/sources', async (req, res) => {
-  const response = {
-    sources: await addSourceForPokemon(req.body.source, req.body.pokemonId),
+  const sources = await addSourceForPokemon(
+    req.body.source,
+    req.body.pokemonId,
+    req.body.userId
+  )
+  if (!sources) res.status(401).send({ message: 'User is not authorized to add sources' })
+  else {
+    const response = {
+      sources,
+    }
+    res.status(200).send(response)
   }
-  res.status(200).send(response)
 })
 
 export default router
