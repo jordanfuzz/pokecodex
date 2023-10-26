@@ -25,10 +25,7 @@ export const getUsersSourcesByGen = mon => {
   } else {
     mon.usersSourcesByGen.forEach(source => {
       const { source: sourceType, name, gen } = source
-      if (!sourceType || !name || !gen) {
-        usersSourcesByGen = null
-        return
-      }
+      if (!sourceType || !name || !gen) return
       if (!usersSourcesByGen[sourceType]) usersSourcesByGen[sourceType] = []
       if (repeatableSourceTypes.includes(sourceType)) {
         const index = usersSourcesByGen[sourceType].findIndex(x => x[0] === name)
