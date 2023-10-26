@@ -1,6 +1,6 @@
-const fs = require('fs')
-const rawPokemon = require('../pokeapi-data/pokemon-species.json')
-const pokemonTypes = require('../pokeapi-data/pokemon-types.json')
+import fs from 'fs'
+import rawPokemon from '../pokeapi-data/updated-pokemon-species.json' assert { type: 'json' }
+import pokemonTypes from '../pokeapi-data/updated-pokemon-types.json' assert { type: 'json' }
 
 const types = [
   'normal',
@@ -24,12 +24,11 @@ const types = [
 ]
 
 let pokemonWithTypes = []
-for (let i = 1; i <= 898; i++) {
+// Stopping at 1010 because 1011-1017 don't have images yet
+for (let i = 899; i <= 1010; i++) {
   const pokemon = rawPokemon.find(pokemon => pokemon.id === i)
 
-  let rawTypes = pokemonTypes.filter(
-    pokemonType => pokemonType.pokemon_id === pokemon.id
-  )
+  let rawTypes = pokemonTypes.filter(pokemonType => pokemonType.pokemon_id === pokemon.id)
 
   const pokemonName =
     pokemon.identifier.charAt(0).toUpperCase() + pokemon.identifier.slice(1)
@@ -49,17 +48,13 @@ for (let i = 1; i <= 898; i++) {
     )}_(Pok%C3%A9mon)`,
     icon: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-viii/icons/${i}.png`,
     defaultImage: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${i}.png`,
-    femaleImage: hasGenderDifferences
-      ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/female/${i}.png`
-      : null,
-    shinyImage: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${i}.png`,
   }
 
   pokemonWithTypes.push(singlePokemon)
 }
 
 fs.writeFile(
-  'pokemon-with-types.json',
+  'updated-pokemon-with-types.json',
   JSON.stringify(pokemonWithTypes),
   'utf8',
   () => {

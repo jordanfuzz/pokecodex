@@ -59,8 +59,7 @@ for (let i = 201; i <= 201; i++) {
     id: randomUUID(),
     pokemonId: pokemon.id,
     name: 'From home region',
-    description:
-      'This pokemon was caught in the first generation in which it appeared.',
+    description: 'This pokemon was caught in the first generation in which it appeared.',
     gen: pokemon.generation_id,
     source: 'original',
   }
@@ -76,8 +75,7 @@ for (let i = 201; i <= 201; i++) {
     const variant = pokemonForms.find(form => form.pokemon_id === id)
     if (['alola', 'galar', 'hisui'].includes(variant.form_identifier)) {
       const regionName =
-        variant.form_identifier.charAt(0).toUpperCase() +
-        variant.form_identifier.slice(1)
+        variant.form_identifier.charAt(0).toUpperCase() + variant.form_identifier.slice(1)
       const regionalVariantSource = {
         id: randomUUID(),
         pokemonId: pokemon.id,

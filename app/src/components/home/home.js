@@ -114,6 +114,23 @@ const Home = () => {
     refreshPokemonList()
   }
 
+  const handleEvolvePokemon = async (oldPokemonData, evolvedPokemonId) => {
+    const newPokemonData = {
+      userId: userData.id,
+      evolvedPokemonId,
+      oldPokemonData,
+    }
+    const usersPokemonData = await axios.put('/api/users-pokemon/evolve', newPokemonData)
+    if (!usersPokemonData) return
+
+    setUsersPokemon(usersPokemonData.data?.usersPokemon)
+    const newCatchData = Object.assign({}, catchData, {
+      usersPokemonSources: usersPokemonData.data?.usersPokemonSources,
+    })
+    setCatchData(newCatchData)
+    refreshPokemonList()
+  }
+
   const handleDeleteUsersPokemon = async pokemonData => {
     const newPokemonData = {
       ...pokemonData,
@@ -143,6 +160,17 @@ const Home = () => {
     refreshPokemonList()
   }
 
+  const addEvolutionsToActivePokemon = activePokemon => {
+    if (!pokemon || !activePokemon.evolvesTo) return activePokemon
+    const activePokemonWithEvolution = Object.assign({}, activePokemon)
+    const evolutions = pokemon.filter(x =>
+      activePokemonWithEvolution.evolvesTo.includes(x.id)
+    )
+    if (evolutions && evolutions.length)
+      activePokemonWithEvolution.evolutions = evolutions
+    return activePokemonWithEvolution
+  }
+
   const renderDrawer = activePokemon => {
     let drawerContents
 
@@ -151,7 +179,7 @@ const Home = () => {
         drawerContents = (
           <SourcesList
             activePokemonSources={activePokemonSources}
-            activePokemon={activePokemon}
+            activePokemon={addEvolutionsToActivePokemon(activePokemon)}
             setDrawerMode={setDrawerMode}
             usersPokemon={usersPokemon}
             catchData={catchData}
@@ -159,6 +187,7 @@ const Home = () => {
             handleUpdatePokemonNote={handleUpdatePokemonNote}
             handleUpdateUsersPokemon={handleUpdateUsersPokemon}
             handleDeleteUsersPokemon={handleDeleteUsersPokemon}
+            handleEvolvePokemon={handleEvolvePokemon}
           />
         )
         break

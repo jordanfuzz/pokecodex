@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import Modal from 'react-modal'
 import { uniq, uniqBy } from 'ramda'
 import { DateTime } from 'luxon'
+import { ArrowBigUpDash } from 'lucide-react'
 import Catch from '../catch/catch'
 import './sources-list.scss'
 import checkIcon from '../../../media/check-icon.svg'
@@ -28,8 +29,14 @@ const SourcesList = props => {
   const [openDrawerIndex, setOpenDrawerIndex] = useState(null)
   const [drawerMode, setDrawerMode] = useState('log')
   const [noteText, setNoteText] = useState('')
+  const [hoveredEvolveButtonId, setHoveredEvolveButtonId] = useState(null)
+  const [pokemonToEvolve, setPokemonToEvolve] = useState(null)
+  const [isFlaggedForEvolution, setIsFlaggedForEvolution] = useState(false)
+  const [targetEvolution, setTargetEvolution] = useState(null)
 
   if (!props.activePokemonSources || !props.usersPokemonSources) return null
+
+  const activePokemonEvolves = !!props.activePokemon.evolvesTo
 
   const handleOpenModal = () => {
     setIsModalOpen(true)
@@ -40,8 +47,10 @@ const SourcesList = props => {
   }
 
   const handleOpenDrawer = async pokemonId => {
-    if (openDrawerIndex === pokemonId) setOpenDrawerIndex(null)
-    else setOpenDrawerIndex(pokemonId)
+    if (openDrawerIndex === pokemonId) {
+      setOpenDrawerIndex(null)
+      setDrawerMode('log')
+    } else setOpenDrawerIndex(pokemonId)
   }
 
   const handleNoteClick = noteText => {
@@ -72,6 +81,55 @@ const SourcesList = props => {
     props.handleDeleteUsersPokemon(pokemonData)
     setDrawerMode('log')
     setOpenDrawerIndex(null)
+  }
+
+  const handleEvolveButtonClick = (event, pokemon) => {
+    setPokemonToEvolve(pokemon)
+    setDrawerMode('evolve')
+    setOpenDrawerIndex(pokemon.id)
+    event.stopPropagation()
+    event.preventDefault()
+  }
+
+  const handleEvolutionClick = evolution => {
+    setTargetEvolution(evolution)
+    setIsFlaggedForEvolution(true)
+  }
+
+  const handleConfirmEvolve = () => {
+    const oldPokemonData = { ...pokemonToEvolve, pokemonId: props.activePokemon.id }
+    props.handleEvolvePokemon(oldPokemonData, targetEvolution.id)
+    setDrawerMode('log')
+    setOpenDrawerIndex(null)
+    setIsFlaggedForEvolution(false)
+    setTargetEvolution(null)
+    setIsModalOpen(false)
+  }
+
+  const renderEvolveConfirmation = () => {
+    return (
+      <div className="evolve-mode-container">
+        <span className="evolution-warning">
+          Do you want to evolve {props.activePokemon.name} into {targetEvolution.name}?
+        </span>
+        <span className="confirm-evolve-container">
+          <button className="confirm-evolve-button" onClick={handleConfirmEvolve}>
+            Yes
+          </button>
+          <button
+            className="confirm-evolve-button"
+            onClick={() => {
+              setIsFlaggedForEvolution(false)
+              setTargetEvolution(null)
+              setDrawerMode('log')
+              setOpenDrawerIndex(null)
+            }}
+          >
+            No
+          </button>
+        </span>
+      </div>
+    )
   }
 
   const renderSources = () => {
@@ -108,12 +166,14 @@ const SourcesList = props => {
 
     const achievedSources = sortSources(
       uniqBy(source => source.id, props.usersPokemonSources)
-    ).map((source, i) => (
-      <span key={i} className="unlocked-source-pill">
-        <img src={checkIcon} className="check-icon" />
-        {source.name}
-      </span>
-    ))
+    )
+      .filter(x => !x.isInherited)
+      .map((source, i) => (
+        <span key={i} className="unlocked-source-pill">
+          <img src={checkIcon} className="check-icon" />
+          {source.name}
+        </span>
+      ))
 
     return [achievedSources, unachievedSources]
   }
@@ -192,6 +252,34 @@ const SourcesList = props => {
           </td>
         )
         break
+      case 'evolve':
+        drawerContents = (
+          <td className="drawer-column" colSpan="6">
+            {isFlaggedForEvolution ? (
+              renderEvolveConfirmation()
+            ) : (
+              <>
+                <span className="evolve-to-label">Evolve to:</span>
+                <div className="evolution-choices-container">
+                  {props.activePokemon.evolutions.map((evolution, i) => (
+                    <div
+                      className="evolution-choice"
+                      key={i}
+                      onClick={() => handleEvolutionClick(evolution)}
+                    >
+                      <img
+                        className="evolution-choice-image"
+                        src={evolution.defaultImage}
+                      />
+                      <span className="evolution-choice-label">{evolution.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </td>
+        )
+        break
       default:
         drawerContents = null
         break
@@ -226,7 +314,19 @@ const SourcesList = props => {
             }`}
             onClick={() => handleOpenDrawer(pokemon.id)}
           >
-            <td>{i + 1}</td>
+            {activePokemonEvolves ? (
+              <td
+                onMouseEnter={() => setHoveredEvolveButtonId(i)}
+                onMouseLeave={() => setHoveredEvolveButtonId(null)}
+              >
+                <ArrowBigUpDash
+                  onClick={event => handleEvolveButtonClick(event, pokemon)}
+                  className="catch-list-evolve-button"
+                  color={hoveredEvolveButtonId === i ? 'black' : 'white'}
+                  size={30}
+                />
+              </td>
+            ) : null}
             <td>{pokemon.gen}</td>
             <td>{pokemon.gameVersion}</td>
             <td>
@@ -279,7 +379,7 @@ const SourcesList = props => {
           <table className="catch-list-table" cellSpacing={0}>
             <thead>
               <tr className="catch-list-header-row">
-                <th>#</th>
+                {activePokemonEvolves ? <th>Evolve</th> : null}
                 <th>Gen</th>
                 <th>Game</th>
                 <th>Ball</th>
@@ -292,7 +392,7 @@ const SourcesList = props => {
                 renderPokemonRows()
               ) : (
                 <tr className={`empty-row drawer-${props.activePokemon?.type1}`}>
-                  <td></td>
+                  {activePokemonEvolves ? <td></td> : null}
                   <td></td>
                   <td></td>
                   <td></td>

@@ -33,7 +33,8 @@ export const addSourceForPokemon = async (sourceData, pokemonId, userId) => {
 export const getUsersPokemonSources = (userId, pokemonId) => {
   return pgPool
     .query(
-      `select s.id, s.name, s.gen, up.id as "pokemonId" from sources s
+      `select s.id, s.name, s.gen, up.id as "pokemonId", ups.is_inherited
+    from sources s
     join users_pokemon_sources ups on ups.source_id = s.id
     join users_pokemon up on up.id = ups.users_pokemon_id
     where up.user_id = $1 and up.pokemon_id = $2;`,

@@ -5,6 +5,7 @@ import {
   getAllForUserAndPokemon,
   updateNoteForUsersPokemon,
   updateUsersPokemon,
+  evolveUsersPokemon,
 } from './users-pokemon-repository.js'
 import { getAllPokeballs, getAllGameVersions } from '../game-data/game-data-repository.js'
 import { getUsersPokemonSources } from '../sources/sources-repository.js'
@@ -43,6 +44,17 @@ router.delete('/users-pokemon', async (req, res) => {
 router.put('/users-pokemon/note', async (req, res) => {
   const response = {
     usersPokemon: await updateNoteForUsersPokemon(req.body),
+  }
+  res.status(200).send(response)
+})
+
+router.put('/users-pokemon/evolve', async (req, res) => {
+  const response = {
+    usersPokemon: await evolveUsersPokemon(req.body),
+    usersPokemonSources: await getUsersPokemonSources(
+      req.body.userId,
+      req.body.oldPokemonData.pokemonId
+    ),
   }
   res.status(200).send(response)
 })

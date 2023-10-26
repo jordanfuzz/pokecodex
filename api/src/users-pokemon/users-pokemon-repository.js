@@ -4,7 +4,7 @@ import { randomUUID } from 'crypto'
 
 const selectQuery = `
 select up.id, up.notes, up.pokemon_id, up.pokeball, up.user_id, 
-up.caught_at, gv.name as "gameVersion", gv.generation_id as "gen" 
+up.caught_at, gv.name as "gameVersion", gv.id as "gameId", gv.generation_id as "gen" 
 from users_pokemon up
 join game_versions gv on gv.id = up.game_id 
 where user_id = $1 and pokemon_id = $2
@@ -87,6 +87,49 @@ export const addPokemonForUser = pokemonData => {
             [randomUUID(), usersPokemonId, sourceId]
           )
         })
+      )
+    })
+    .then(() => {
+      return pgPool
+        .query(selectQuery, [userId, pokemonId])
+        .then(res => camelize(res.rows))
+    })
+}
+
+export const evolveUsersPokemon = pokemonData => {
+  const { userId, evolvedPokemonId, oldPokemonData } = pokemonData
+  const { pokeball, gameId, caughtAt, id: usersPokemonId, pokemonId } = oldPokemonData
+
+  const evolvedUsersPokemonId = randomUUID()
+
+  return pgPool
+    .query(
+      `insert into users_pokemon (id, user_id, pokemon_id, game_id, pokeball, caught_at)
+    values($1, $2, $3, $4, $5, $6)
+    returning *;`,
+      [evolvedUsersPokemonId, userId, evolvedPokemonId, gameId, pokeball, caughtAt]
+    )
+    .then(async () => {
+      await pgPool.query(
+        `update users_pokemon_sources
+            set users_pokemon_id = $1, is_inherited = true
+            where users_pokemon_id = $2;`,
+        [evolvedUsersPokemonId, usersPokemonId]
+      )
+
+      await pgPool.query(`delete from users_pokemon where id = $1;`, [usersPokemonId])
+
+      const evolutionSourceId = await pgPool
+        .query("select id from sources where source = 'evolved' and pokemon_id = $1;", [
+          evolvedPokemonId,
+        ])
+        .then(res => res.rows[0].id)
+
+      const evolutionUsersPokemonSourcesId = randomUUID()
+
+      return await pgPool.query(
+        'insert into users_pokemon_sources(id, users_pokemon_id, source_id) values($1, $2, $3);',
+        [evolutionUsersPokemonSourcesId, evolvedUsersPokemonId, evolutionSourceId]
       )
     })
     .then(() => {

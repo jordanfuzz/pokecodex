@@ -76,7 +76,9 @@ const insertSources = async (recordsToSet, offset = 1) => {
   console.log('Skipped: ', skippedPokemon)
 }
 
-insertSources(150, 361)
+insertSources(100, 446)
+
+// const totalSkipped2 = ['dipplin', 'sinistcha']
 
 // const totalSkipped = [
 //   'annihilape',

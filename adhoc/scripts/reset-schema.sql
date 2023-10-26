@@ -31,11 +31,10 @@ create type pokemon_type as enum ('normal', 'fighting', 'flying', 'poison', 'gro
 --   type2 pokemon_type,
 --   icon text,
 --   default_image text,
---   female_image text,
---   shiny_image text
 --   bulbapedia_link text,
 --   has_gender_differences boolean,
---   original_gen integer not null
+--   original_gen integer not null,
+--   evolves_to integer[]
 -- );
 
 create table sources (
@@ -68,7 +67,8 @@ create table users_pokemon (
 create table users_pokemon_sources (
   id uuid primary key,
   users_pokemon_id uuid not null,
-  source_id uuid not null
+  source_id uuid not null,
+  is_inherited boolean not null default 'false'
 );
 
 -- create table game_versions (

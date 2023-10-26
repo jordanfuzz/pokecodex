@@ -133,3 +133,81 @@
 .catch-list-table td {
   font-size: 26px;
 }
+
+.catch-list-evolve-button {
+  margin-bottom: -5px;
+}
+
+.evolve-to-label {
+  color: black;
+}
+
+.evolution-choices-container {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  margin-bottom: 10px;
+  padding: 10px;
+}
+
+.evolution-choice {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  margin: 0 5px;
+}
+
+// hover
+
+.evolution-choice-image {
+  width: 100px;
+  height: 100px;
+  image-rendering: pixelated;
+  margin-bottom: 5px;
+}
+
+.evolution-choice-label {
+  color: black;
+}
+
+.evolve-button-container {
+  float: right;
+  text-align: left;
+  display: inline-flex;
+  margin-bottom: 15px;
+  margin-right: 20px;
+}
+
+.evolve-pokemon-button {
+  border: none;
+  border-radius: 0%;
+  margin-left: 5px;
+  height: 27px;
+}
+
+.evolution-warning {
+  color: black;
+  margin-top: 30px;
+}
+
+.evolve-mode-container {
+  height: 244px;
+  padding-top: 50px;
+  box-sizing: border-box;
+}
+
+.confirm-evolve-container {
+  display: flex;
+  margin: 0 auto;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirm-evolve-button {
+  border: none;
+  border-radius: 0%;
+  margin: 20px;
+  font-size: 30px;
+  padding: 3px;
+}
