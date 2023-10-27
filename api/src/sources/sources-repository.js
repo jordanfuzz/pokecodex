@@ -42,3 +42,21 @@ export const getUsersPokemonSources = (userId, pokemonId) => {
     )
     .then(res => camelize(res.rows))
 }
+
+export const getEvolutionSourcesForPokemon = async (userId, pokemonId) => {
+  const possibleEvolutions = await pgPool
+    .query(`select evolves_to from pokemon where id = $1`, [pokemonId])
+    .then(res => res.rows[0]?.evolves_to || [])
+
+  return pgPool
+    .query(
+      `select s.id, s.name, s.gen, up.id as "pokemonId", ups.is_inherited
+    from sources s
+    join users_pokemon_sources ups on ups.source_id = s.id
+    join users_pokemon up on up.id = ups.users_pokemon_id
+    where up.user_id = $1 and up.pokemon_id = any($2::integer[]) 
+    and ups.is_inherited = true and s.source = any(array['npc-trade'::source_type, 'side-game'::source_type, 'special'::source_type]);`,
+      [userId, possibleEvolutions]
+    )
+    .then(res => camelize(res.rows))
+}

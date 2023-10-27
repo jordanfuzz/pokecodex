@@ -154,11 +154,35 @@ const SourcesList = props => {
 
     const uniqueUsersSourceIds = uniq(props.usersPokemonSources.map(x => x.id))
 
-    const unachievedSources = sortSources(
-      props.activePokemonSources.filter(x => !uniqueUsersSourceIds.includes(x.id))
-    ).map((source, i) => {
+    let rawUnachievedSources = []
+    let rawEvolutionSources = []
+
+    if (!props.usersPokemonEvolutionSources?.length) {
+      rawUnachievedSources = sortSources(
+        props.activePokemonSources.filter(x => !uniqueUsersSourceIds.includes(x.id))
+      )
+    } else {
+      sortSources(
+        props.activePokemonSources.filter(x => !uniqueUsersSourceIds.includes(x.id))
+      ).forEach(source => {
+        if (props.usersPokemonEvolutionSources.some(x => x.id === source.id))
+          rawEvolutionSources.push(source)
+        else rawUnachievedSources.push(source)
+      })
+    }
+
+    const unachievedSources = rawUnachievedSources.map((source, i) => {
       return (
-        <span key={i} className="locked-source-pill">
+        <span key={`normal-${i}`} className="locked-source-pill">
+          {source.name}
+        </span>
+      )
+    })
+
+    const evolutionAchievedSources = rawEvolutionSources.map((source, i) => {
+      return (
+        <span key={`evo-${i}`} className="unlocked-source-pill">
+          <ArrowBigUpDash className="evolve-icon" color="white" size={30} />
           {source.name}
         </span>
       )
@@ -169,13 +193,13 @@ const SourcesList = props => {
     )
       .filter(x => !x.isInherited)
       .map((source, i) => (
-        <span key={i} className="unlocked-source-pill">
+        <span key={`achieved-${i}`} className="unlocked-source-pill">
           <img src={checkIcon} className="check-icon" />
           {source.name}
         </span>
       ))
 
-    return [achievedSources, unachievedSources]
+    return [achievedSources, evolutionAchievedSources, unachievedSources]
   }
 
   const renderUsersPokemonDrawer = pokemon => {
@@ -296,13 +320,33 @@ const SourcesList = props => {
     if (!props.usersPokemon) return null
 
     const renderTags = pokemon => {
-      return props.usersPokemonSources
-        .filter(x => x.pokemonId === pokemon.id)
-        .map((source, i) => (
-          <span key={i} className="catch-tag">
-            {source.name}
-          </span>
-        ))
+      const allUsersSources = props.usersPokemonSources
+        ? props.usersPokemonSources.filter(x => x.pokemonId === pokemon.id)
+        : []
+
+      const inheritedSources = allUsersSources.reduce((acc, source) => {
+        if (source.isInherited) {
+          acc.push(source)
+          return acc
+        }
+        return acc
+      }, [])
+
+      const nonInheritedSources = allUsersSources.filter(source => !source.isInherited)
+
+      const nonInheritedTags = nonInheritedSources.map((source, i) => (
+        <span key={`non-${i}`} className="catch-tag">
+          {source.name}
+        </span>
+      ))
+
+      const inheritedTags = inheritedSources.map((source, i) => (
+        <span key={`inherit-${i}`} className="catch-tag inherited">
+          {source.name}
+        </span>
+      ))
+
+      return [...nonInheritedTags, ...inheritedTags]
     }
 
     return props.usersPokemon.map((pokemon, i) => {

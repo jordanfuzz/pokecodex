@@ -12,6 +12,7 @@ import { getAllPokeballs, getAllGameVersions } from '../game-data/game-data-repo
 import {
   getSourcesForPokemon,
   getUsersPokemonSources,
+  getEvolutionSourcesForPokemon,
 } from '../sources/sources-repository.js'
 import { formatGamesForBoxView } from './pokemon-utils.js'
 
@@ -32,6 +33,10 @@ router.get('/pokemon', async (req, res) => {
       req.query.userId,
       req.query.pokemonId
     ),
+    usersPokemonEvolutionSources: await getEvolutionSourcesForPokemon(
+      req.query.userId,
+      req.query.pokemonId
+    ),
     pokeballs: await getAllPokeballs(),
     gameVersions: await getAllGameVersions(),
   }
@@ -43,12 +48,16 @@ router.post('/pokemon', async (req, res) => {
 
   // Resend the entire pokemon data anyway because it's less confusing on the frontend
   const response = {
+    sources: await getSourcesForPokemon(req.body.pokemonId),
     usersPokemon: await addPokemonForUser(req.body),
     usersPokemonSources: await getUsersPokemonSources(
       req.body.userId,
       req.body.pokemonId
     ),
-    sources: await getSourcesForPokemon(req.body.pokemonId),
+    usersPokemonEvolutionSources: await getEvolutionSourcesForPokemon(
+      req.body.userId,
+      req.body.pokemonId
+    ),
     pokeballs: await getAllPokeballs(),
     gameVersions: await getAllGameVersions(),
   }

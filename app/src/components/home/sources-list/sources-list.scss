@@ -59,6 +59,11 @@
   margin-right: 7px;
 }
 
+.evolve-icon {
+  margin-bottom: -6px;
+  margin-right: 3px;
+}
+
 .catch-list-table {
   min-width: 900px;
 }
@@ -97,6 +102,10 @@
   color: white;
   cursor: default;
   margin-right: 5px;
+}
+
+.inherited {
+  opacity: 0.4;
 }
 
 .tag-container {

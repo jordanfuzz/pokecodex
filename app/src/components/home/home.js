@@ -59,8 +59,14 @@ const Home = () => {
   }
 
   const setPokemonState = usersPokemonData => {
-    const { sources, usersPokemon, usersPokemonSources, pokeballs, gameVersions } =
-      usersPokemonData
+    const {
+      sources,
+      usersPokemon,
+      usersPokemonSources,
+      pokeballs,
+      gameVersions,
+      usersPokemonEvolutionSources,
+    } = usersPokemonData
 
     setActivePokemonSources(sources)
     setUsersPokemon(usersPokemon)
@@ -68,6 +74,7 @@ const Home = () => {
       usersPokemonSources,
       pokeballs,
       gameVersions,
+      usersPokemonEvolutionSources,
     })
   }
 
@@ -126,6 +133,7 @@ const Home = () => {
     setUsersPokemon(usersPokemonData.data?.usersPokemon)
     const newCatchData = Object.assign({}, catchData, {
       usersPokemonSources: usersPokemonData.data?.usersPokemonSources,
+      usersPokemonEvolutionSources: usersPokemonData.data?.usersPokemonEvolutionSources,
     })
     setCatchData(newCatchData)
     refreshPokemonList()
@@ -184,6 +192,7 @@ const Home = () => {
             usersPokemon={usersPokemon}
             catchData={catchData}
             usersPokemonSources={catchData?.usersPokemonSources}
+            usersPokemonEvolutionSources={catchData?.usersPokemonEvolutionSources}
             handleUpdatePokemonNote={handleUpdatePokemonNote}
             handleUpdateUsersPokemon={handleUpdateUsersPokemon}
             handleDeleteUsersPokemon={handleDeleteUsersPokemon}
