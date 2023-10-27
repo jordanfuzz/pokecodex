@@ -44,7 +44,7 @@ export const updateUsersPokemon = pokemonData => {
     .then(() => {
       return pgPool.query(
         `delete from users_pokemon_sources 
-      where users_pokemon_id = $1;`,
+      where users_pokemon_id = $1 and is_inherited = false;`,
         [usersPokemonId]
       )
     })
