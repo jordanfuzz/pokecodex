@@ -1,13 +1,23 @@
 const repeatableSourceTypes = ['variant', 'regional', 'special', 'npc-trade', 'side-game']
 
 export const checkIfUserHasCompletedRecord = (mon, neededRules) => {
-  const newRules = neededRules.filter(rule => mon.sources.includes(rule))
+  const neededRulesForPokemon = neededRules.filter(rule => mon.sources.includes(rule))
   let userHasCompletedRecord = false
 
-  if (!newRules.length) {
+  if (!neededRulesForPokemon.length) {
     // if a user has any pokemon at all
     if (mon.usersSources[0]) userHasCompletedRecord = true
-  } else userHasCompletedRecord = newRules.every(rule => mon.usersSources.includes(rule))
+  } else
+    userHasCompletedRecord = neededRulesForPokemon.every(rule => {
+      const pokemonSatisfiesRule = mon.usersSources.includes(rule)
+
+      if (['special', 'npc-trade', 'side-game'].includes(rule)) {
+        const evolutionSatisfiesRule = mon.usersEvolutionSources.includes(rule)
+        return pokemonSatisfiesRule || evolutionSatisfiesRule
+      }
+
+      return pokemonSatisfiesRule
+    })
 
   return userHasCompletedRecord
 }
