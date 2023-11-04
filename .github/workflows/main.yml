@@ -1,0 +1,77 @@
+on:
+  push:
+    branches:
+      - master
+  repository_dispatch:
+    types: [default]
+jobs:
+  api-push-to-registry:
+    name: build api
+    runs-on: self-hosted
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: set variables
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: docker login
+        run: echo ${{ secrets.REGISTRY_PASSWORD }} | base64 -d | docker login -u ${{ secrets.REGISTRY_USER }} --password-stdin
+      - name: build
+        run: |
+          docker build --tag jordanfuzz/pokecodex-api:latest --tag jordanfuzz/pokecodex-api:${{ steps.vars.outputs.sha_short }} ./api
+          docker push jordanfuzz/pokecodex-api:latest
+          docker push jordanfuzz/pokecodex-api:${{ steps.vars.outputs.sha_short }}
+  ui-push-to-registry:
+    name: build ui
+    runs-on: self-hosted
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: set variables
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: docker login
+        run: echo ${{ secrets.REGISTRY_PASSWORD }} | base64 -d | docker login -u ${{ secrets.REGISTRY_USER }} --password-stdin
+      - name: build
+        run: |
+          docker build --tag jordanfuzz/pokecodex-ui:latest --tag jordanfuzz/pokecodex-ui:${{ steps.vars.outputs.sha_short }} -f ./app/Dockerfile.prod ./app
+          docker push jordanfuzz/pokecodex-ui:latest
+          docker push jordanfuzz/pokecodex-ui:${{ steps.vars.outputs.sha_short }}
+  adhoc-push-to-registry:
+    name: build adhoc
+    runs-on: self-hosted
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: set variables
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: docker login
+        run: echo ${{ secrets.REGISTRY_PASSWORD }} | base64 -d | docker login -u ${{ secrets.REGISTRY_USER }} --password-stdin
+      - name: build
+        run: |
+          docker build --tag jordanfuzz/pokecodex-adhoc:latest --tag jordanfuzz/pokecodex-adhoc:${{ steps.vars.outputs.sha_short }} ./adhoc
+          docker push jordanfuzz/pokecodex-adhoc:latest
+          docker push jordanfuzz/pokecodex-adhoc:${{ steps.vars.outputs.sha_short }}
+  deploy:
+    name: deploy
+    runs-on: self-hosted
+    needs:
+      - api-push-to-registry
+      - ui-push-to-registry
+      - adhoc-push-to-registry
+    steps:
+      - name: set variables
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: set variables to env
+        run: |
+          touch .env
+          echo GITHUB_SHA_SHORT=${{ steps.vars.outputs.sha_short }} >> .env
+      - name: pull images
+        run: |
+          docker pull jordanfuzz/pokecodex-api:${{ steps.vars.outputs.sha_short }}
+          docker pull jordanfuzz/pokecodex-ui:${{ steps.vars.outputs.sha_short }}
+          docker pull jordanfuzz/pokecodex-adhoc:${{ steps.vars.outputs.sha_short }}
+      - name: start site
+        run: docker-compose -f docker-compose.production.yml up -d --force-recreate
