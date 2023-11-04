@@ -1,7 +1,7 @@
 {
-  "name": "picker-adhoc",
+  "name": "pokecodex-adhoc",
   "version": "0.1.0",
-  "description": "Adhoc service for the Pokemon Picker site",
+  "description": "Adhoc service for the Pokecodex site",
   "main": "src/index.js",
   "type": "module",
   "author": "jordan@cooperplanet.com",

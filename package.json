@@ -1,7 +1,7 @@
 {
-  "name": "pokemon-finder",
+  "name": "pokecodex",
   "version": "0.1.0",
-  "description": "Tools for generating pokemon teams",
+  "description": "A catch em all pokedex",
   "main": "index.js",
   "scripts": {
     "test": "mocha --config ./test/mocharc.yml",

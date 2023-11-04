@@ -1,7 +1,7 @@
 {
-  "name": "picker-ui",
+  "name": "pokecodex-ui",
   "version": "0.1.0",
-  "description": "Web UI for the Pokemon Picker app",
+  "description": "Web UI for the Pokecodex app",
   "main": "index.js",
   "scripts": {
     "start": "webpack serve --mode development",

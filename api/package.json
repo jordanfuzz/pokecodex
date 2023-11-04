@@ -1,7 +1,7 @@
 {
-  "name": "picker-api",
+  "name": "pokecodex-api",
   "version": "0.1.0",
-  "description": "API service for the Pokemon Picker site",
+  "description": "API service for the Pokecodex site",
   "main": "src/index.js",
   "type": "module",
   "author": "jordan@cooperplanet.com",
