@@ -7,6 +7,7 @@ import DiscordStrategy from 'passport-discord'
 
 import config from '../config.js'
 import authRouter from './users/auth-routes.js'
+import gameDataRouter from './game-data/game-data-routes.js'
 import pokemonRouter from './pokemon/pokemon-routes.js'
 import usersPokemonRouter from './users-pokemon/users-pokemon-routes.js'
 import sourcesRouter from './sources/sources-routes.js'
@@ -32,6 +33,7 @@ app.use(cookieParser())
 app.use(passport.initialize())
 app.use(passport.session())
 app.use('/api/auth', authRouter)
+app.use('/api', gameDataRouter)
 app.use('/api', pokemonRouter)
 app.use('/api', usersPokemonRouter)
 app.use('/api', sourcesRouter)

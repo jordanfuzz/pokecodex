@@ -21,14 +21,14 @@ left join users_pokemon up2 on up2.pokemon_id = evolution.id and up2.user_id = $
 left join users_pokemon_sources ups on ups.users_pokemon_id = up.id
 left join users_pokemon_sources ups2 on ups2.users_pokemon_id = up2.id
 left join sources s on s.id = ups.source_id and ups.users_pokemon_id = up.id
-left join sources s2 on s2.pokemon_id = p.id
+left join sources s2 on s2.pokemon_id = p.id and (CAST($2 AS INTEGER) IS NULL OR s2.gen = ANY(ARRAY[0, CAST($2 AS INTEGER)]))
 left join sources s3 on s3.id = ups2.source_id and ups2.users_pokemon_id = up2.id
 left join game_versions gv on gv.id = up.game_id
 group by p.id, p."name", p.type1, p.type2, p.icon, p.default_image, p.bulbapedia_link, p.has_gender_differences, p.original_gen
 order by p.id;`
 
-export const getAllForUser = userId => {
-  return pgPool.query(pokemonWithSourcesQuery, [userId]).then(res =>
+export const getAllForUser = (userId, generationId = null) => {
+  return pgPool.query(pokemonWithSourcesQuery, [userId, generationId]).then(res =>
     pgPool
       .query(`select user_rules from users where id = $1;`, [userId])
       .then(rulesRes => {

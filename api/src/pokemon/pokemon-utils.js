@@ -79,7 +79,7 @@ export const getNeededRules = rules => {
   return neededRules
 }
 
-export const formatGamesForBoxView = gameVersions => {
+export const formatGamesForFiltering = gameVersions => {
   // ['Box Option', gameVersionId]
   const boxViewOptions = [
     ['Gen 1', 3],

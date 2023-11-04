@@ -18,8 +18,11 @@ const Home = () => {
   const [openDrawerIndex, setOpenDrawerIndex] = useState(null)
   const [drawerMode, setDrawerMode] = useState('sources')
   const [shouldRedirect, setShouldRedirect] = useState(false)
-  const [filterRange, setFilterRange] = useState('')
+  const [filterRange, setFilterRange] = useState(null)
   const [filterComplete, setFilterComplete] = useState(false)
+  const [gameVersions, setGameVersions] = useState([])
+  const [gameGenForFiltering, setGameGenForFiltering] = useState(null)
+  const [limitedDex, setLimitedDex] = useState(null)
 
   useEffect(async () => {
     try {
@@ -42,14 +45,24 @@ const Home = () => {
     refreshPokemonList()
     const rulesResponse = await axios.get(`/api/user/rules?userId=${userData.id}`)
     setUsersRules(rulesResponse.data.rules)
+    const gameData = await axios.get('/api/game-data')
+    setGameVersions(gameData.data.gameVersions)
   }, [userData])
+
+  useEffect(async () => {
+    if (!userData?.id) return
+    refreshPokemonList()
+  }, [gameGenForFiltering])
 
   const handleOpenDrawer = async pokemonId => {
     if (openDrawerIndex === pokemonId) setOpenDrawerIndex(null)
     else {
       setOpenDrawerIndex(pokemonId)
+      const genIdParameter = gameGenForFiltering
+        ? `&generationId=${gameGenForFiltering}`
+        : ''
       const usersPokemonData = await axios.get(
-        `/api/pokemon?userId=${userData.id}&pokemonId=${pokemonId}`
+        `/api/pokemon?userId=${userData.id}&pokemonId=${pokemonId}${genIdParameter}`
       )
       if (!usersPokemonData.data) return
 
@@ -79,7 +92,12 @@ const Home = () => {
   }
 
   const refreshPokemonList = async () => {
-    const newPokemonResults = await axios.get(`/api/all-pokemon?userId=${userData?.id}`)
+    const genIdParameter = gameGenForFiltering
+      ? `&generationId=${gameGenForFiltering}`
+      : ''
+    const newPokemonResults = await axios.get(
+      `/api/all-pokemon?userId=${userData?.id}${genIdParameter}`
+    )
     setPokemon(newPokemonResults.data.pokemon)
   }
 
@@ -226,11 +244,14 @@ const Home = () => {
   }
 
   const renderListRows = () => {
-    const lowerLimit = filterRange.split(',')[0]
-    const upperLimit = filterRange.split(',')[1]
-    const pokemonFilteredByGen = filterRange
-      ? pokemon.filter(x => x.id >= lowerLimit && x.id <= upperLimit)
-      : pokemon
+    let pokemonFilteredByGen
+    if (limitedDex) {
+      pokemonFilteredByGen = pokemon.filter(x => limitedDex.includes(x.id))
+    } else {
+      pokemonFilteredByGen = filterRange
+        ? pokemon.filter(x => x.id >= filterRange[0] && x.id <= filterRange[1])
+        : pokemon
+    }
 
     const filteredPokemon = filterComplete
       ? pokemonFilteredByGen.filter(x => !x.isComplete)
@@ -280,6 +301,9 @@ const Home = () => {
               setFilterRange={setFilterRange}
               filterComplete={filterComplete}
               setFilterComplete={setFilterComplete}
+              gameVersions={gameVersions}
+              setGameGenForFiltering={setGameGenForFiltering}
+              setLimitedDex={setLimitedDex}
             />
             <Link to="/box-view">
               <span className="box-view-link">Box View</span>

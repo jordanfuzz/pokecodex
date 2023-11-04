@@ -14,20 +14,20 @@ import {
   getUsersPokemonSources,
   getEvolutionSourcesForPokemon,
 } from '../sources/sources-repository.js'
-import { formatGamesForBoxView } from './pokemon-utils.js'
+import { formatGamesForFiltering } from './pokemon-utils.js'
 
 router.get('/all-pokemon', async (req, res) => {
   if (!req.query.userId) res.status(400).send({ message: 'No userId provided' })
 
   const response = {
-    pokemon: await getAllForUser(req.query.userId),
+    pokemon: await getAllForUser(req.query.userId, req.query.generationId),
   }
   res.status(200).send(response)
 })
 
 router.get('/pokemon', async (req, res) => {
   const response = {
-    sources: await getSourcesForPokemon(req.query.pokemonId),
+    sources: await getSourcesForPokemon(req.query.pokemonId, req.query.generationId),
     usersPokemon: await getAllForUserAndPokemon(req.query.userId, req.query.pokemonId),
     usersPokemonSources: await getUsersPokemonSources(
       req.query.userId,
@@ -70,7 +70,7 @@ router.get('/pokemon/box-data', async (req, res) => {
 
   const response = {
     usersBoxData: await getBoxDataForUser(req.query.userId),
-    gameVersions: formatGamesForBoxView(await getAllGameVersions()),
+    gameVersions: formatGamesForFiltering(await getAllGameVersions()),
   }
   res.status(200).send(response)
 })

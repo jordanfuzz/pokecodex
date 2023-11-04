@@ -2,9 +2,13 @@ import pgPool from '../pg-pool.js'
 import camelize from 'camelize'
 import { randomUUID } from 'crypto'
 
-export const getSourcesForPokemon = pokemonId => {
+export const getSourcesForPokemon = (pokemonId, generationId = null) => {
   return pgPool
-    .query('select * from sources where pokemon_id = $1;', [pokemonId])
+    .query(
+      `select * from sources where pokemon_id = $1 
+      and (CAST($2 AS INTEGER) IS NULL OR gen = ANY(ARRAY[0, CAST($2 AS INTEGER)]));`,
+      [pokemonId, generationId]
+    )
     .then(res => camelize(res.rows))
 }
 
