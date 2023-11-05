@@ -7,7 +7,7 @@ services:
     ports:
       - '5436:5432'
     volumes:
-      - /home/ultrabox/host-files/pokecodex/postgres-data:/var/lib/postgresql/data
+      - /home/ultrabox/host-files/pokecodex/pg-data:/var/lib/postgresql/data
     deploy:
       restart_policy:
         condition: on-failure
