@@ -7,7 +7,7 @@ export const getRulesForUser = userId => {
   return pgPool
     .query('select user_rules from users where id = $1;', [userId])
     .then(res => res.rows[0].user_rules)
-    .catch(() => null)
+    .catch(e => console.log(e))
 }
 
 // Do not camelize
@@ -19,24 +19,29 @@ export const updateRulesForUser = (rules, userId) => {
       [rules, userId]
     )
     .then(res => res.rows[0].user_rules)
-    .catch(() => null)
+    .catch(e => console.log(e))
 }
 
 export const getUserById = id => {
+  console.log('Got here, getUserById')
   return pgPool
     .query(`select * from users where id = $1;`, [id])
     .then(res => camelize(res.rows[0]))
-    .catch(() => null)
+    .catch(e => console.log(e))
 }
 
 export const getUserByDiscordId = discordId => {
+  console.log('Got here, getUserByDiscordId')
+
   return pgPool
     .query(`select * from users where discord_id = $1;`, [discordId])
     .then(res => camelize(res.rows[0]))
-    .catch(() => null)
+    .catch(e => console.log(e))
 }
 
 export const recordUserVisit = id => {
+  console.log('Got here, recordUserVisit')
+
   const now = new Date().toISOString()
 
   return pgPool
@@ -47,10 +52,11 @@ export const recordUserVisit = id => {
   where id = $2;`,
       [now, id]
     )
-    .catch(() => null)
+    .catch(e => console.log(e))
 }
 
 export const saveNewUser = (discordId, discordUsername) => {
+  console.log('Got here, saveNewUser')
   const id = randomUUID()
   const now = new Date().toISOString()
 
@@ -64,5 +70,5 @@ export const saveNewUser = (discordId, discordUsername) => {
       [id, discordId, discordUsername, now]
     )
     .then(res => camelize(res.rows[0]))
-    .catch(() => null)
+    .catch(e => console.log(e))
 }
