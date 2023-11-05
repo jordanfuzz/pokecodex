@@ -10,6 +10,6 @@ RUN npm install -g nodemon
 
 COPY . .
 
-EXPOSE 3002
+EXPOSE 3004
 
 CMD ["node", "./src"]

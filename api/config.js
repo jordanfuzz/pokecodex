@@ -13,7 +13,7 @@ export default {
     password: e.POSTGRES_PASSWORD,
   },
   isDevelopment,
-  port: 3002,
+  port: 3004,
   cookieOptions: {
     maxAge: 1000 * 60 * 60 * 24 * 7,
   },
