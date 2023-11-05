@@ -2,10 +2,9 @@ import React, { useState } from 'react'
 import Modal from 'react-modal'
 import { uniq, uniqBy } from 'ramda'
 import { DateTime } from 'luxon'
-import { ArrowBigUpDash } from 'lucide-react'
+import { ArrowBigUpDash, Check } from 'lucide-react'
 import Catch from '../catch/catch'
 import './sources-list.scss'
-import checkIcon from '../../../media/check-icon.svg'
 
 const modalStyles = {
   overlay: {
@@ -194,7 +193,7 @@ const SourcesList = props => {
       .filter(x => !x.isInherited)
       .map((source, i) => (
         <span key={`achieved-${i}`} className="unlocked-source-pill">
-          <img src={checkIcon} className="check-icon" />
+          <Check className="check-icon" color="white" size={25} strokeWidth={3.5} />
           {source.name}
         </span>
       ))

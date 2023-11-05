@@ -4,6 +4,7 @@
   color: white;
   margin: 5px;
   cursor: default;
+  display: flex;
 }
 
 .locked-source-pill {
@@ -56,8 +57,9 @@
 }
 
 .check-icon {
-  width: 20px;
+  margin-top: 1px;
   margin-right: 7px;
+  align-self: center;
 }
 
 .evolve-icon {
