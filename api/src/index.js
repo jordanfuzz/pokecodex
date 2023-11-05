@@ -59,23 +59,18 @@ passport.use(
       scope: ['identify', 'guilds'],
     },
     async (accessToken, refreshToken, profile, done) => {
-      console.log('Got here', profile)
       const userIsInMegabox = profile.guilds.some(x => x.id === '146109488745807873')
       const existingUser = await getUserByDiscordId(profile.id)
-      console.log('user is in megabox', userIsInMegabox)
+
       if (userIsInMegabox) {
         if (existingUser) {
-          console.log('Got here 2')
           await recordUserVisit(existingUser.id)
           done(null, existingUser)
         } else {
-          console.log('Got here 3')
           const newUser = await saveNewUser(profile.id, profile.username)
-          console.log('Got here 4', newUser)
           done(null, newUser)
         }
       } else {
-        console.log("User isn't in megabox")
         done(null, false, { message: 'User is not in Megabox' })
       }
     }

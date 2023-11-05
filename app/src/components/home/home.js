@@ -294,7 +294,7 @@ const Home = () => {
       </a>
       <div className="list-container">
         <div className="list-header-container">
-          <h1 className="list-header">Pokemon List</h1>
+          <h1 className="list-header">Pokécodex</h1>
           <div className="list-options-container">
             <Filters
               filterRange={filterRange}
