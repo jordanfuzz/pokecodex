@@ -8,7 +8,7 @@ drop table if exists pokeballs;
 
 drop type if exists source_type;
 drop type if exists pokemon_type;
-create type source_type as enum ('male', 'female', 'npc-trade', 'side-game', 'regional', 'special', 'shiny', 'wild', 'original', 'mega', 'gmax', 'battle-only', 'variant', 'hatch', 'starter', 'evolved', 'prize', 'gift');
+create type source_type as enum ('male', 'female', 'npc-trade', 'side-game', 'regional', 'special', 'shiny', 'wild', 'original', 'mega', 'gmax', 'battle-only', 'variant', 'hatch', 'starter', 'evolved', 'prize', 'gift', 'pokewalker');
 create type pokemon_type as enum ('normal', 'fighting', 'flying', 'poison', 'ground', 'rock', 'bug', 'ghost', 'steel', 'fire', 'water', 'grass', 'electric', 'psychic', 'ice', 'dragon', 'dark', 'fairy',);
 
 
