@@ -271,7 +271,11 @@ const Home = () => {
             <img src={mon.defaultImage} className="list-icon" />
           </td>
           <td className="name">
-            <a className="name-link" href={mon.bulbapediaLink} target="_blank">
+            <a
+              className="name-link"
+              href={`${mon.bulbapediaLink}#Game_locations`}
+              target="_blank"
+            >
               {mon.name}
             </a>
           </td>
