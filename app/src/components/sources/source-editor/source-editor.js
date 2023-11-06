@@ -47,6 +47,8 @@ const SourceEditor = props => {
             <option value="side-game">Side game</option>
             <option value="special">Special</option>
             <option value="regional">Regional</option>
+            <option value="prize">Prize</option>
+            <option value="gift">Gift</option>
           </select>
         </div>
         <div className="editor-container">
