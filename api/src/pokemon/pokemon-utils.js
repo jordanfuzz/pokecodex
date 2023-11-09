@@ -1,3 +1,4 @@
+// sources that a pokemon can have multiple of (eg. unown forms)
 const repeatableSourceTypes = [
   'variant',
   'regional',
@@ -6,7 +7,8 @@ const repeatableSourceTypes = [
   'side-game',
   'prize',
   'gift',
-  'pokewalker',
+  'pokewalker', // can be repeatable because of flying and surfing pikachu
+  'event',
 ]
 
 export const checkIfUserHasCompletedRecord = (mon, neededRules) => {
@@ -20,10 +22,19 @@ export const checkIfUserHasCompletedRecord = (mon, neededRules) => {
     userHasCompletedRecord = neededRulesForPokemon.every(rule => {
       const pokemonSatisfiesRule = mon.usersSources.includes(rule)
 
+      // rules that can be satisfied by evolution
       if (
-        ['special', 'npc-trade', 'side-game', 'prize', 'gift', 'pokewalker'].includes(
-          rule
-        )
+        [
+          'special',
+          'npc-trade',
+          'side-game',
+          'prize',
+          'gift',
+          'pokewalker',
+          'honey-tree',
+          'event',
+          'game-corner',
+        ].includes(rule)
       ) {
         const evolutionSatisfiesRule = mon.usersEvolutionSources.includes(rule)
         return pokemonSatisfiesRule || evolutionSatisfiesRule
