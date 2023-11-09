@@ -49,6 +49,9 @@ const SourceEditor = props => {
             <option value="regional">Regional</option>
             <option value="prize">Prize</option>
             <option value="gift">Gift</option>
+            <option value="event">Event</option>
+            <option value="honey-tree">Honey Tree</option>
+            <option value="game-corner">Game Corner</option>
             <option value="pokewalker">Pokewalker</option>
           </select>
         </div>
