@@ -53,6 +53,7 @@ const SourceEditor = props => {
             <option value="honey-tree">Honey Tree</option>
             <option value="game-corner">Game Corner</option>
             <option value="pokewalker">Pokewalker</option>
+            <option value="static-default">Static Default</option>
           </select>
         </div>
         <div className="editor-container">
