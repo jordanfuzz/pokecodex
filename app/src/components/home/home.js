@@ -106,6 +106,7 @@ const Home = () => {
     const newPokemonData = {
       ...pokemonData,
       userId: userData?.id,
+      generationId: gameGenForFiltering,
     }
 
     const usersPokemonData = await axios.post('/api/pokemon', newPokemonData)

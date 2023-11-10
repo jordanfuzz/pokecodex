@@ -48,7 +48,7 @@ router.post('/pokemon', async (req, res) => {
 
   // Resend the entire pokemon data anyway because it's less confusing on the frontend
   const response = {
-    sources: await getSourcesForPokemon(req.body.pokemonId),
+    sources: await getSourcesForPokemon(req.body.pokemonId, req.body.generationId),
     usersPokemon: await addPokemonForUser(req.body),
     usersPokemonSources: await getUsersPokemonSources(
       req.body.userId,
