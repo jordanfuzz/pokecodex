@@ -22,7 +22,7 @@ create type pokemon_type as enum ('normal', 'fighting', 'flying', 'poison', 'gro
 --   user_rules jsonb,
 --   is_admin boolean not null default 'false'
 -- );
--- avatar_pokemon integer,
+-- avatar_pokemon integer
 
 -- create table pokemon (
 --   id integer primary key,
