@@ -3,11 +3,11 @@ version: '3.7'
 services:
   postgres:
     image: postgres:12.3-alpine
-    env_file: /home/ultrabox/host-files/pokecodex/.env
+    env_file: /home/admin/host-files/pokecodex/.env
     ports:
       - '5436:5432'
     volumes:
-      - /home/ultrabox/host-files/pokecodex/pg-data:/var/lib/postgresql/data
+      - /home/admin/host-files/pokecodex/pg-data:/var/lib/postgresql/data
     deploy:
       restart_policy:
         condition: on-failure
@@ -16,7 +16,7 @@ services:
         window: 60s
   ui:
     image: jordanfuzz/pokecodex-ui:${GITHUB_SHA_SHORT}
-    env_file: /home/ultrabox/host-files/pokecodex/.env
+    env_file: /home/admin/host-files/pokecodex/.env
     depends_on:
       - postgres
       - api
@@ -30,7 +30,7 @@ services:
         window: 60s
   api:
     image: jordanfuzz/pokecodex-api:${GITHUB_SHA_SHORT}
-    env_file: /home/ultrabox/host-files/pokecodex/.env
+    env_file: /home/admin/host-files/pokecodex/.env
     ports:
       - '3004:3004'
     deploy:
@@ -41,7 +41,7 @@ services:
         window: 60s
   adhoc:
     image: jordanfuzz/pokecodex-adhoc:${GITHUB_SHA_SHORT}
-    env_file: /home/ultrabox/host-files/pokecodex/.env
+    env_file: /home/admin/host-files/pokecodex/.env
     deploy:
       restart_policy:
         condition: on-failure
