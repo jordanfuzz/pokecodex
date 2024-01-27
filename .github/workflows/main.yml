@@ -74,4 +74,4 @@ jobs:
           docker pull jordanfuzz/pokecodex-ui:${{ steps.vars.outputs.sha_short }}
           docker pull jordanfuzz/pokecodex-adhoc:${{ steps.vars.outputs.sha_short }}
       - name: start site
-        run: docker-compose -f docker-compose.production.yml up -d --force-recreate
+        run: docker compose -f docker-compose.production.yml up -d --force-recreate
