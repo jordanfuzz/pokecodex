@@ -8,12 +8,7 @@ services:
       - '5436:5432'
     volumes:
       - /home/admin/host-files/pokecodex/pg-data:/var/lib/postgresql/data
-    deploy:
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 10
-        window: 60s
+    restart: always
   ui:
     image: jordanfuzz/pokecodex-ui:${GITHUB_SHA_SHORT}
     env_file: /home/admin/host-files/pokecodex/.env
@@ -22,29 +17,14 @@ services:
       - api
     ports:
       - '8002:80'
-    deploy:
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 10
-        window: 60s
+    restart: always
   api:
     image: jordanfuzz/pokecodex-api:${GITHUB_SHA_SHORT}
     env_file: /home/admin/host-files/pokecodex/.env
     ports:
       - '3004:3004'
-    deploy:
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 10
-        window: 60s
+    restart: always
   adhoc:
     image: jordanfuzz/pokecodex-adhoc:${GITHUB_SHA_SHORT}
     env_file: /home/admin/host-files/pokecodex/.env
-    deploy:
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 10
-        window: 60s
+    restart: always
