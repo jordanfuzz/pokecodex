@@ -20,5 +20,5 @@ export default {
   clientId: e.CLIENT_ID,
   clientSecret: e.CLIENT_SECRET,
   sessionSecret: e.SESSION_SECRET,
-  appUrl: isDevelopment ? 'http://localhost:3000' : 'https://ppdex.pro',
+  appUrl: isDevelopment ? 'http://localhost:3000' : 'https://pokecodex.com',
 }
