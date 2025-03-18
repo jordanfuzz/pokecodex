@@ -8,7 +8,7 @@ networks:
 
 services:
   postgres:
-    image: postgres:12.3-alpine
+    image: postgres:17.4-alpine
     env_file: .env
     volumes:
       - ./pg-data:/var/lib/postgresql/data
