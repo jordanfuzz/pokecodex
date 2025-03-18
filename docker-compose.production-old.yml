@@ -1,0 +1,30 @@
+version: '3.7'
+
+services:
+  postgres:
+    image: postgres:12.3-alpine
+    env_file: /home/admin/host-files/pokecodex/.env
+    ports:
+      - '5436:5432'
+    volumes:
+      - /home/admin/host-files/pokecodex/pg-data:/var/lib/postgresql/data
+    restart: always
+  ui:
+    image: jordanfuzz/pokecodex-ui:${GITHUB_SHA_SHORT}
+    env_file: /home/admin/host-files/pokecodex/.env
+    depends_on:
+      - postgres
+      - api
+    ports:
+      - '8002:80'
+    restart: always
+  api:
+    image: jordanfuzz/pokecodex-api:${GITHUB_SHA_SHORT}
+    env_file: /home/admin/host-files/pokecodex/.env
+    ports:
+      - '3004:3004'
+    restart: always
+  adhoc:
+    image: jordanfuzz/pokecodex-adhoc:${GITHUB_SHA_SHORT}
+    env_file: /home/admin/host-files/pokecodex/.env
+    restart: always

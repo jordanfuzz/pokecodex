@@ -20,7 +20,7 @@ services:
     build: ./api
     command: nodemon ./src
     ports:
-      - '3004:3004'
+      - '3003:3003'
     volumes:
       - ./api:/app
     env_file: .env
