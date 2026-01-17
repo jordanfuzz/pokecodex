@@ -57,7 +57,7 @@ export const saveNewUser = (discordId, discordUsername) => {
   return pgPool
     .query(
       `
-    insert into users(id, discord_id, discord_username, last_seen_at) 
+    insert into users(id, discord_id, discord_username, last_seen_at)
     values($1, $2, $3, $4)
     returning *;
     `,

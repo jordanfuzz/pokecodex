@@ -21,6 +21,9 @@ import {
 } from './users/users-repository.js'
 
 app.use(express.json())
+if (config.isDevelopment) {
+  app.set('trust proxy', 1)
+}
 app.use(
   cookieSession({
     name: 'session',

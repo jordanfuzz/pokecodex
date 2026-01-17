@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha --config ./test/mocharc.yml",
-    "start": "docker-compose up -d --force-recreate",
-    "stop": "docker-compose down"
+    "start": "docker compose up -d --force-recreate",
+    "stop": "docker compose down"
   },
   "author": "jordan@cooperplanet.com",
   "license": "ISC",

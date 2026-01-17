@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import { Link, Redirect } from 'react-router-dom'
+import { Link, Navigate } from 'react-router'
 import Box from './box/box'
 import BoxChecklist from './box-checklist/box-checklist'
 import './box-view.scss'
@@ -18,42 +18,44 @@ const BoxView = () => {
   const [isChecklistEditMode, setIsChecklistEditMode] = useState(false)
   const [hoveredPokemonIndex, setHoveredPokemonIndex] = useState(null)
 
-  useEffect(async () => {
-    try {
-      const response = await axios.get('/api/auth/login', {
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Credentials': true,
-        },
-      })
-      if (response?.data?.id) setUserData(response.data)
-      else setShouldRedirect(true)
-    } catch (error) {
-      setShouldRedirect(true)
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await axios.get('/api/auth/login', {
+          withCredentials: true,
+        })
+        if (response?.data?.id) setUserData(response.data)
+        else setShouldRedirect(true)
+      } catch (error) {
+        setShouldRedirect(true)
+      }
     }
+    checkAuth()
   }, [])
 
-  useEffect(async () => {
-    if (!userData?.id) return
-    refreshPokemonList()
-    const rulesResponse = await axios.get(`/api/user/rules?userId=${userData.id}`)
-    setUsersRules(rulesResponse.data.rules)
-    const boxDataResponse = await axios.get(`/api/pokemon/box-data?userId=${userData.id}`)
-    setGameData(boxDataResponse.data.gameVersions)
-    if (!boxDataResponse.data.usersBoxData || !boxDataResponse.data.usersBoxData.length) {
-      const newUserBoxData = await axios.post(
-        `/api/pokemon/box-data/setup?userId=${userData.id}`
-      )
-      setUsersBoxData(newUserBoxData.data.usersBoxData)
-    } else setUsersBoxData(boxDataResponse.data.usersBoxData)
+  useEffect(() => {
+    const loadUserData = async () => {
+      if (!userData?.id) return
+      refreshPokemonList()
+      const rulesResponse = await axios.get(`/api/user/rules?userId=${userData.id}`)
+      setUsersRules(rulesResponse.data.rules)
+      const boxDataResponse = await axios.get(`/api/pokemon/box-data?userId=${userData.id}`)
+      setGameData(boxDataResponse.data.gameVersions)
+      if (!boxDataResponse.data.usersBoxData || !boxDataResponse.data.usersBoxData.length) {
+        const newUserBoxData = await axios.post(
+          `/api/pokemon/box-data/setup?userId=${userData.id}`
+        )
+        setUsersBoxData(newUserBoxData.data.usersBoxData)
+      } else setUsersBoxData(boxDataResponse.data.usersBoxData)
+    }
+    loadUserData()
   }, [userData])
 
-  useEffect(async () => {
+  useEffect(() => {
     if (selectedVersion) handleFilterPokemon(pokemon)
   }, [selectedVersion, pokemon])
 
-  useEffect(async () => {
+  useEffect(() => {
     setSelectedVersion(gameData?.[0]?.[1])
   }, [gameData])
 
@@ -226,7 +228,7 @@ const BoxView = () => {
   if (!gameData || !selectedVersion) return null
 
   return shouldRedirect ? (
-    <Redirect to="/login" />
+    <Navigate to="/login" replace />
   ) : (
     <div className="box-view-page">
       <a className="logout" href="/api/auth/logout">

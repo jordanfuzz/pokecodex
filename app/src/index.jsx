@@ -1,15 +1,15 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
-import { BrowserRouter as Router } from 'react-router-dom'
+import { createRoot } from 'react-dom/client'
+import { BrowserRouter as Router } from 'react-router'
 import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon'
 import App from './app'
 
-ReactDOM.render(
+const root = createRoot(document.getElementById('app'))
+root.render(
   <Router>
     <LocalizationProvider dateAdapter={AdapterLuxon}>
       <App />
     </LocalizationProvider>
-  </Router>,
-  document.getElementById('app')
+  </Router>
 )

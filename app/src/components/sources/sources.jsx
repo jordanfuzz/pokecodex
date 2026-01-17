@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import { Redirect } from 'react-router-dom'
+import { Navigate } from 'react-router'
 import SourceEditor from './source-editor/source-editor'
 import './sources.scss'
 
@@ -17,34 +17,38 @@ const Sources = () => {
   const [pokemonSources, setPokemonSources] = useState([])
   const [isEditMode, setIsEditMode] = useState(false)
 
-  useEffect(async () => {
-    try {
-      const response = await axios.get('/api/auth/login', {
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Credentials': true,
-        },
-      })
-      const userIsAdmin = response?.data?.isAdmin
-      if (response?.data?.id && userIsAdmin) setUserData(response.data)
-      else setShouldRedirect(true)
-    } catch (error) {
-      setShouldRedirect(true)
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await axios.get('/api/auth/login', {
+          withCredentials: true,
+        })
+        const userIsAdmin = response?.data?.isAdmin
+        if (response?.data?.id && userIsAdmin) setUserData(response.data)
+        else setShouldRedirect(true)
+      } catch (error) {
+        setShouldRedirect(true)
+      }
     }
+    checkAuth()
   }, [])
 
-  useEffect(async () => {
-    if (!userData?.id) return
-    const response = await axios.get(`/api/all-pokemon?userId=${userData?.id}`)
-    setPokemon(response.data.pokemon)
+  useEffect(() => {
+    const loadPokemon = async () => {
+      if (!userData?.id) return
+      const response = await axios.get(`/api/all-pokemon?userId=${userData?.id}`)
+      setPokemon(response.data.pokemon)
+    }
+    loadPokemon()
   }, [userData])
 
-  useEffect(async () => {
-    if (!activePokemon) return
-
-    const response = await axios.get(`/api/sources?pokemonId=${activePokemon.id}`)
-    setPokemonSources(response.data.sources)
+  useEffect(() => {
+    const loadSources = async () => {
+      if (!activePokemon) return
+      const response = await axios.get(`/api/sources?pokemonId=${activePokemon.id}`)
+      setPokemonSources(response.data.sources)
+    }
+    loadSources()
   }, [activePokemon])
 
   const handleSearch = () => {
@@ -96,7 +100,7 @@ const Sources = () => {
   }
 
   return shouldRedirect ? (
-    <Redirect to="/login" />
+    <Navigate to="/login" replace />
   ) : (
     <div className="sources-container">
       <div className="pokemon-search-display">

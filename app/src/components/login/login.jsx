@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Redirect } from 'react-router-dom'
+import { Navigate } from 'react-router'
 import axios from 'axios'
 import './login.scss'
 
@@ -11,11 +11,7 @@ const Login = () => {
   useEffect(() => {
     axios
       .get('/api/auth/login', {
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Credentials': true,
-        },
+        withCredentials: true,
       })
       .then(res => {
         if (res.data?.id) setUserData(res.data)
@@ -25,7 +21,7 @@ const Login = () => {
   const isLoggedIn = userData?.id
 
   return isLoggedIn ? (
-    <Redirect to="/" replace />
+    <Navigate to="/" replace />
   ) : (
     <div className="login-page">
       <div className="login-container">

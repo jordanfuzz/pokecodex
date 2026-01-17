@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import { Link, Redirect } from 'react-router-dom'
+import { Link, Navigate } from 'react-router'
 import './home.scss'
-import typeImages from '../../media/types.js'
+import typeImages from '../../media/types'
 import SourcesList from './sources-list/sources-list'
 import Catch from './catch/catch'
 import Rules from '../common/rules/rules'
@@ -24,32 +24,34 @@ const Home = () => {
   const [gameGenForFiltering, setGameGenForFiltering] = useState(null)
   const [limitedDex, setLimitedDex] = useState(null)
 
-  useEffect(async () => {
-    try {
-      const response = await axios.get('/api/auth/login', {
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Credentials': true,
-        },
-      })
-      if (response?.data?.id) setUserData(response.data)
-      else setShouldRedirect(true)
-    } catch (error) {
-      setShouldRedirect(true)
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await axios.get('/api/auth/login', {
+          withCredentials: true,
+        })
+        if (response?.data?.id) setUserData(response.data)
+        else setShouldRedirect(true)
+      } catch (error) {
+        setShouldRedirect(true)
+      }
     }
+    checkAuth()
   }, [])
 
-  useEffect(async () => {
-    if (!userData?.id) return
-    refreshPokemonList()
-    const rulesResponse = await axios.get(`/api/user/rules?userId=${userData.id}`)
-    setUsersRules(rulesResponse.data.rules)
-    const gameData = await axios.get('/api/game-data')
-    setGameVersions(gameData.data.gameVersions)
+  useEffect(() => {
+    const loadUserData = async () => {
+      if (!userData?.id) return
+      refreshPokemonList()
+      const rulesResponse = await axios.get(`/api/user/rules?userId=${userData.id}`)
+      setUsersRules(rulesResponse.data.rules)
+      const gameData = await axios.get('/api/game-data')
+      setGameVersions(gameData.data.gameVersions)
+    }
+    loadUserData()
   }, [userData])
 
-  useEffect(async () => {
+  useEffect(() => {
     if (!userData?.id) return
     refreshPokemonList()
   }, [gameGenForFiltering])
@@ -291,7 +293,7 @@ const Home = () => {
   }
 
   return shouldRedirect ? (
-    <Redirect to="/login" />
+    <Navigate to="/login" replace />
   ) : (
     <div className="home-page">
       <a className="logout" href="/api/auth/logout">
