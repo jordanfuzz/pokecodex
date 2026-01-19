@@ -1,6 +1,6 @@
 import fs from 'fs'
-import rawPokemon from '../pokeapi-data/updated-pokemon-species.json' assert { type: 'json' }
-import pokemonTypes from '../pokeapi-data/updated-pokemon-types.json' assert { type: 'json' }
+import rawPokemon from '../pokeapi-data/updated-pokemon-species.json' with { type: 'json' }
+import pokemonTypes from '../pokeapi-data/updated-pokemon-types.json' with { type: 'json' }
 
 const types = [
   'normal',

@@ -6,10 +6,13 @@
   "type": "module",
   "author": "jordan@cooperplanet.com",
   "license": "ISC",
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "dependencies": {
-    "axios": "^0.21.1",
-    "dotenv": "^10.0.0",
-    "pg": "^8.4.1",
-    "pokedex-promise-v2": "^4.1.1"
+    "axios": "^1.7.9",
+    "dotenv": "^16.4.7",
+    "pg": "^8.13.1",
+    "pokedex-promise-v2": "^4.2.0"
   }
 }
