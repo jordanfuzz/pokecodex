@@ -27,8 +27,8 @@ was previously a tedious manual scrub of Bulbapedia "game locations" sections.
 Nothing else touches data until this is done.
 
 - [x] Restore SSH access from the Windows desktop (dedicated per-machine key)
-- [ ] `pg_dump` the production database over SSH; store outside git
-- [ ] Verify the dump restores cleanly into local Docker Postgres
+- [x] `pg_dump` the production database over SSH; store outside git
+- [x] Verify the dump restores cleanly into local Docker Postgres
 
 ### Phase 1 — Windows dev environment + agent basics
 
