@@ -29,6 +29,13 @@ export const getUserById = id => {
     .catch(() => null)
 }
 
+export const getMostRecentlySeenUser = () => {
+  return pgPool
+    .query(`select * from users order by last_seen_at desc nulls last limit 1;`)
+    .then(res => camelize(res.rows[0]))
+    .catch(() => null)
+}
+
 export const getUserByDiscordId = discordId => {
   return pgPool
     .query(`select * from users where discord_id = $1;`, [discordId])

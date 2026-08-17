@@ -34,8 +34,9 @@ Nothing else touches data until this is done.
 
 - [x] Bring up `compose.dev.yml` on Windows against restored data; fix any
       Windows-specific breakage (line endings, volume mounts, etc.)
-- [ ] Working local login: needs Discord OAuth credentials (see `.env.example`)
-      or a dev-only auth bypass — decision pending
+- [x] Working local login: `GET /api/auth/dev-login` (development only) logs in
+      as the most recently seen user, no Discord round-trip; real OAuth creds
+      can still be used via `.env` when needed
 - [ ] Write `CLAUDE.md`: architecture, how to run, data model, the "source"
       concept, gotchas
 - [ ] Add a couple of key skills (run the app, query pokemon data)

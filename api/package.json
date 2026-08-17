@@ -11,7 +11,8 @@
   },
   "scripts": {
     "start": "node ./src",
-    "dev": "nodemon ./src"
+    "dev": "nodemon ./src",
+    "test": "mocha"
   },
   "dependencies": {
     "camelize": "^1.0.1",
@@ -22,5 +23,9 @@
     "passport": "^0.7.0",
     "passport-discord": "^0.1.4",
     "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "mocha": "^11.8.0",
+    "supertest": "^7.2.2"
   }
 }

@@ -18,7 +18,9 @@ services:
     env_file: .env
   api:
     build: ./api
-    command: nodemon ./src
+    # --legacy-watch polls for changes: inotify events don't cross Windows
+    # bind mounts, so plain nodemon never sees host-side edits.
+    command: nodemon --legacy-watch ./src
     ports:
       - '3003:3003'
     volumes:
