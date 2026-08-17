@@ -32,8 +32,10 @@ Nothing else touches data until this is done.
 
 ### Phase 1 — Windows dev environment + agent basics
 
-- [ ] Bring up `compose.dev.yml` on Windows against restored data; fix any
+- [x] Bring up `compose.dev.yml` on Windows against restored data; fix any
       Windows-specific breakage (line endings, volume mounts, etc.)
+- [ ] Working local login: needs Discord OAuth credentials (see `.env.example`)
+      or a dev-only auth bypass — decision pending
 - [ ] Write `CLAUDE.md`: architecture, how to run, data model, the "source"
       concept, gotchas
 - [ ] Add a couple of key skills (run the app, query pokemon data)
@@ -66,6 +68,12 @@ January 2026. Remaining work is an audit, not a rewrite:
 - [ ] Verify build and tests pass on Windows
 - [ ] Sweep remaining outdated dependencies
 - [ ] One code-quality pass producing a prioritized fix list (appended here)
+
+Early findings parking lot (from phase 1 shakeout):
+
+- Unhandled promise rejection in the UI when the auth check 401s on the
+  logged-out landing page
+- React warning: a component switches an input from uncontrolled to controlled
 
 ### Phase 3 — Core issues and planned v1
 

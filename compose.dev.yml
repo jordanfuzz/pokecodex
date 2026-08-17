@@ -4,7 +4,9 @@ services:
     ports:
       - '5432:5432'
     volumes:
-      - ./pg-data:/var/lib/postgresql/data
+      # Named volume instead of a bind mount: Postgres data dirs on NTFS bind
+      # mounts fail permission checks under Docker Desktop on Windows.
+      - pg-data:/var/lib/postgresql/data
     env_file: .env
   ui:
     build: ./app
@@ -29,3 +31,6 @@ services:
       - ./adhoc:/app
       - /app/node_modules
     env_file: .env
+
+volumes:
+  pg-data:
