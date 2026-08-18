@@ -76,7 +76,9 @@ priority. Data-gathering work lives in [source-data.md](source-data.md).
 ## Bonus ideas (unordered)
 
 Row/list UX: hover-state icons linking to Bulbapedia/Serebii/catch-location
-modal; Bulbapedia catch-location iframe or stored snippet per pokemon; gradient
+modal; Bulbapedia catch-location iframe or stored snippet per pokemon (easy
+via the MediaWiki API's rendered per-section HTML — see
+source-data-feasibility.md); gradient
 row color for dual types; cycle main image in open row; improve modal
 (blur/transition); keyboard navigation & accessibility; remember filter
 settings in localstorage; filter by type; date filter / catch view; search in

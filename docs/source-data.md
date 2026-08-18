@@ -74,12 +74,19 @@ NPC-presence pokemon (dancing Clefairy; Oddish w/ Lady Lynette in White;
 Magnemite w/ Scientist Marie; Dunsparce w/ Breeder April); Partner Eevee;
 Spiky-eared Pichu; Pikachu-colored Pichu.
 
-## Access strategy (phase 1.5 spike)
+## Access strategy (settled by the phase 1.5 spike)
 
-- **PokeAPI**: run the official self-hosted instance locally before any bulk
-  work — the public API rate-limits and IP-bans aggressively. PokeAPI does
-  not contain unique-source data.
-- **Bulbapedia**: the only known source for unique-source data. It's
-  MediaWiki, so a queryable API and/or dumps likely exist even if crawling is
-  blocked — the spike should settle the method (and whether the old
-  "Bulbapedia iframe/snippet per pokemon" idea is feasible as a byproduct).
+See [source-data-feasibility.md](source-data-feasibility.md) for the full
+findings and decided pipeline. Summary:
+
+- **Bulbapedia**: open MediaWiki API, templated content — one-time polite
+  fetch into a local cache, parse into candidate rows, human review gate
+  (staging table + review page) before anything touches `sources`. The same
+  diff audits the existing hand-gathered rows.
+- **PKHeX encounter tables** (+ pret decomps, EventsGallery): independent
+  machine-readable cross-check for statics/gifts/trades, all gens 1–7.
+- **PokeAPI**: clone the static `PokeAPI/api-data` repo for offline data —
+  no self-hosting, no rate-limit risk. Partial cross-check value only; it
+  has no event distributions and incomplete gen 1–6 trades.
+- The "Bulbapedia iframe/snippet per pokemon" idea remains a backlog bonus
+  item (not part of the pipeline).

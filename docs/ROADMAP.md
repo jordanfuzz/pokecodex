@@ -65,11 +65,13 @@ updating.
 Answer one question: can the Bulbapedia "game locations" scrubbing be
 semi-automated? Output is a short feasibility doc informing phase 4's approach.
 
-- [ ] Investigate Bulbapedia access: it runs MediaWiki, which usually means a
-      queryable API even where crawling is blocked; also check for dumps/mirrors
-- [ ] Stand up a local PokeAPI instance (official self-host docker-compose) to
-      permanently remove the rate-limit/IP-ban risk
-- [ ] Write up feasibility findings in `docs/`
+- [x] Investigate Bulbapedia access: open MediaWiki API, heavily templated
+      content, no dumps — semi-automation is feasible (see
+      [source-data-feasibility.md](source-data-feasibility.md))
+- [x] Local PokeAPI: decided to clone the static `PokeAPI/api-data` repo
+      instead of self-hosting — same rate-limit-free access, no stack to run
+- [x] Write up feasibility findings in `docs/`
+      ([source-data-feasibility.md](source-data-feasibility.md))
 - [ ] Revisit agent skills at this point
 
 ### Phase 2 — Audit-driven cleanup
