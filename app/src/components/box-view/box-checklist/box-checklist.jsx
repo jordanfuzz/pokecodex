@@ -72,7 +72,9 @@ const BoxChecklist = ({
             </td>
           ) : (
             <td className="checklist-checkbox">
-              {pokemon.isCaught && completeRecords.includes(pokemon.recordKey) ? '✅' : '⬜'}
+              {pokemon.isCaught && completeRecords.includes(pokemon.recordKey)
+                ? '✅'
+                : '⬜'}
             </td>
           )}
 

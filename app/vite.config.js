@@ -14,10 +14,10 @@ export default defineConfig({
       '/api': {
         target: process.env.API_PROXY_TARGET || 'http://api:3003',
         changeOrigin: true,
-      }
-    }
+      },
+    },
   },
   build: {
-    outDir: 'build'
-  }
+    outDir: 'build',
+  },
 })

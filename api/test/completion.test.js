@@ -6,9 +6,30 @@ import { buildRequiredSources, checkCompletion } from '../src/pokemon/completion
 // Minimal raw-row fixtures in the camelized shape getAllForUser sees.
 const unown = {
   sourcesByType: [
-    { id: 'src-a', type: 'variant', name: 'A', image: null, replaceDefault: false, firstGen: 2 },
-    { id: 'src-b', type: 'variant', name: 'B', image: null, replaceDefault: false, firstGen: 2 },
-    { id: 'src-wild', type: 'wild', name: 'Wild', image: null, replaceDefault: false, firstGen: 0 },
+    {
+      id: 'src-a',
+      type: 'variant',
+      name: 'A',
+      image: null,
+      replaceDefault: false,
+      firstGen: 2,
+    },
+    {
+      id: 'src-b',
+      type: 'variant',
+      name: 'B',
+      image: null,
+      replaceDefault: false,
+      firstGen: 2,
+    },
+    {
+      id: 'src-wild',
+      type: 'wild',
+      name: 'Wild',
+      image: null,
+      replaceDefault: false,
+      firstGen: 0,
+    },
   ],
   usersSourcesByGen: [{ id: 'src-a', source: 'variant', name: 'A', gen: 2 }],
   usersSources: ['variant'],
@@ -18,10 +39,7 @@ const unown = {
 describe('buildRequiredSources', () => {
   it('requires every row of a repeatable type, not just the type', () => {
     const required = buildRequiredSources(unown, ['variant'])
-    assert.deepEqual(
-      required.map(r => r.sourceId).sort(),
-      ['src-a', 'src-b']
-    )
+    assert.deepEqual(required.map(r => r.sourceId).sort(), ['src-a', 'src-b'])
   })
 
   it('marks per-row caught state', () => {
@@ -33,19 +51,32 @@ describe('buildRequiredSources', () => {
 
   it('an override forces a normally-excluded source in', () => {
     const required = buildRequiredSources(unown, [], { 'src-wild': true })
-    assert.deepEqual(required.map(r => r.sourceId), ['src-wild'])
+    assert.deepEqual(
+      required.map(r => r.sourceId),
+      ['src-wild']
+    )
     assert.equal(required[0].isOverridden, true)
   })
 
   it('an override excludes a normally-required source', () => {
     const required = buildRequiredSources(unown, ['variant'], { 'src-b': false })
-    assert.deepEqual(required.map(r => r.sourceId), ['src-a'])
+    assert.deepEqual(
+      required.map(r => r.sourceId),
+      ['src-a']
+    )
   })
 
   it('evolution-satisfiable rows are flagged when the evolution inherited them', () => {
     const abra = {
       sourcesByType: [
-        { id: 'src-trade', type: 'npc-trade', name: 'Trade', image: null, replaceDefault: false, firstGen: 1 },
+        {
+          id: 'src-trade',
+          type: 'npc-trade',
+          name: 'Trade',
+          image: null,
+          replaceDefault: false,
+          firstGen: 1,
+        },
       ],
       usersSourcesByGen: [null],
       usersSources: [null],
@@ -58,7 +89,14 @@ describe('buildRequiredSources', () => {
   it('an inherited wild source does not satisfy the wild rule (wild is not evolution-satisfiable)', () => {
     const wildEvolved = {
       sourcesByType: [
-        { id: 'src-wild', type: 'wild', name: 'Wild', image: null, replaceDefault: false, firstGen: 0 },
+        {
+          id: 'src-wild',
+          type: 'wild',
+          name: 'Wild',
+          image: null,
+          replaceDefault: false,
+          firstGen: 0,
+        },
       ],
       usersSourcesByGen: [null],
       usersSources: [null],
@@ -97,7 +135,14 @@ describe('checkCompletion', () => {
   it('evolution-inherited sources satisfy their row', () => {
     const abra = {
       sourcesByType: [
-        { id: 'src-trade', type: 'npc-trade', name: 'Trade', image: null, replaceDefault: false, firstGen: 1 },
+        {
+          id: 'src-trade',
+          type: 'npc-trade',
+          name: 'Trade',
+          image: null,
+          replaceDefault: false,
+          firstGen: 1,
+        },
       ],
       usersSourcesByGen: [{ id: 'src-other', source: 'wild', name: 'Wild', gen: 1 }],
       usersSources: ['wild'],

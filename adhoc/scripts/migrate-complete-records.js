@@ -13,8 +13,9 @@ const main = async () => {
     console.log('DRY RUN — no rows will be written.\n')
   }
 
-  const sources = (await pgPool.query('select id, pokemon_id, name, source from sources;'))
-    .rows
+  const sources = (
+    await pgPool.query('select id, pokemon_id, name, source from sources;')
+  ).rows
 
   const findSourceId = (pokemonId, suffix) => {
     if (suffix === 'male' || suffix === 'female') {
@@ -23,7 +24,8 @@ const main = async () => {
     return sources.find(s => s.pokemon_id === pokemonId && s.name === suffix)?.id
   }
 
-  const rows = (await pgPool.query('select id, complete_records from users_box_data;')).rows
+  const rows = (await pgPool.query('select id, complete_records from users_box_data;'))
+    .rows
   let unmatched = []
   let changedRows = 0
   let totalDuplicatesRemoved = 0
@@ -83,10 +85,10 @@ const main = async () => {
         `  box row ${row.id}: ${JSON.stringify(records)} -> ${JSON.stringify(deduped)}`
       )
       if (!dryRun) {
-        await pgPool.query('update users_box_data set complete_records = $1 where id = $2;', [
-          JSON.stringify(deduped),
-          row.id,
-        ])
+        await pgPool.query(
+          'update users_box_data set complete_records = $1 where id = $2;',
+          [JSON.stringify(deduped), row.id]
+        )
       }
     } catch (err) {
       console.error(`Error processing users_box_data.id=${row.id}`)
@@ -100,7 +102,9 @@ const main = async () => {
   }
   if (unmatched.length) {
     console.log('UNMATCHED entries (left as-is, review manually):')
-    unmatched.forEach(u => console.log(`  box row ${u.boxRow}: ${JSON.stringify(u.record)}`))
+    unmatched.forEach(u =>
+      console.log(`  box row ${u.boxRow}: ${JSON.stringify(u.record)}`)
+    )
   }
   if (dryRun) {
     console.log('\nDRY RUN — no rows written.')

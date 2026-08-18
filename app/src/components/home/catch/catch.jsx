@@ -28,7 +28,9 @@ const Catch = props => {
     if (!isEditMode || !usersPokemonSources || !catchData) return
 
     setSelectedSources(
-      usersPokemonSources.filter(x => x.pokemonId === activeUsersPokemon.id).map(x => x.id)
+      usersPokemonSources
+        .filter(x => x.pokemonId === activeUsersPokemon.id)
+        .map(x => x.id)
     )
     setSelectedGameVersion(
       catchData.gameVersions.find(x => x.name === activeUsersPokemon.gameVersion)?.id ??
@@ -172,7 +174,9 @@ const Catch = props => {
               type="datetime-local"
               className="edit-date-picker"
               value={
-                updatedDate ? DateTime.fromISO(updatedDate).toFormat("yyyy-MM-dd'T'HH:mm") : ''
+                updatedDate
+                  ? DateTime.fromISO(updatedDate).toFormat("yyyy-MM-dd'T'HH:mm")
+                  : ''
               }
               onChange={e => setUpdatedDate(e.target.value || null)}
             />

@@ -9,7 +9,9 @@ import { getNeededRules } from '../src/pokemon/pokemon-utils.js'
 // Uses a real source row from the dev data; deterministic so repeat runs hit
 // the same row. Cleans up its own override rows afterward.
 const anySourceId = () =>
-  pgPool.query('select id, pokemon_id from sources order by id limit 1;').then(r => r.rows[0])
+  pgPool
+    .query('select id, pokemon_id from sources order by id limit 1;')
+    .then(r => r.rows[0])
 
 // Picks a source whose type is NOT required by the logged-in user's current
 // rules, so PUTting isRequired: true is a genuine flip (rules-excluded ->
@@ -86,7 +88,10 @@ describe('source overrides', () => {
     const requiredEntry = mon.requiredSources.find(r => r.sourceId === source.id)
     // The source's own type is rules-excluded for this user, so the only way
     // it can appear in requiredSources at all is via the override.
-    assert.ok(requiredEntry, 'expected the overridden source to be forced into requiredSources')
+    assert.ok(
+      requiredEntry,
+      'expected the overridden source to be forced into requiredSources'
+    )
     assert.equal(requiredEntry.isOverridden, true)
   })
 

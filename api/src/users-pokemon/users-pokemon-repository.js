@@ -98,8 +98,14 @@ export const addPokemonForUser = pokemonData => {
 
 export const evolveUsersPokemon = async pokemonData => {
   const { userId, evolvedPokemonId, oldPokemonData } = pokemonData
-  const { pokeball, gameId, caughtAt, id: usersPokemonId, pokemonId, notes } =
-    oldPokemonData
+  const {
+    pokeball,
+    gameId,
+    caughtAt,
+    id: usersPokemonId,
+    pokemonId,
+    notes,
+  } = oldPokemonData
 
   const evolvedUsersPokemonId = randomUUID()
   const client = await pgPool.connect()
@@ -110,7 +116,15 @@ export const evolveUsersPokemon = async pokemonData => {
     await client.query(
       `insert into users_pokemon (id, user_id, pokemon_id, notes, game_id, pokeball, caught_at)
       values($1, $2, $3, $4, $5, $6, $7);`,
-      [evolvedUsersPokemonId, userId, evolvedPokemonId, notes ?? null, gameId, pokeball, caughtAt]
+      [
+        evolvedUsersPokemonId,
+        userId,
+        evolvedPokemonId,
+        notes ?? null,
+        gameId,
+        pokeball,
+        caughtAt,
+      ]
     )
 
     // Never inherit an old 'evolved' source (prevents double evolved tags).

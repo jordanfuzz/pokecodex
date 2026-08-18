@@ -114,7 +114,9 @@ const Home = () => {
   const handleToggleSourceOverride = async source => {
     const pokemonId = openDrawerIndex
     try {
-      const existing = catchData?.usersSourceOverrides?.find(x => x.sourceId === source.id)
+      const existing = catchData?.usersSourceOverrides?.find(
+        x => x.sourceId === source.id
+      )
       if (existing) {
         await axios.delete(`/api/user/source-override/${source.id}`)
       } else {
@@ -124,7 +126,9 @@ const Home = () => {
         })
       }
       // Refresh both the open drawer and the list checkboxes.
-      const genIdParameter = gameGenForFiltering ? `&generationId=${gameGenForFiltering}` : ''
+      const genIdParameter = gameGenForFiltering
+        ? `&generationId=${gameGenForFiltering}`
+        : ''
       const usersPokemonData = await axios.get(
         `/api/pokemon?pokemonId=${pokemonId}${genIdParameter}`
       )
@@ -171,10 +175,7 @@ const Home = () => {
   }
 
   const handleUpdateUsersPokemon = async pokemonData => {
-    const newPokemonData = {
-      ...pokemonData,
-    }
-    const usersPokemonData = await axios.put('/api/users-pokemon', newPokemonData)
+    const usersPokemonData = await axios.put('/api/users-pokemon', pokemonData)
     if (!usersPokemonData) return
 
     setUsersPokemon(usersPokemonData.data?.usersPokemon)
@@ -203,11 +204,8 @@ const Home = () => {
   }
 
   const handleDeleteUsersPokemon = async pokemonData => {
-    const newPokemonData = {
-      ...pokemonData,
-    }
     const usersPokemonData = await axios.delete('/api/users-pokemon', {
-      data: newPokemonData,
+      data: pokemonData,
     })
     if (!usersPokemonData) return
 
@@ -302,7 +300,7 @@ const Home = () => {
       ? pokemonFilteredByGen.filter(x => !x.isComplete)
       : pokemonFilteredByGen
 
-    return filteredPokemon.map((mon, i) => (
+    return filteredPokemon.map(mon => (
       <React.Fragment key={mon.id}>
         <tr
           className={`data-row hover-${mon.type1} ${

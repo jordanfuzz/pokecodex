@@ -1,6 +1,10 @@
 import pgPool from '../pg-pool.js'
 import camelize from 'camelize'
-import { getUsersSourcesByGen, getSourcesByType, getNeededRules } from './pokemon-utils.js'
+import {
+  getUsersSourcesByGen,
+  getSourcesByType,
+  getNeededRules,
+} from './pokemon-utils.js'
 import { buildRequiredSources, checkCompletion } from './completion.js'
 import { getSourceOverridesForUser } from '../users/source-overrides-repository.js'
 

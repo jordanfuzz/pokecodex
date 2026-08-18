@@ -84,7 +84,9 @@ const BoxView = () => {
     if (selectedVersion.dexLimit)
       filteredPokemon = allPokemon.slice(0, selectedVersion.dexLimit)
     else if (selectedVersion.limitedDex)
-      filteredPokemon = allPokemon.filter(mon => selectedVersion.limitedDex.includes(mon.id))
+      filteredPokemon = allPokemon.filter(mon =>
+        selectedVersion.limitedDex.includes(mon.id)
+      )
 
     if (selectedVersion.addMeltanLine) {
       const meltan = allPokemon.find(mon => mon.id === 808)
@@ -108,7 +110,7 @@ const BoxView = () => {
         let replacedDefault = false
         const newEntries = (mon.requiredSources || [])
           .filter(entryMakesBoxRow)
-          .filter(entry => entry.firstGen === 0 || entry.firstGen <= versionGen)
+          .filter(entry => entry.firstGen <= versionGen)
           .map(entry => {
             if (entry.replaceDefault) replacedDefault = true
             return {
@@ -117,7 +119,8 @@ const BoxView = () => {
               recordKey: `${mon.id}:${entry.sourceId}`,
               isCaught: entry.caughtInGens.some(gen => transferPathOk(gen, versionGen)),
               image:
-                mon.imagesBySource.find(x => x[0] === entry.name)?.[1] || mon.defaultImage,
+                mon.imagesBySource.find(x => x[0] === entry.name)?.[1] ||
+                mon.defaultImage,
             }
           })
 

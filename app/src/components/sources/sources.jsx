@@ -89,7 +89,7 @@ const Sources = () => {
   }
 
   const renderSourceRows = () => {
-    return pokemonSources.map((source, i) => (
+    return pokemonSources.map(source => (
       <tr className={`source-data-row hover-${activePokemon.type1}`} key={source.id}>
         <td>
           {source.image ? <img src={source.image} className="source-image" /> : 'X'}

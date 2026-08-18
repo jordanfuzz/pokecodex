@@ -30,9 +30,7 @@ export const evolutionSatisfiableTypes = [
 export const buildRequiredSources = (mon, neededRules, overrides = {}) => {
   const sourceRows = (mon.sourcesByType || []).filter(row => row && row.id)
   const ownedRows = (mon.usersSourcesByGen || []).filter(row => row && row.id)
-  const evolutionIds = new Set(
-    (mon.usersEvolutionSourceIds || []).filter(Boolean)
-  )
+  const evolutionIds = new Set((mon.usersEvolutionSourceIds || []).filter(Boolean))
   const seen = new Set()
   const required = []
 

@@ -7,9 +7,10 @@ import pgPool from '../pg-pool.js'
 // hyphenated object keys, silently dropping every override.
 export const getSourceOverridesForUser = userId => {
   return pgPool
-    .query('select source_id, is_required from users_source_overrides where user_id = $1;', [
-      userId,
-    ])
+    .query(
+      'select source_id, is_required from users_source_overrides where user_id = $1;',
+      [userId]
+    )
     .then(res => Object.fromEntries(res.rows.map(r => [r.source_id, r.is_required])))
 }
 
