@@ -51,7 +51,7 @@ const BoxView = () => {
 
   useEffect(() => {
     if (selectedVersion) handleFilterPokemon(pokemon)
-  }, [selectedVersion, pokemon])
+  }, [selectedVersion, pokemon, usersRules])
 
   useEffect(() => {
     setSelectedVersion(gameData?.[0]?.[1])
@@ -71,14 +71,16 @@ const BoxView = () => {
     setPokemon(newPokemonResults.data.pokemon)
   }
 
+  // Gens 1-2 and 3+ have no transfer path between them.
+  const transferPathOk = (catchGen, versionGen) =>
+    catchGen <= versionGen && !(catchGen <= 2 && versionGen >= 3)
+
   const handleFilterPokemon = allPokemon => {
     let filteredPokemon = allPokemon
     if (selectedVersion.dexLimit)
       filteredPokemon = allPokemon.slice(0, selectedVersion.dexLimit)
     else if (selectedVersion.limitedDex)
-      filteredPokemon = allPokemon.filter(mon =>
-        selectedVersion.limitedDex.includes(mon.id)
-      )
+      filteredPokemon = allPokemon.filter(mon => selectedVersion.limitedDex.includes(mon.id))
 
     if (selectedVersion.addMeltanLine) {
       const meltan = allPokemon.find(mon => mon.id === 808)
@@ -86,127 +88,45 @@ const BoxView = () => {
       filteredPokemon = [...filteredPokemon, meltan, melmetal]
     }
 
-    const shouldAddGenderVariants = !selectedVersion.ignoreGender && usersRules?.gender
-    const shouldAddRegionVariants =
-      !selectedVersion.ignoreRegionalVariants && usersRules?.regional
-    const shouldAddFormVariants = usersRules?.variant
+    const versionGen = selectedVersion.generationId
+
+    const entryMakesBoxRow = entry => {
+      if (entry.type === 'male' || entry.type === 'female')
+        return !selectedVersion.ignoreGender
+      if (entry.type === 'regional') return !selectedVersion.ignoreRegionalVariants
+      if (entry.type === 'variant') return true
+      // Non-standard types only appear as box rows when the user forced them.
+      return entry.isOverridden
+    }
 
     const pokemonWithSources = filteredPokemon
       .map(mon => {
-        let newEntries = []
         let replacedDefault = false
-        mon.sources.forEach(source => {
-          switch (source) {
-            case 'male':
-              if (shouldAddGenderVariants) {
-                const isCaught =
-                  mon.usersSourcesByGen && mon.usersSourcesByGen.male
-                    ? mon.usersSourcesByGen.male.some(
-                        gen => gen <= selectedVersion.generationId
-                      )
-                    : false
-                newEntries.push({
-                  ...mon,
-                  variant: source,
-                  isCaught,
-                  image:
-                    mon.imagesBySource.find(x => x[0] === 'Male')?.[1] ||
-                    mon.defaultImage,
-                })
-                if (!replacedDefault)
-                  replacedDefault = mon.sourcesByType.defaultSource === 'Male'
-              }
-              return
-            case 'female':
-              if (shouldAddGenderVariants) {
-                const isCaught =
-                  mon.usersSourcesByGen && mon.usersSourcesByGen.female
-                    ? mon.usersSourcesByGen.female.some(
-                        gen => gen <= selectedVersion.generationId
-                      )
-                    : false
-                newEntries.push({
-                  ...mon,
-                  variant: source,
-                  isCaught,
-                  image:
-                    mon.imagesBySource.find(x => x[0] === 'Female')?.[1] ||
-                    mon.defaultImage,
-                })
-                if (!replacedDefault)
-                  replacedDefault = mon.sourcesByType.defaultSource === 'Female'
-              }
-              return
-            case 'variant':
-              if (shouldAddFormVariants) {
-                if (!mon.sourcesByType || !mon.sourcesByType.variant) return
-                mon.sourcesByType.variant.forEach(variant => {
-                  const [variantName, variantGen] = variant
-                  if (variantGen > selectedVersion.generationId) return
-
-                  const userHasVariantSources =
-                    mon.usersSourcesByGen && mon.usersSourcesByGen.variant
-
-                  const isCaught =
-                    userHasVariantSources &&
-                    mon.usersSourcesByGen.variant.some(
-                      ([usersSourceName, gens]) =>
-                        usersSourceName === variantName &&
-                        gens.some(gen => gen <= selectedVersion.generationId)
-                    )
-                  newEntries.push({
-                    ...mon,
-                    variant: variantName,
-                    isCaught,
-                    image:
-                      mon.imagesBySource.find(x => x[0] === variantName)?.[1] ||
-                      mon.defaultImage,
-                  })
-                  if (!replacedDefault)
-                    replacedDefault = mon.sourcesByType.defaultSource === variantName
-                })
-              }
-              return
-            case 'regional':
-              if (shouldAddRegionVariants) {
-                if (!mon.sourcesByType || !mon.sourcesByType.regional) return
-                mon.sourcesByType.regional.forEach(regionalSource => {
-                  const [sourceName, sourceGen] = regionalSource
-                  if (sourceGen > selectedVersion.generationId) return
-
-                  const userHasRegionalSources =
-                    mon.usersSourcesByGen && mon.usersSourcesByGen.regional
-
-                  const isCaught =
-                    userHasRegionalSources &&
-                    mon.usersSourcesByGen.regional.some(
-                      ([usersSourceName, gens]) =>
-                        usersSourceName === sourceName &&
-                        gens.some(gen => gen <= selectedVersion.generationId)
-                    )
-                  newEntries.push({
-                    ...mon,
-                    variant: sourceName,
-                    isCaught,
-                    image:
-                      mon.imagesBySource.find(x => x[0] === sourceName)?.[1] ||
-                      mon.defaultImage,
-                  })
-                })
-              }
-              return
-            default:
-              return
-          }
-        })
+        const newEntries = (mon.requiredSources || [])
+          .filter(entryMakesBoxRow)
+          .filter(entry => entry.firstGen === 0 || entry.firstGen <= versionGen)
+          .map(entry => {
+            if (entry.replaceDefault) replacedDefault = true
+            return {
+              ...mon,
+              variant: entry.name,
+              recordKey: `${mon.id}:${entry.sourceId}`,
+              isCaught: entry.caughtInGens.some(gen => transferPathOk(gen, versionGen)),
+              image:
+                mon.imagesBySource.find(x => x[0] === entry.name)?.[1] || mon.defaultImage,
+            }
+          })
 
         const isCaught =
           mon.usersSourcesByGen && mon.usersSourcesByGen.all
-            ? mon.usersSourcesByGen.all.some(gen => gen <= selectedVersion.generationId)
+            ? mon.usersSourcesByGen.all.some(gen => transferPathOk(gen, versionGen))
             : false
-        return replacedDefault
-          ? newEntries
-          : [Object.assign({}, mon, { isCaught, image: mon.defaultImage }), ...newEntries]
+        const baseEntry = Object.assign({}, mon, {
+          isCaught,
+          recordKey: `${mon.id}`,
+          image: mon.defaultImage,
+        })
+        return replacedDefault ? newEntries : [baseEntry, ...newEntries]
       })
       .flat()
 
@@ -216,17 +136,17 @@ const BoxView = () => {
   const handleVersionChange = version => {
     const versionData = gameData.find(([key]) => key === version)
     setSelectedVersion(versionData[1])
+    setSelectedBox(1)
   }
 
   const handleBoxChange = box => {
     setSelectedBox(box)
   }
 
+  if (shouldRedirect) return <Navigate to="/login" replace />
   if (!gameData || !selectedVersion) return null
 
-  return shouldRedirect ? (
-    <Navigate to="/login" replace />
-  ) : (
+  return (
     <div className="box-view-page">
       <a className="logout" href="/api/auth/logout">
         Logout
@@ -236,6 +156,7 @@ const BoxView = () => {
           <h1 className="box-view-header">Box View</h1>
           <select
             className="filter-dropdown"
+            value={gameData.find(([, v]) => v === selectedVersion)?.[0] ?? ''}
             onChange={e => handleVersionChange(e.target.value)}
             disabled={isChecklistEditMode}
           >

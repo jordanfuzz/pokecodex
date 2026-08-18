@@ -22,31 +22,17 @@ const BoxChecklist = ({
     const boxDataForVersion = usersBoxData.find(
       gameVersion => gameVersion.gameId === selectedVersion.id
     )
-    setCompleteRecords(boxDataForVersion.completeRecords)
+    setCompleteRecords(boxDataForVersion?.completeRecords ?? [])
   }, [usersBoxData, selectedVersion])
 
   const handleRecordChange = (checked, mon) => {
     let newCompleteRecords = [...completeRecords]
     if (checked) {
-      if (mon.variant) {
-        const foundMon = newCompleteRecords.some(
-          record => record === `${mon.id}:${mon.variant}`
-        )
-        if (!foundMon) newCompleteRecords.push(`${mon.id}:${mon.variant}`)
-      } else {
-        const foundMon = newCompleteRecords.some(record => record === mon.id)
-        if (!foundMon) newCompleteRecords.push(mon.id)
-      }
+      if (!newCompleteRecords.includes(mon.recordKey))
+        newCompleteRecords.push(mon.recordKey)
     } else {
-      if (mon.variant) {
-        const foundMon = newCompleteRecords.findIndex(
-          record => record === `${mon.id}:${mon.variant}`
-        )
-        if (foundMon > -1) newCompleteRecords.splice(foundMon, 1)
-      } else {
-        const foundMon = newCompleteRecords.findIndex(record => record === mon.id)
-        if (foundMon > -1) newCompleteRecords.splice(foundMon, 1)
-      }
+      const index = newCompleteRecords.indexOf(mon.recordKey)
+      if (index > -1) newCompleteRecords.splice(index, 1)
     }
     setCompleteRecords(newCompleteRecords)
   }
@@ -67,7 +53,7 @@ const BoxChecklist = ({
       return (
         <tr
           className={`checklist-row hover-${pokemon.type1}`}
-          key={i}
+          key={pokemon.recordKey}
           onMouseEnter={() => setHoveredPokemonIndex(i)}
           onMouseLeave={() => setHoveredPokemonIndex(null)}
         >
@@ -81,23 +67,12 @@ const BoxChecklist = ({
                 type="checkbox"
                 onChange={e => handleRecordChange(e.target.checked, pokemon)}
                 disabled={!pokemon.isCaught}
-                checked={
-                  pokemon.isCaught && pokemon.variant
-                    ? completeRecords.includes(`${pokemon.id}:${pokemon.variant}`)
-                    : completeRecords.includes(pokemon.id)
-                }
+                checked={completeRecords.includes(pokemon.recordKey)}
               />
-            </td>
-          ) : pokemon.variant ? (
-            <td className="checklist-checkbox">
-              {pokemon.isCaught &&
-              completeRecords.includes(`${pokemon.id}:${pokemon.variant}`)
-                ? '✅'
-                : '⬜'}
             </td>
           ) : (
             <td className="checklist-checkbox">
-              {pokemon.isCaught && completeRecords.includes(pokemon.id) ? '✅' : '⬜'}
+              {pokemon.isCaught && completeRecords.includes(pokemon.recordKey) ? '✅' : '⬜'}
             </td>
           )}
 
