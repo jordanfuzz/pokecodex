@@ -1,5 +1,9 @@
-import { useState, useEffect } from 'react'
-import { wallpapers, largeWallpaper } from '../box-view.logic'
+import {
+  wallpapers,
+  largeWallpaper,
+  completeRecordsForVersion,
+  isShownInBox,
+} from '../box-view.logic'
 import './box.scss'
 
 import boxArrowLeft from '../../../media/box-arrow-left.png'
@@ -14,7 +18,7 @@ const Box = ({
   usersBoxData,
   hoveredPokemonIndex,
 }) => {
-  const [completeRecords, setCompleteRecords] = useState([])
+  const completeRecords = completeRecordsForVersion(usersBoxData, selectedVersion)
 
   const handleArrowClick = direction => {
     if (isChecklistEditMode) return
@@ -27,16 +31,6 @@ const Box = ({
       handleBoxChange(selectedBox + 1)
     }
   }
-
-  // TODO: This is duplicated between box and box-checklist. Refactor to be in one place.
-  useEffect(() => {
-    if (!usersBoxData) return
-
-    const boxDataForVersion = usersBoxData.find(
-      gameVersion => gameVersion.gameId === selectedVersion.id
-    )
-    setCompleteRecords(boxDataForVersion?.completeRecords ?? [])
-  }, [usersBoxData, selectedVersion])
 
   const getWallpaper = () => {
     let wallpaperIndex = selectedBox
@@ -55,8 +49,7 @@ const Box = ({
     return (
       <div className={`box-flex-container-${boxSize}`}>
         {pokemon.slice(firstSlot, lastSlot).map((mon, i) => {
-          const recordIsCompleteInBox = completeRecords.includes(mon.recordKey)
-          const transparent = recordIsCompleteInBox ? '' : 'transparent'
+          const transparent = isShownInBox(mon, completeRecords) ? '' : 'transparent'
           const hovered = hoveredPokemonIndex === i ? 'hovered' : ''
           return (
             <div key={mon.recordKey} className={`box-pokemon-${boxSize} ${hovered}`}>

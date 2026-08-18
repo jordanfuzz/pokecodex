@@ -3,6 +3,7 @@ import axios from 'axios'
 import { Link, Navigate } from 'react-router'
 import Box from './box/box'
 import BoxChecklist from './box-checklist/box-checklist'
+import { catchSatisfiesBox } from './box-view.logic'
 import './box-view.scss'
 
 const BoxView = () => {
@@ -75,10 +76,6 @@ const BoxView = () => {
     setPokemon(newPokemonResults.data.pokemon)
   }
 
-  // Gens 1-2 and 3+ have no transfer path between them.
-  const transferPathOk = (catchGen, versionGen) =>
-    catchGen <= versionGen && !(catchGen <= 2 && versionGen >= 3)
-
   const handleFilterPokemon = allPokemon => {
     let filteredPokemon = allPokemon
     if (selectedVersion.dexLimit)
@@ -117,17 +114,18 @@ const BoxView = () => {
               ...mon,
               variant: entry.name,
               recordKey: `${mon.id}:${entry.sourceId}`,
-              isCaught: entry.caughtInGens.some(gen => transferPathOk(gen, versionGen)),
+              isCaught: (entry.caughtIn || []).some(c =>
+                catchSatisfiesBox(c, selectedVersion)
+              ),
               image:
                 mon.imagesBySource.find(x => x[0] === entry.name)?.[1] ||
                 mon.defaultImage,
             }
           })
 
-        const isCaught =
-          mon.usersSourcesByGen && mon.usersSourcesByGen.all
-            ? mon.usersSourcesByGen.all.some(gen => transferPathOk(gen, versionGen))
-            : false
+        const isCaught = (mon.usersCatches || []).some(c =>
+          catchSatisfiesBox(c, selectedVersion)
+        )
         const baseEntry = Object.assign({}, mon, {
           isCaught,
           recordKey: `${mon.id}`,

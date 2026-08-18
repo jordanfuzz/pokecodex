@@ -45,12 +45,11 @@ describe('buildRequiredSources', () => {
   it('marks per-row caught state', () => {
     const required = buildRequiredSources(unown, ['variant'])
     const byId = Object.fromEntries(required.map(r => [r.sourceId, r]))
-    assert.deepEqual(byId['src-a'].caughtInGens, [2])
-    assert.deepEqual(byId['src-b'].caughtInGens, [])
     assert.deepEqual(
       byId['src-a'].caughtIn.map(c => c.gen),
       [2]
     )
+    assert.deepEqual(byId['src-b'].caughtIn, [])
   })
 
   it('an override forces a normally-excluded source in', () => {
@@ -111,7 +110,7 @@ describe('buildRequiredSources', () => {
     assert.equal(checkCompletion(wildEvolved, required), false)
   })
 
-  it('two catches of one source in different games of the same gen yield one caughtInGens entry', () => {
+  it('two catches of one source in different games of the same gen stay separate caughtIn entries', () => {
     const twoGames = {
       ...unown,
       usersSourcesByGen: [
@@ -122,7 +121,10 @@ describe('buildRequiredSources', () => {
     const required = buildRequiredSources(twoGames, ['variant'])
     const entry = required.find(r => r.sourceId === 'src-a')
     assert.equal(entry.caughtIn.length, 2)
-    assert.deepEqual(entry.caughtInGens, [2])
+    assert.deepEqual(
+      entry.caughtIn.map(c => c.gameId),
+      [4, 5]
+    )
   })
 })
 

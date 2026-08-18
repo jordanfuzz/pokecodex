@@ -1,10 +1,6 @@
 import pgPool from '../pg-pool.js'
 import camelize from 'camelize'
-import {
-  getUsersSourcesByGen,
-  getSourcesByType,
-  getNeededRules,
-} from './pokemon-utils.js'
+import { getSourcesByType, getNeededRules } from './pokemon-utils.js'
 import { buildRequiredSources, checkCompletion } from './completion.js'
 import { getSourceOverridesForUser } from '../users/source-overrides-repository.js'
 
@@ -43,7 +39,6 @@ export const getAllForUser = async (userId, generationId = null) => {
     const requiredSources = buildRequiredSources(mon, neededRules, overrides)
     const isComplete = checkCompletion(mon, requiredSources)
     const [sourcesByType, imagesBySource] = getSourcesByType(mon)
-    const usersSourcesByGen = getUsersSourcesByGen(mon)
     const usersCatches = (mon.usersCatches || [])
       .filter(row => row && row.gameId)
       .map(row => ({
@@ -57,7 +52,6 @@ export const getAllForUser = async (userId, generationId = null) => {
       isComplete,
       requiredSources,
       sourcesByType,
-      usersSourcesByGen,
       imagesBySource,
       usersCatches,
     })
