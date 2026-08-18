@@ -77,29 +77,17 @@
 
 .edit-date-picker {
   background-color: white;
-  vertical-align: center;
-}
-
-.edit-date-picker input {
   color: black;
-}
-
-.edit-date-picker svg {
-  color: gray;
-}
-
-.no-border .MuiInput-underline:before {
-  border-bottom: none;
-}
-
-.edit-date-input:hover {
   border: none;
+  padding: 0 10px 0 15px;
+  max-width: 205px;
+  font-family: inherit;
+  font-size: 14px;
 }
 
-.edit-date-button {
-  border: none;
-  border-radius: 0%;
-  margin-left: 5px;
+.edit-date-picker::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.6;
 }
 
 .edit-date-error {
