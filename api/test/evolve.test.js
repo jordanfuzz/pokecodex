@@ -117,4 +117,122 @@ describe('evolveUsersPokemon', () => {
     // and no evolved-type duplicates
     assert.equal(links.filter(l => l.source === 'evolved').length, 1)
   })
+
+  it('rolls back and changes nothing when the base row belongs to another user', async () => {
+    const upId = await insertCatch(false)
+    const victimUserId = randomUUID()
+    await pgPool.query(
+      `insert into users(id, discord_id, discord_username) values($1, 'evolve-ownership-test', 'x');`,
+      [victimUserId]
+    )
+    try {
+      await evolveUsersPokemon({
+        userId: victimUserId, // not the owner of upId
+        evolvedPokemonId: EVOLVED,
+        oldPokemonData: {
+          id: upId,
+          pokemonId: BASE,
+          pokeball: 1,
+          gameId,
+          caughtAt: new Date().toISOString(),
+          notes: 'evolve-test',
+        },
+      })
+      const baseRow = await pgPool.query(`select * from users_pokemon where id = $1;`, [
+        upId,
+      ])
+      assert.equal(baseRow.rows.length, 1, 'base row must survive')
+      const evolved = await pgPool.query(
+        `select * from users_pokemon where user_id = $1;`,
+        [victimUserId]
+      )
+      assert.equal(evolved.rows.length, 0, 'no evolved record for the attacker')
+    } finally {
+      await pgPool.query(`delete from users_pokemon where user_id = $1;`, [victimUserId])
+      await pgPool.query(`delete from users where id = $1;`, [victimUserId])
+    }
+  })
+})
+
+describe('evolveUsersPokemon gender swap', () => {
+  const G_BASE = 456 // Finneon
+  const G_EVOLVED = 457 // Lumineon
+
+  let userId, gameId, baseFemaleId, evolvedFemaleId
+
+  const genderCleanup = async uid => {
+    await pgPool.query(
+      `delete from users_pokemon_sources where users_pokemon_id in
+       (select id from users_pokemon where user_id = $1 and pokemon_id = any($2::int[]) and notes = 'evolve-test');`,
+      [uid, [G_BASE, G_EVOLVED]]
+    )
+    await pgPool.query(
+      `delete from users_pokemon where user_id = $1 and pokemon_id = any($2::int[]) and notes = 'evolve-test';`,
+      [uid, [G_BASE, G_EVOLVED]]
+    )
+  }
+
+  beforeEach(async () => {
+    userId = (await pgPool.query(userIdQuery)).rows[0].id
+    gameId = (await pgPool.query('select id from game_versions limit 1;')).rows[0].id
+    baseFemaleId = (
+      await pgPool.query(
+        `select id from sources where pokemon_id = $1 and source = 'female' limit 1;`,
+        [G_BASE]
+      )
+    ).rows[0]?.id
+    evolvedFemaleId = (
+      await pgPool.query(
+        `select id from sources where pokemon_id = $1 and source = 'female' limit 1;`,
+        [G_EVOLVED]
+      )
+    ).rows[0]?.id
+    await genderCleanup(userId)
+  })
+
+  after(async () => {
+    const uid = (await pgPool.query(userIdQuery)).rows[0].id
+    await genderCleanup(uid)
+  })
+
+  it('a female base becomes a female evolution (own source, not inherited)', async t => {
+    if (!baseFemaleId || !evolvedFemaleId) return t.skip('no gender sources in data')
+    const upId = randomUUID()
+    await pgPool.query(
+      `insert into users_pokemon(id, user_id, pokemon_id, notes, game_id, pokeball, caught_at)
+       values($1, $2, $3, 'evolve-test', $4, 1, now());`,
+      [upId, userId, G_BASE, gameId]
+    )
+    await pgPool.query(
+      `insert into users_pokemon_sources(id, users_pokemon_id, source_id) values($1, $2, $3);`,
+      [randomUUID(), upId, baseFemaleId]
+    )
+
+    await evolveUsersPokemon({
+      userId,
+      evolvedPokemonId: G_EVOLVED,
+      oldPokemonData: {
+        id: upId,
+        pokemonId: G_BASE,
+        pokeball: 1,
+        gameId,
+        caughtAt: new Date().toISOString(),
+        notes: 'evolve-test',
+      },
+    })
+
+    const links = (
+      await pgPool.query(
+        `select ups.source_id, ups.is_inherited, s.source from users_pokemon_sources ups
+         join sources s on s.id = ups.source_id
+         join users_pokemon up on up.id = ups.users_pokemon_id
+         where up.user_id = $1 and up.pokemon_id = $2 and up.notes = 'evolve-test';`,
+        [userId, G_EVOLVED]
+      )
+    ).rows
+    const female = links.find(l => l.source === 'female')
+    assert.ok(female, 'evolved record should have a female source')
+    assert.equal(female.source_id, evolvedFemaleId)
+    assert.equal(female.is_inherited, false)
+  })
 })

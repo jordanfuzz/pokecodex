@@ -116,83 +116,127 @@ export const evolveUsersPokemon = async pokemonData => {
   const evolvedUsersPokemonId = randomUUID()
   const client = await pgPool.connect()
 
+  let aborted = false
   try {
     await client.query('BEGIN')
 
-    await client.query(
-      `insert into users_pokemon (id, user_id, pokemon_id, notes, game_id, pokeball, caught_at)
-      values($1, $2, $3, $4, $5, $6, $7);`,
-      [
-        evolvedUsersPokemonId,
-        userId,
-        evolvedPokemonId,
-        notes ?? null,
-        gameId,
-        pokeball,
-        caughtAt,
-      ]
+    const owned = await client.query(
+      `select id from users_pokemon where id = $1 and user_id = $2 for update;`,
+      [usersPokemonId, userId]
     )
+    if (owned.rows.length === 0) {
+      await client.query('ROLLBACK')
+      aborted = true
+    }
 
-    // Never inherit an old 'evolved' source (prevents double evolved tags).
-    await client.query(
-      `delete from users_pokemon_sources
-      where users_pokemon_id = $1
-      and source_id in (select id from sources where source = 'evolved');`,
-      [usersPokemonId]
-    )
+    if (!aborted) {
+      await client.query(
+        `insert into users_pokemon (id, user_id, pokemon_id, notes, game_id, pokeball, caught_at)
+        values($1, $2, $3, $4, $5, $6, $7);`,
+        [
+          evolvedUsersPokemonId,
+          userId,
+          evolvedPokemonId,
+          notes ?? null,
+          gameId,
+          pokeball,
+          caughtAt,
+        ]
+      )
 
-    // A shiny base evolves into a shiny evolution: swap the base's shiny link
-    // for the evolved pokemon's own shiny source, non-inherited.
-    const baseShinyLink = await client
-      .query(
-        `select ups.id from users_pokemon_sources ups
-        join sources s on s.id = ups.source_id
-        where ups.users_pokemon_id = $1 and s.source = 'shiny';`,
+      // Never inherit an old 'evolved' source (prevents double evolved tags).
+      await client.query(
+        `delete from users_pokemon_sources
+        where users_pokemon_id = $1
+        and source_id in (select id from sources where source = 'evolved');`,
         [usersPokemonId]
       )
-      .then(res => res.rows[0])
 
-    if (baseShinyLink) {
-      const evolvedShinyId = await client
-        .query(`select id from sources where source = 'shiny' and pokemon_id = $1;`, [
+      // A shiny base evolves into a shiny evolution: swap the base's shiny link
+      // for the evolved pokemon's own shiny source, non-inherited.
+      const baseShinyLink = await client
+        .query(
+          `select ups.id from users_pokemon_sources ups
+          join sources s on s.id = ups.source_id
+          where ups.users_pokemon_id = $1 and s.source = 'shiny';`,
+          [usersPokemonId]
+        )
+        .then(res => res.rows[0])
+
+      if (baseShinyLink) {
+        const evolvedShinyId = await client
+          .query(`select id from sources where source = 'shiny' and pokemon_id = $1;`, [
+            evolvedPokemonId,
+          ])
+          .then(res => res.rows[0]?.id)
+
+        await client.query(`delete from users_pokemon_sources where id = $1;`, [
+          baseShinyLink.id,
+        ])
+        if (evolvedShinyId)
+          await client.query(
+            `insert into users_pokemon_sources(id, users_pokemon_id, source_id)
+            values($1, $2, $3);`,
+            [randomUUID(), evolvedUsersPokemonId, evolvedShinyId]
+          )
+      }
+
+      // Gender carries through evolution: swap the base's gender link for the
+      // evolved pokemon's own gender source, non-inherited (same as shiny).
+      for (const genderType of ['male', 'female']) {
+        const baseGenderLink = await client
+          .query(
+            `select ups.id from users_pokemon_sources ups
+            join sources s on s.id = ups.source_id
+            where ups.users_pokemon_id = $1 and s.source = $2::source_type;`,
+            [usersPokemonId, genderType]
+          )
+          .then(res => res.rows[0])
+
+        if (baseGenderLink) {
+          const evolvedGenderId = await client
+            .query(
+              `select id from sources where source = $1::source_type and pokemon_id = $2;`,
+              [genderType, evolvedPokemonId]
+            )
+            .then(res => res.rows[0]?.id)
+
+          await client.query(`delete from users_pokemon_sources where id = $1;`, [
+            baseGenderLink.id,
+          ])
+          if (evolvedGenderId)
+            await client.query(
+              `insert into users_pokemon_sources(id, users_pokemon_id, source_id)
+              values($1, $2, $3);`,
+              [randomUUID(), evolvedUsersPokemonId, evolvedGenderId]
+            )
+        }
+      }
+
+      // Everything else moves to the evolution as inherited.
+      await client.query(
+        `update users_pokemon_sources
+        set users_pokemon_id = $1, is_inherited = true
+        where users_pokemon_id = $2;`,
+        [evolvedUsersPokemonId, usersPokemonId]
+      )
+
+      await client.query(`delete from users_pokemon where id = $1;`, [usersPokemonId])
+
+      const evolutionSourceId = await client
+        .query(`select id from sources where source = 'evolved' and pokemon_id = $1;`, [
           evolvedPokemonId,
         ])
         .then(res => res.rows[0]?.id)
-
-      await client.query(`delete from users_pokemon_sources where id = $1;`, [
-        baseShinyLink.id,
-      ])
-      if (evolvedShinyId)
+      if (evolutionSourceId)
         await client.query(
           `insert into users_pokemon_sources(id, users_pokemon_id, source_id)
           values($1, $2, $3);`,
-          [randomUUID(), evolvedUsersPokemonId, evolvedShinyId]
+          [randomUUID(), evolvedUsersPokemonId, evolutionSourceId]
         )
+
+      await client.query('COMMIT')
     }
-
-    // Everything else moves to the evolution as inherited.
-    await client.query(
-      `update users_pokemon_sources
-      set users_pokemon_id = $1, is_inherited = true
-      where users_pokemon_id = $2;`,
-      [evolvedUsersPokemonId, usersPokemonId]
-    )
-
-    await client.query(`delete from users_pokemon where id = $1;`, [usersPokemonId])
-
-    const evolutionSourceId = await client
-      .query(`select id from sources where source = 'evolved' and pokemon_id = $1;`, [
-        evolvedPokemonId,
-      ])
-      .then(res => res.rows[0]?.id)
-    if (evolutionSourceId)
-      await client.query(
-        `insert into users_pokemon_sources(id, users_pokemon_id, source_id)
-        values($1, $2, $3);`,
-        [randomUUID(), evolvedUsersPokemonId, evolutionSourceId]
-      )
-
-    await client.query('COMMIT')
   } catch (err) {
     await client.query('ROLLBACK')
     throw err
