@@ -18,7 +18,7 @@
     "camelize": "^1.0.1",
     "cookie-parser": "^1.4.7",
     "cookie-session": "^2.1.1",
-    "dotenv": "^16.6.1",
+    "dotenv": "^17.4.2",
     "express": "^4.22.2",
     "passport": "^0.7.0",
     "passport-discord": "^0.1.4",

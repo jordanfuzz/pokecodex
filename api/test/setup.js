@@ -4,6 +4,9 @@
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'url'
 
-dotenv.config({ path: fileURLToPath(new URL('../../.env', import.meta.url)) })
+dotenv.config({
+  path: fileURLToPath(new URL('../../.env', import.meta.url)),
+  quiet: true,
+})
 process.env.POSTGRES_HOST = 'localhost'
 process.env.NODE_ENV = 'development'
