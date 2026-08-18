@@ -93,22 +93,20 @@ const Home = () => {
       gameVersions,
       usersPokemonEvolutionSources,
       usersSourceOverrides,
+      homeRegionCatchIds,
     } = usersPokemonData
 
     setActivePokemonSources(sources)
     setUsersPokemon(usersPokemon)
-    setCatchData({
+    // Payloads that omit overrides or home-region ids must not wipe them.
+    setCatchData(prev => ({
       usersPokemonSources,
       pokeballs,
       gameVersions,
       usersPokemonEvolutionSources,
-      usersSourceOverrides,
-    })
-  }
-
-  const typeRequiredByRules = type => {
-    if (type === 'male' || type === 'female') return Boolean(usersRules?.gender)
-    return Boolean(usersRules?.[type])
+      usersSourceOverrides: usersSourceOverrides ?? prev?.usersSourceOverrides,
+      homeRegionCatchIds: homeRegionCatchIds ?? prev?.homeRegionCatchIds,
+    }))
   }
 
   const handleToggleSourceOverride = async source => {
@@ -117,13 +115,19 @@ const Home = () => {
       const existing = catchData?.usersSourceOverrides?.find(
         x => x.sourceId === source.id
       )
-      if (existing) {
-        await axios.delete(`/api/user/source-override/${source.id}`)
-      } else {
+      // Cycle: follow rules -> always required -> never required -> follow rules
+      if (!existing) {
         await axios.put('/api/user/source-override', {
           sourceId: source.id,
-          isRequired: !typeRequiredByRules(source.source),
+          isRequired: true,
         })
+      } else if (existing.isRequired) {
+        await axios.put('/api/user/source-override', {
+          sourceId: source.id,
+          isRequired: false,
+        })
+      } else {
+        await axios.delete(`/api/user/source-override/${source.id}`)
       }
       // Refresh both the open drawer and the list checkboxes.
       const genIdParameter = gameGenForFiltering
@@ -181,6 +185,10 @@ const Home = () => {
     setUsersPokemon(usersPokemonData.data?.usersPokemon)
     const newCatchData = Object.assign({}, catchData, {
       usersPokemonSources: usersPokemonData.data?.usersPokemonSources,
+      homeRegionCatchIds:
+        usersPokemonData.data?.homeRegionCatchIds ?? catchData?.homeRegionCatchIds,
+      usersSourceOverrides:
+        usersPokemonData.data?.usersSourceOverrides ?? catchData?.usersSourceOverrides,
     })
     setCatchData(newCatchData)
     refreshPokemonList()
@@ -198,6 +206,8 @@ const Home = () => {
     const newCatchData = Object.assign({}, catchData, {
       usersPokemonSources: usersPokemonData.data?.usersPokemonSources,
       usersPokemonEvolutionSources: usersPokemonData.data?.usersPokemonEvolutionSources,
+      homeRegionCatchIds:
+        usersPokemonData.data?.homeRegionCatchIds ?? catchData?.homeRegionCatchIds,
     })
     setCatchData(newCatchData)
     refreshPokemonList()
@@ -211,6 +221,8 @@ const Home = () => {
 
     const newCatchData = Object.assign({}, catchData, {
       usersPokemonSources: usersPokemonData.data?.usersPokemonSources,
+      homeRegionCatchIds:
+        usersPokemonData.data?.homeRegionCatchIds ?? catchData?.homeRegionCatchIds,
     })
 
     setUsersPokemon(usersPokemonData.data?.usersPokemon)
