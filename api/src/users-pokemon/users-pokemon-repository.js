@@ -14,6 +14,32 @@ export const getAllForUserAndPokemon = (userId, pokemonId) => {
   return pgPool.query(selectQuery, [userId, pokemonId]).then(res => camelize(res.rows))
 }
 
+export const getHomeRegionCatchIds = (userId, pokemonId) => {
+  return pgPool
+    .query(
+      `select up.id from users_pokemon up
+      join game_versions gv on gv.id = up.game_id
+      join pokemon p on p.id = up.pokemon_id
+      where up.user_id = $1 and up.pokemon_id = $2
+      and gv.generation_id = p.original_gen
+      and gv.region is not null and gv.region = p.home_region;`,
+      [userId, pokemonId]
+    )
+    .then(res => res.rows.map(r => r.id))
+}
+
+// The 'original' source is derived from catch data (see completion.js);
+// storing a link would double-represent it, so write paths drop those ids.
+const insertableSourceIds = sources => {
+  if (!sources?.length) return Promise.resolve([])
+  return pgPool
+    .query(
+      `select id from sources where id = any($1::uuid[]) and source <> 'original';`,
+      [sources]
+    )
+    .then(res => res.rows.map(r => r.id))
+}
+
 export const updateNoteForUsersPokemon = noteData => {
   const { note, userId, pokemonId, usersPokemonId } = noteData
 
@@ -53,9 +79,10 @@ export const updateUsersPokemon = pokemonData => {
       where users_pokemon_id = $1 and is_inherited = false;`,
           [usersPokemonId]
         )
-        .then(() => {
+        .then(() => insertableSourceIds(sources))
+        .then(validSources => {
           return Promise.all(
-            sources.map(sourceId => {
+            validSources.map(sourceId => {
               return pgPool.query(
                 `insert into users_pokemon_sources(id, users_pokemon_id, source_id)
           values($1, $2, $3);`,
@@ -84,9 +111,10 @@ export const addPokemonForUser = pokemonData => {
     returning *;`,
       [usersPokemonId, userId, pokemonId, gameVersion, pokeball, new Date()]
     )
-    .then(() => {
+    .then(() => insertableSourceIds(sources))
+    .then(validSources => {
       return Promise.all(
-        sources.map(sourceId => {
+        validSources.map(sourceId => {
           return pgPool.query(
             `insert into users_pokemon_sources(id, users_pokemon_id, source_id)
             values($1, $2, $3);`,
