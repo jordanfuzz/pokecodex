@@ -189,12 +189,15 @@ priority. Data-gathering work lives in [source-data.md](source-data.md).
 - [ ] User can set time preference
 - [ ] Show images for forms/shiny when evolving
 - [ ] Add note about closed beta on login page (maybe invite-only?)
-- [ ] Pokewalker: add rule support, plus geographic location on catch log
+- [ ] Pokewalker: add rule support, plus geographic location on catch log (source exists, no user rule, no geographic location)
 - [ ] Add last few missing pokemon with images
 - [ ] Limit ball choice when adding pokemon (trade/prize ⇒ default pokeball;
       gens 1–2 ⇒ default pokeball)
 - [ ] "Uncaught only" filter (in the Figma alongside "incomplete only" —
       original motivation forgotten; evaluate before building)
+- [ ] PKHeX importer - import a save -> adds pokemon (including box view)
+- [ ] Add hover effects to yes and no options in confirmation boxes (evolve pokemon, delete pokemon, etc)
+- [ ] Source pill hover state - brief description + image for unique forms (gender, shiny, etc)
 
 ## Bonus ideas (unordered)
 

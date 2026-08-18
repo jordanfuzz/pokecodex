@@ -89,6 +89,9 @@ January 2026. Remaining work is an audit, not a rewrite:
 
 Work the "Core v1 issues" section of [BACKLOG.md](BACKLOG.md), starting with a
 re-evaluation of v1 scope against the old MVP definition recorded there.
+- [x] First pass of core issues
+- [ ] Fix remaining issues after manual testing (See PHASE-3-FINDINGS.md and phase-3-user-testing.md)
+- [ ] Automatic testing - What is the unit test coverage of the app at this point? Audit and add tests as needed before moving on.
 
 ### Phase 4 — Source data for gens 1–7 (deadline-critical)
 

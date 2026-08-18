@@ -21,6 +21,8 @@ Fix is small: add `and user_id = $n` to each `where` clause (and drop
 source-override/box-data code already scopes writes. Risk is low today
 (small, Discord-gated user base), which is why it was left as your call.
 
+User note: Yes, fix this immediately.
+
 ## 2. Box view vs. globally-required non-standard source types (design)
 
 The spec and plan quietly disagreed, and the plan's version shipped: box view
@@ -38,6 +40,17 @@ Related minor: box sprite, read-mode checklist, and edit-mode checkbox
 disagree about whether `isCaught` gates the checked display — reachable by
 checking a record in a gen-1 game and viewing it from gen 3.
 
+User note: For the major decision - option (b) for now. Keep the box view form-only. 
+Most games will not have room in PC boxes for more than this anyway. 
+For the related minor note: This is actually probably more significant than it seems 
+and may need some brainstorming. For "box completion", many games will require trading up
+from previous generations. So in the box view, whether a pokemon "is caught" might 
+actually mean "is traded up". The difference here is that you cannot trade pokemon 
+directly from gens 1-2 to gen 3, so all gen 3 pokemon have to be caught in gen 3 games in
+order to appear in the boxes. The rules for what counts as "is caught" might differ from
+generation to generation. If this is not clear, let's brainstorm this.
+
+
 ## 3. Admin /sources page unverified (smoke gap)
 
 The end-to-end smoke could not exercise the admin source-editor page: the
@@ -47,6 +60,10 @@ depends on (auth, `/api/sources` routes, `addSourceForPokemon` admin check)
 passed at the API level, but the page itself hasn't been clicked through
 since the auth change. One manual pass as your real admin account (or a
 temporary `is_admin` flip in dev) closes it.
+
+I'll check this manually in production once phase 3 is deployed. For our purposes here, 
+mark it as done. Nothing else for agents to do here yet. Anything flagged from
+the sources page testing will get added to BACKLOG.md.
 
 ---
 
