@@ -54,6 +54,20 @@ describe('buildRequiredSources', () => {
     const required = buildRequiredSources(abra, ['npc-trade'])
     assert.equal(required[0].caughtViaEvolution, true)
   })
+
+  it('an inherited wild source does not satisfy the wild rule (wild is not evolution-satisfiable)', () => {
+    const wildEvolved = {
+      sourcesByType: [
+        { id: 'src-wild', type: 'wild', name: 'Wild', image: null, replaceDefault: false, firstGen: 0 },
+      ],
+      usersSourcesByGen: [null],
+      usersSources: [null],
+      usersEvolutionSourceIds: ['src-wild'],
+    }
+    const required = buildRequiredSources(wildEvolved, ['wild'])
+    assert.equal(required[0].caughtViaEvolution, false)
+    assert.equal(checkCompletion(wildEvolved, required), false)
+  })
 })
 
 describe('checkCompletion', () => {

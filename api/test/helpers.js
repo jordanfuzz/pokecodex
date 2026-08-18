@@ -4,6 +4,11 @@ import request from 'supertest'
 // and returns an agent that carries the session cookie.
 export const loginAgent = async app => {
   const agent = request.agent(app)
-  await agent.get('/api/auth/dev-login')
+  const res = await agent.get('/api/auth/dev-login')
+  const setCookie = res.headers['set-cookie'] || []
+  const gotSessionCookie = setCookie.some(c => c.startsWith('session='))
+  if (res.status !== 302 || !gotSessionCookie) {
+    throw new Error('dev-login failed — is the dev stack up?')
+  }
   return agent
 }
