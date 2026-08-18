@@ -24,39 +24,64 @@ const main = async () => {
   let totalDuplicatesRemoved = 0
 
   for (const row of rows) {
-    const records = row.complete_records ?? []
-    const migrated = records.map(record => {
-      if (typeof record === 'number') return String(record)
-      const match = /^(\d+):(.+)$/.exec(record)
-      if (!match) return record // already a plain "<id>" string or unknown
-      const [, idText, suffix] = match
-      // Already migrated? Source ids are uuids.
-      if (/^[0-9a-f-]{36}$/.test(suffix)) return record
-      const sourceId = findSourceId(Number(idText), suffix)
-      if (!sourceId) {
-        unmatched.push({ boxRow: row.id, record })
-        return record
+    try {
+      const records = row.complete_records ?? []
+      const migrated = records.map(record => {
+        if (typeof record === 'number') return String(record)
+        if (typeof record !== 'string') {
+          // Not a number or string at all (null, boolean, object, ...) -
+          // nothing to migrate to; report for manual review.
+          unmatched.push({ boxRow: row.id, record })
+          return record
+        }
+        const match = /^(\d+):(.+)$/.exec(record)
+        if (!match) {
+          // Already a plain "<id>" string, or an unrecognized shape
+          // (empty string, "25:", non-numeric text, ...). Only the former
+          // is expected; report anything else so real production shapes
+          // surface instead of being silently swallowed.
+          if (!/^\d+$/.test(record)) unmatched.push({ boxRow: row.id, record })
+          return record
+        }
+        const [, idText, suffix] = match
+        // Already migrated? Source ids are uuids.
+        if (/^[0-9a-f-]{36}$/.test(suffix)) return record
+        const sourceId = findSourceId(Number(idText), suffix)
+        if (!sourceId) {
+          unmatched.push({ boxRow: row.id, record })
+          return record
+        }
+        return `${idText}:${sourceId}`
+      })
+
+      const deduped = [...new Set(migrated)]
+      const duplicatesRemoved = migrated.length - deduped.length
+      if (duplicatesRemoved > 0) {
+        totalDuplicatesRemoved += duplicatesRemoved
+        // migrated.indexOf(v) !== i picks out every occurrence after the
+        // first, i.e. exactly the values Set() dropped - printed so e.g.
+        // two different legacy suffixes collapsing onto the same uuid is
+        // distinguishable from a plain 1 / "1" duplicate pair.
+        const removedValues = migrated.filter((v, i) => migrated.indexOf(v) !== i)
+        console.log(
+          `  box row ${row.id}: removed ${duplicatesRemoved} duplicate(s) after mapping: ${removedValues.join(', ')}`
+        )
       }
-      return `${idText}:${sourceId}`
-    })
 
-    const deduped = [...new Set(migrated)]
-    const duplicatesRemoved = migrated.length - deduped.length
-    if (duplicatesRemoved > 0) {
-      totalDuplicatesRemoved += duplicatesRemoved
-      console.log(`  box row ${row.id}: removed ${duplicatesRemoved} duplicate(s) after mapping`)
+      // Compare as JSON (not via String() coercion) so a type-only change
+      // (number 60 -> string "60") still counts as a change that needs writing.
+      const isUnchanged = JSON.stringify(records) === JSON.stringify(deduped)
+      if (isUnchanged) continue
+
+      changedRows++
+      await pgPool.query('update users_box_data set complete_records = $1 where id = $2;', [
+        JSON.stringify(deduped),
+        row.id,
+      ])
+    } catch (err) {
+      console.error(`Error processing users_box_data.id=${row.id}`)
+      throw err
     }
-
-    // Compare as JSON (not via String() coercion) so a type-only change
-    // (number 60 -> string "60") still counts as a change that needs writing.
-    const isUnchanged = JSON.stringify(records) === JSON.stringify(deduped)
-    if (isUnchanged) continue
-
-    changedRows++
-    await pgPool.query('update users_box_data set complete_records = $1 where id = $2;', [
-      JSON.stringify(deduped),
-      row.id,
-    ])
   }
 
   console.log(`Checked ${rows.length} users_box_data rows; changed ${changedRows}.`)
