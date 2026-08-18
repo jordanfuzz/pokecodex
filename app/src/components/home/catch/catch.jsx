@@ -140,6 +140,7 @@ const Catch = props => {
             styles={multiSelectStyles}
             isSearchable={false}
             isMulti={true}
+            closeMenuOnSelect={false}
             onChange={options => setSelectedSources(options.map(x => x.value))}
             value={sourceOptions.filter(x => selectedSources?.includes(x.value))}
           />

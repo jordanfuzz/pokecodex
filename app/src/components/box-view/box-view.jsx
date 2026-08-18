@@ -35,13 +35,20 @@ const BoxView = () => {
   useEffect(() => {
     const loadUserData = async () => {
       if (!userData?.id) return
-      refreshPokemonList()
-      const boxDataResponse = await axios.get('/api/pokemon/box-data')
-      setGameData(boxDataResponse.data.gameVersions)
-      if (!boxDataResponse.data.usersBoxData || !boxDataResponse.data.usersBoxData.length) {
-        const newUserBoxData = await axios.post('/api/pokemon/box-data/setup')
-        setUsersBoxData(newUserBoxData.data.usersBoxData)
-      } else setUsersBoxData(boxDataResponse.data.usersBoxData)
+      try {
+        refreshPokemonList()
+        const boxDataResponse = await axios.get('/api/pokemon/box-data')
+        setGameData(boxDataResponse.data.gameVersions)
+        if (
+          !boxDataResponse.data.usersBoxData ||
+          !boxDataResponse.data.usersBoxData.length
+        ) {
+          const newUserBoxData = await axios.post('/api/pokemon/box-data/setup')
+          setUsersBoxData(newUserBoxData.data.usersBoxData)
+        } else setUsersBoxData(boxDataResponse.data.usersBoxData)
+      } catch (error) {
+        console.error('Failed to load data', error)
+      }
     }
     loadUserData()
   }, [userData])

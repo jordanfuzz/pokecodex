@@ -1,23 +1,23 @@
 import { useState, useEffect } from 'react'
 import './rules.scss'
 
+const defaultRules = {
+  gender: false,
+  'npc-trade': false,
+  'side-game': false,
+  regional: false,
+  variant: false,
+  special: false,
+  original: false,
+  shiny: false,
+}
+
 const Rules = ({ usersRules, updateUsersRules }) => {
   const [isEditMode, setIsEditMode] = useState(false)
-  const [ruleState, setRuleState] = useState(null)
+  const [ruleState, setRuleState] = useState(defaultRules)
 
   useEffect(() => {
-    if (!usersRules)
-      setRuleState({
-        gender: false,
-        'npc-trade': false,
-        'side-game': false,
-        regional: false,
-        variant: false,
-        special: false,
-        original: false,
-        shiny: false,
-      })
-    else setRuleState(usersRules)
+    if (usersRules) setRuleState({ ...defaultRules, ...usersRules })
   }, [usersRules])
 
   const handleEditButtonClick = () => {
@@ -45,7 +45,7 @@ const Rules = ({ usersRules, updateUsersRules }) => {
           id="gender"
           value="gender"
           onChange={e => handleRuleCheck(e)}
-          checked={ruleState && ruleState['gender']}
+          checked={!!ruleState['gender']}
         />
         <label className="rule-label" htmlFor="gender">
           Gender differences
@@ -58,7 +58,7 @@ const Rules = ({ usersRules, updateUsersRules }) => {
           id="npc-trade"
           value="npc-trade"
           onChange={e => handleRuleCheck(e)}
-          checked={ruleState && ruleState['npc-trade']}
+          checked={!!ruleState['npc-trade']}
         />
         <label htmlFor="npc-trade">In-game trades</label>
       </div>
@@ -69,7 +69,7 @@ const Rules = ({ usersRules, updateUsersRules }) => {
           id="side-game"
           value="side-game"
           onChange={e => handleRuleCheck(e)}
-          checked={ruleState && ruleState['side-game']}
+          checked={!!ruleState['side-game']}
         />
         <label htmlFor="side-game">Trades from side games</label>
       </div>
@@ -80,7 +80,7 @@ const Rules = ({ usersRules, updateUsersRules }) => {
           id="regional"
           value="regional"
           onChange={e => handleRuleCheck(e)}
-          checked={ruleState && ruleState['regional']}
+          checked={!!ruleState['regional']}
         />
         <label htmlFor="regional">Regional forms</label>
       </div>
@@ -91,7 +91,7 @@ const Rules = ({ usersRules, updateUsersRules }) => {
           id="variant"
           value="variant"
           onChange={e => handleRuleCheck(e)}
-          checked={ruleState && ruleState['variant']}
+          checked={!!ruleState['variant']}
         />
         <label htmlFor="variant">Variant forms</label>
       </div>
@@ -102,7 +102,7 @@ const Rules = ({ usersRules, updateUsersRules }) => {
           id="special"
           value="special"
           onChange={e => handleRuleCheck(e)}
-          checked={ruleState && ruleState['special']}
+          checked={!!ruleState['special']}
         />
         <label htmlFor="special">Unique sources</label>
       </div>
@@ -113,7 +113,7 @@ const Rules = ({ usersRules, updateUsersRules }) => {
           id="original"
           value="original"
           onChange={e => handleRuleCheck(e)}
-          checked={ruleState && ruleState['original']}
+          checked={!!ruleState['original']}
         />
         <label htmlFor="original">From original region</label>
       </div>
@@ -124,7 +124,7 @@ const Rules = ({ usersRules, updateUsersRules }) => {
           id="shiny"
           value="shiny"
           onChange={e => handleRuleCheck(e)}
-          checked={ruleState && ruleState['shiny']}
+          checked={!!ruleState['shiny']}
         />
         <label htmlFor="shiny">Shiny</label>
       </div>

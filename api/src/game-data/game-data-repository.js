@@ -6,5 +6,7 @@ export const getAllPokeballs = () => {
 }
 
 export const getAllGameVersions = () => {
-  return pgPool.query('select * from game_versions;').then(res => camelize(res.rows))
+  return pgPool
+    .query('select * from game_versions order by game_order;')
+    .then(res => camelize(res.rows))
 }

@@ -207,10 +207,12 @@ const SourcesList = props => {
       )
     })
 
+    const activeSourceIds = new Set(props.activePokemonSources.map(x => x.id))
+
     const achievedSources = sortSources(
       uniqBy(source => source.id, props.usersPokemonSources)
     )
-      .filter(x => !x.isInherited)
+      .filter(x => !x.isInherited && activeSourceIds.has(x.id))
       .map(source => (
         <span
           key={source.id}
@@ -377,7 +379,7 @@ const SourcesList = props => {
 
     return props.usersPokemon.map((pokemon, i) => {
       return (
-        <React.Fragment key={i}>
+        <React.Fragment key={pokemon.id}>
           <tr
             className={`pokemon-data-row hover-${props.activePokemon?.type1} ${
               openDrawerIndex === pokemon.id ? `active-${props.activePokemon?.type1}` : ''

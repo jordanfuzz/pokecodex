@@ -285,7 +285,7 @@ const Home = () => {
       : pokemonFilteredByGen
 
     return filteredPokemon.map((mon, i) => (
-      <React.Fragment key={i}>
+      <React.Fragment key={mon.id}>
         <tr
           className={`data-row hover-${mon.type1} ${
             openDrawerIndex === mon.id ? `active-${mon.type1}` : ''
