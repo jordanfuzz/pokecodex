@@ -157,6 +157,30 @@ const SourcesList = props => {
       return override.isRequired ? 'override-required' : 'override-excluded'
     }
 
+    const originalSource = props.activePokemonSources.find(x => x.source === 'original')
+    const nonOriginalSources = props.activePokemonSources.filter(
+      x => x.source !== 'original'
+    )
+    const homeRegionAchieved = Boolean(props.homeRegionCatchIds?.length)
+
+    const originalPill = originalSource ? (
+      <span
+        key={originalSource.id}
+        className={`${
+          homeRegionAchieved ? 'unlocked-source-pill' : 'locked-source-pill'
+        } ${overrideClass(originalSource)}`}
+        onClick={e => {
+          e.stopPropagation()
+          props.handleToggleSourceOverride(originalSource)
+        }}
+      >
+        {homeRegionAchieved ? (
+          <Check className="check-icon" color="white" size={25} strokeWidth={3.5} />
+        ) : null}
+        {originalSource.name}
+      </span>
+    ) : null
+
     const uniqueUsersSourceIds = uniq(props.usersPokemonSources.map(x => x.id))
 
     let rawUnachievedSources = []
@@ -164,11 +188,11 @@ const SourcesList = props => {
 
     if (!props.usersPokemonEvolutionSources?.length) {
       rawUnachievedSources = sortSources(
-        props.activePokemonSources.filter(x => !uniqueUsersSourceIds.includes(x.id))
+        nonOriginalSources.filter(x => !uniqueUsersSourceIds.includes(x.id))
       )
     } else {
       sortSources(
-        props.activePokemonSources.filter(x => !uniqueUsersSourceIds.includes(x.id))
+        nonOriginalSources.filter(x => !uniqueUsersSourceIds.includes(x.id))
       ).forEach(source => {
         if (props.usersPokemonEvolutionSources.some(x => x.id === source.id))
           rawEvolutionSources.push(source)
@@ -212,7 +236,7 @@ const SourcesList = props => {
     const achievedSources = sortSources(
       uniqBy(source => source.id, props.usersPokemonSources)
     )
-      .filter(x => !x.isInherited && activeSourceIds.has(x.id))
+      .filter(x => !x.isInherited && x.source !== 'original' && activeSourceIds.has(x.id))
       .map(source => (
         <span
           key={source.id}
@@ -227,7 +251,13 @@ const SourcesList = props => {
         </span>
       ))
 
-    return [achievedSources, evolutionAchievedSources, unachievedSources]
+    return [
+      achievedSources,
+      homeRegionAchieved ? originalPill : null,
+      evolutionAchievedSources,
+      unachievedSources,
+      homeRegionAchieved ? null : originalPill,
+    ]
   }
 
   const renderUsersPokemonDrawer = pokemon => {
@@ -373,6 +403,13 @@ const SourcesList = props => {
           {source.name}
         </span>
       ))
+
+      if (props.homeRegionCatchIds?.includes(pokemon.id))
+        nonInheritedTags.push(
+          <span key="home-region" className="catch-tag">
+            From home region
+          </span>
+        )
 
       return [...nonInheritedTags, ...inheritedTags]
     }

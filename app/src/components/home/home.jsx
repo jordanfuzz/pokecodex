@@ -265,6 +265,7 @@ const Home = () => {
             usersPokemonSources={catchData?.usersPokemonSources}
             usersPokemonEvolutionSources={catchData?.usersPokemonEvolutionSources}
             usersSourceOverrides={catchData?.usersSourceOverrides}
+            homeRegionCatchIds={catchData?.homeRegionCatchIds}
             handleToggleSourceOverride={handleToggleSourceOverride}
             handleUpdatePokemonNote={handleUpdatePokemonNote}
             handleUpdateUsersPokemon={handleUpdateUsersPokemon}
