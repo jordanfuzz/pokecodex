@@ -81,7 +81,9 @@ const Home = () => {
       const usersPokemonData = await axios.get(
         `/api/pokemon?pokemonId=${pokemonId}${genIdParameter}`
       )
-      if (!usersPokemonData.data) return
+      // Guard against a stale response: if the drawer moved on while this
+      // request was in flight, don't clobber the newer drawer's state.
+      if (!usersPokemonData.data || openDrawerIndexRef.current !== pokemonId) return
 
       setPokemonState(usersPokemonData.data)
     }
