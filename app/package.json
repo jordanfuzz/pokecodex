@@ -29,7 +29,7 @@
     "validator": "^13.15.35"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.7.0",
-    "vite": "^6.4.3"
+    "@vitejs/plugin-react": "^5.2.0",
+    "vite": "^7.3.6"
   }
 }
