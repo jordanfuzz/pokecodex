@@ -10,11 +10,7 @@ router.get('/sources', async (req, res) => {
 })
 
 router.post('/sources', async (req, res) => {
-  const sources = await addSourceForPokemon(
-    req.body.source,
-    req.body.pokemonId,
-    req.body.userId
-  )
+  const sources = await addSourceForPokemon(req.body.source, req.body.pokemonId, req.user.id)
   if (!sources) res.status(401).send({ message: 'User is not authorized to add sources' })
   else {
     const response = {
