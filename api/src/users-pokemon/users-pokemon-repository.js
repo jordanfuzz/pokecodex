@@ -18,7 +18,11 @@ export const updateNoteForUsersPokemon = noteData => {
   const { note, userId, pokemonId, usersPokemonId } = noteData
 
   return pgPool
-    .query(`update users_pokemon set notes = $1 where id = $2;`, [note, usersPokemonId])
+    .query(`update users_pokemon set notes = $1 where id = $2 and user_id = $3;`, [
+      note,
+      usersPokemonId,
+      userId,
+    ])
     .then(() => {
       return pgPool
         .query(selectQuery, [userId, pokemonId])
@@ -32,32 +36,34 @@ export const updateUsersPokemon = pokemonData => {
 
   return pgPool
     .query(
-      `update users_pokemon 
+      `update users_pokemon
       set pokeball = $1,
-      user_id = $2,
-      pokemon_id = $3,
-      game_id = $4,
-      caught_at = $5
-      where id = $6;`,
-      [pokeball, userId, pokemonId, gameVersion, caughtAt, usersPokemonId]
+      pokemon_id = $2,
+      game_id = $3,
+      caught_at = $4
+      where id = $5 and user_id = $6;`,
+      [pokeball, pokemonId, gameVersion, caughtAt, usersPokemonId, userId]
     )
-    .then(() => {
-      return pgPool.query(
-        `delete from users_pokemon_sources 
+    .then(result => {
+      // Ownership predicate failed: leave the row's sources untouched too.
+      if (result.rowCount === 0) return
+      return pgPool
+        .query(
+          `delete from users_pokemon_sources
       where users_pokemon_id = $1 and is_inherited = false;`,
-        [usersPokemonId]
-      )
-    })
-    .then(() => {
-      return Promise.all(
-        sources.map(sourceId => {
-          return pgPool.query(
-            `insert into users_pokemon_sources(id, users_pokemon_id, source_id)
+          [usersPokemonId]
+        )
+        .then(() => {
+          return Promise.all(
+            sources.map(sourceId => {
+              return pgPool.query(
+                `insert into users_pokemon_sources(id, users_pokemon_id, source_id)
           values($1, $2, $3);`,
-            [randomUUID(), usersPokemonId, sourceId]
+                [randomUUID(), usersPokemonId, sourceId]
+              )
+            })
           )
         })
-      )
     })
     .then(() => {
       return pgPool
@@ -201,11 +207,16 @@ export const deleteUsersPokemon = pokemonData => {
   const { userId, pokemonId, usersPokemonId } = pokemonData
 
   return pgPool
-    .query(`delete from users_pokemon_sources where users_pokemon_id = $1;`, [
-      usersPokemonId,
-    ])
+    .query(
+      `delete from users_pokemon_sources where users_pokemon_id in
+      (select id from users_pokemon where id = $1 and user_id = $2);`,
+      [usersPokemonId, userId]
+    )
     .then(() => {
-      return pgPool.query(`delete from users_pokemon where id = $1;`, [usersPokemonId])
+      return pgPool.query(
+        `delete from users_pokemon where id = $1 and user_id = $2;`,
+        [usersPokemonId, userId]
+      )
     })
     .then(() => {
       return pgPool
