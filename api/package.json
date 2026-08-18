@@ -12,7 +12,7 @@
   "scripts": {
     "start": "node ./src",
     "dev": "nodemon ./src",
-    "test": "mocha"
+    "test": "node --test test/*.test.js"
   },
   "dependencies": {
     "camelize": "^1.0.1",
@@ -25,7 +25,6 @@
     "pg": "^8.23.0"
   },
   "devDependencies": {
-    "mocha": "^11.8.0",
     "supertest": "^7.2.2"
   }
 }
