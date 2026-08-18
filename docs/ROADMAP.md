@@ -72,7 +72,8 @@ semi-automated? Output is a short feasibility doc informing phase 4's approach.
       instead of self-hosting — same rate-limit-free access, no stack to run
 - [x] Write up feasibility findings in `docs/`
       ([source-data-feasibility.md](source-data-feasibility.md))
-- [ ] Revisit agent skills at this point
+- [x] Revisit agent skills: deferred again — reconsider when phase 4 builds
+      the parse/review pipeline, where a repeatable workflow would exist
 
 ### Phase 2 — Audit-driven cleanup
 
