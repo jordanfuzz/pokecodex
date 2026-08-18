@@ -80,9 +80,10 @@ semi-automated? Output is a short feasibility doc informing phase 4's approach.
 The big lifts (Vite migration, Node/API dependency updates) were already done in
 January 2026. Remaining work is an audit, not a rewrite:
 
-- [ ] Verify build and tests pass on Windows
-- [ ] Sweep remaining outdated dependencies
-- [ ] One code-quality pass; findings go into [BACKLOG.md](BACKLOG.md)
+- [x] Verify build and tests pass on Windows
+- [x] Sweep remaining outdated dependencies (all majors taken: Express 5,
+      Vite 8, react-router 8, MUI 9, dotenv 17, lucide-react 1)
+- [x] One code-quality pass; findings went into [BACKLOG.md](BACKLOG.md)
 
 ### Phase 3 — Core issues and planned v1
 
