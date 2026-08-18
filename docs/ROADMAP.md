@@ -37,7 +37,7 @@ Nothing else touches data until this is done.
 - [x] Working local login: `GET /api/auth/dev-login` (development only) logs in
       as the most recently seen user, no Discord round-trip; real OAuth creds
       can still be used via `.env` when needed
-- [ ] Write `CLAUDE.md`: architecture, how to run, data model, the "source"
+- [x] Write `CLAUDE.md`: architecture, how to run, data model, the "source"
       concept, gotchas
 - [ ] Add a couple of key skills (run the app, query pokemon data)
 - [ ] Distill still-relevant material from `old-notes/` into `docs/`
