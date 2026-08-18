@@ -1,4 +1,3 @@
-import React from 'react'
 import Modal from 'react-modal'
 import { Routes, Route } from 'react-router'
 import Home from './components/home/home'

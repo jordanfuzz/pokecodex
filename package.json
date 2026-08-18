@@ -4,7 +4,6 @@
   "description": "A catch em all pokedex",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --config ./test/mocharc.yml",
     "start": "docker compose -f compose.dev.yml up -d --force-recreate",
     "stop": "docker compose -f compose.dev.yml down"
   },

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import './filters.scss'
 
 const filterRangesByGen = {
@@ -45,7 +45,7 @@ const Filters = ({
       return
     }
 
-    const versionData = gameVersions.find(([key, value]) => key === version)
+    const versionData = gameVersions.find(([key]) => key === version)
     if (!versionData || !versionData[1]) return
 
     const { limitedDex, generationId, dexLimit } = versionData[1]
@@ -87,7 +87,7 @@ const Filters = ({
         onChange={e => handleGameFilterChange(e.target.value)}
       >
         <option value={''}>All games</option>
-        {gameVersions?.map(([key, value], i) => (
+        {gameVersions?.map(([key], i) => (
           <option key={i} value={key}>
             {key}
           </option>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import './box-checklist.scss'
 
 import pokeball from '../../../media/pokeball.png'

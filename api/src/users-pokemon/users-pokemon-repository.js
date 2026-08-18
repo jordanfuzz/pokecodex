@@ -172,7 +172,7 @@ export const updateUsersBoxData = (completeRecords, userId, gameId) => {
 
   return pgPool
     .query(boxDataQuery, [JSON.stringify(completeRecords), userId, gameId])
-    .then(res => getBoxDataForUser(userId))
+    .then(() => getBoxDataForUser(userId))
 }
 
 export const setupBoxDataForUser = userId => {

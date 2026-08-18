@@ -17,7 +17,7 @@ import {
 import { formatGamesForFiltering } from './pokemon-utils.js'
 
 router.get('/all-pokemon', async (req, res) => {
-  if (!req.query.userId) res.status(400).send({ message: 'No userId provided' })
+  if (!req.query.userId) return res.status(400).send({ message: 'No userId provided' })
 
   const response = {
     pokemon: await getAllForUser(req.query.userId, req.query.generationId),
@@ -67,7 +67,7 @@ router.post('/pokemon', async (req, res) => {
 })
 
 router.get('/pokemon/box-data', async (req, res) => {
-  if (!req.query.userId) res.status(400).send({ message: 'No userId provided' })
+  if (!req.query.userId) return res.status(400).send({ message: 'No userId provided' })
 
   const response = {
     usersBoxData: await getBoxDataForUser(req.query.userId),
@@ -89,7 +89,7 @@ router.put('/pokemon/box-data', async (req, res) => {
 })
 
 router.post('/pokemon/box-data/setup', async (req, res) => {
-  if (!req.query.userId) res.status(400).send({ message: 'No userId provided' })
+  if (!req.query.userId) return res.status(400).send({ message: 'No userId provided' })
 
   const response = {
     usersBoxData: await setupBoxDataForUser(req.query.userId),

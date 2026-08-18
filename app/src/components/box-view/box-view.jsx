@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Link, Navigate } from 'react-router'
 import Box from './box/box'
@@ -217,7 +217,7 @@ const BoxView = () => {
   }
 
   const handleVersionChange = version => {
-    const versionData = gameData.find(([key, value]) => key === version)
+    const versionData = gameData.find(([key]) => key === version)
     setSelectedVersion(versionData[1])
   }
 
@@ -242,7 +242,7 @@ const BoxView = () => {
             onChange={e => handleVersionChange(e.target.value)}
             disabled={isChecklistEditMode}
           >
-            {gameData.map(([key, value], i) => (
+            {gameData.map(([key], i) => (
               <option key={i} value={key}>
                 {key}
               </option>
