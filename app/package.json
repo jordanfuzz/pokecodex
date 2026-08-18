@@ -6,7 +6,8 @@
   "scripts": {
     "start": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "dev:host": "vite"
   },
   "author": "jordan@cooperplanet.com",
   "license": "ISC",
