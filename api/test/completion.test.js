@@ -110,6 +110,20 @@ describe('buildRequiredSources', () => {
     assert.equal(required[0].caughtViaEvolution, false)
     assert.equal(checkCompletion(wildEvolved, required), false)
   })
+
+  it('two catches of one source in different games of the same gen yield one caughtInGens entry', () => {
+    const twoGames = {
+      ...unown,
+      usersSourcesByGen: [
+        { id: 'src-a', source: 'variant', name: 'A', gen: 2, gameId: 4 },
+        { id: 'src-a', source: 'variant', name: 'A', gen: 2, gameId: 5 },
+      ],
+    }
+    const required = buildRequiredSources(twoGames, ['variant'])
+    const entry = required.find(r => r.sourceId === 'src-a')
+    assert.equal(entry.caughtIn.length, 2)
+    assert.deepEqual(entry.caughtInGens, [2])
+  })
 })
 
 describe('checkCompletion', () => {

@@ -15,11 +15,16 @@ export const getUsersSourcesByGen = mon => {
       const { source: sourceType, name, gen } = source
       if (!sourceType || !name || !gen) return
       if (!usersSourcesByGen[sourceType]) usersSourcesByGen[sourceType] = []
+      // Raw rows are per-(source, game) since the query widened with game_id,
+      // so the same gen can appear more than once here (e.g. one source
+      // caught in two games of the same gen) — dedupe before pushing.
       if (repeatableSourceTypes.includes(sourceType)) {
         const index = usersSourcesByGen[sourceType].findIndex(x => x[0] === name)
         if (index === -1) usersSourcesByGen[sourceType].push([name, [Number(gen)]])
-        else usersSourcesByGen[sourceType][index][1].push(Number(gen))
-      } else usersSourcesByGen[sourceType].push(Number(gen))
+        else if (!usersSourcesByGen[sourceType][index][1].includes(Number(gen)))
+          usersSourcesByGen[sourceType][index][1].push(Number(gen))
+      } else if (!usersSourcesByGen[sourceType].includes(Number(gen)))
+        usersSourcesByGen[sourceType].push(Number(gen))
 
       if (!usersSourcesByGen.all.includes(Number(gen)))
         usersSourcesByGen.all.push(Number(gen))

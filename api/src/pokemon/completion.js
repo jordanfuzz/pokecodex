@@ -74,7 +74,7 @@ export const buildRequiredSources = (mon, neededRules, overrides = {}) => {
       firstGen: Number(row.firstGen),
       replaceDefault: Boolean(row.replaceDefault),
       caughtIn,
-      caughtInGens: caughtIn.map(c => c.gen),
+      caughtInGens: [...new Set(caughtIn.map(c => c.gen))],
       caughtViaEvolution:
         evolutionSatisfiableTypes.includes(row.type) && evolutionIds.has(row.id),
       isOverridden: override !== undefined,
