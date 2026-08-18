@@ -44,7 +44,8 @@ router.get('/pokemon', async (req, res) => {
 })
 
 router.post('/pokemon', async (req, res) => {
-  if (!req.body) res.status(400).send({ message: 'No data was sent to the server' })
+  if (!req.body)
+    return res.status(400).send({ message: 'No data was sent to the server' })
 
   // Resend the entire pokemon data anyway because it's less confusing on the frontend
   const response = {
@@ -76,7 +77,8 @@ router.get('/pokemon/box-data', async (req, res) => {
 })
 
 router.put('/pokemon/box-data', async (req, res) => {
-  if (!req.body) res.status(400).send({ message: 'No data was sent to the server' })
+  if (!req.body)
+    return res.status(400).send({ message: 'No data was sent to the server' })
   const { completeRecords, userId, gameId } = req.body
 
   const response = {
