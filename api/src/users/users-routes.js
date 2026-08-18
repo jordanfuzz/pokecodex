@@ -4,9 +4,6 @@ import { getRulesForUser, updateRulesForUser } from './users-repository.js'
 
 router.get('/user/rules', async (req, res) => {
   const rules = await getRulesForUser(req.user.id)
-
-  if (!rules)
-    return res.status(500).send({ message: 'An error occurred fetching rules for user' })
   res.status(200).send({ rules })
 })
 

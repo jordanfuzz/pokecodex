@@ -33,7 +33,7 @@ export const getAllForUser = (userId, generationId = null) => {
       .query(`select user_rules from users where id = $1;`, [userId])
       .then(rulesRes => {
         const pokemon = camelize(res.rows)
-        const rules = rulesRes.rows[0].user_rules
+        const rules = rulesRes.rows[0]?.user_rules ?? {}
         const neededRules = getNeededRules(rules)
 
         return pokemon.map(mon => {

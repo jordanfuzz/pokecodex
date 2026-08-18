@@ -42,11 +42,15 @@ const Home = () => {
   useEffect(() => {
     const loadUserData = async () => {
       if (!userData?.id) return
-      refreshPokemonList()
-      const rulesResponse = await axios.get('/api/user/rules')
-      setUsersRules(rulesResponse.data.rules)
-      const gameData = await axios.get('/api/game-data')
-      setGameVersions(gameData.data.gameVersions)
+      try {
+        refreshPokemonList()
+        const rulesResponse = await axios.get('/api/user/rules')
+        setUsersRules(rulesResponse.data.rules)
+        const gameData = await axios.get('/api/game-data')
+        setGameVersions(gameData.data.gameVersions)
+      } catch (error) {
+        console.error('Failed to load user data', error)
+      }
     }
     loadUserData()
   }, [userData])

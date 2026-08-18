@@ -6,8 +6,7 @@ import pgPool from '../pg-pool.js'
 export const getRulesForUser = userId => {
   return pgPool
     .query('select user_rules from users where id = $1;', [userId])
-    .then(res => res.rows[0].user_rules)
-    .catch(() => null)
+    .then(res => res.rows[0]?.user_rules ?? {})
 }
 
 // Do not camelize
