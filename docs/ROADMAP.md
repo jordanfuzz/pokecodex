@@ -6,10 +6,17 @@ historical reference only.
 
 ## Context and deadline
 
-Nintendo announced the shutdown of Pokemon Bank (closing **February 2027**). The
-app must be usable at least through **gen 7** before then, so all pokemon for
-the catch-em-all challenge can be tracked and moved to Pokemon Home in time.
-That makes phases 3–4 the critical path; everything from phase 5 onward is soft.
+Nintendo announced the shutdown of Pokemon Bank (closing **February 2027**).
+All pokemon for the catch-em-all challenge must be tracked and moved to Pokemon
+Home before then — and the *in-game collecting* is by far the slowest part of
+that. So the app and its gen 1–7 source data need to be done **well before**
+the deadline to leave maximum catching time; February is the finish line for
+the playthrough, not for the software. Phases 3–4 are the critical path;
+everything from phase 5 onward is soft.
+
+Related docs: [BACKLOG.md](BACKLOG.md) (triaged bugs/features),
+[domain.md](domain.md) (challenge rules and app domain model),
+[source-data.md](source-data.md) (source dataset status, phase 4's worklist).
 
 ## Key concept: a pokemon's "source"
 
@@ -39,9 +46,13 @@ Nothing else touches data until this is done.
       can still be used via `.env` when needed
 - [x] Write `CLAUDE.md`: architecture, how to run, data model, the "source"
       concept, gotchas
-- [ ] Add a couple of key skills (run the app, query pokemon data)
-- [ ] Distill still-relevant material from `old-notes/` into `docs/`
-- [ ] Delete `2026-project-recap.md` once its content is fully absorbed here
+- [ ] Decide whether any agent skills are worth adding now that docs are
+      consolidated (deferred; CLAUDE.md may be sufficient)
+- [x] Distill still-relevant material from `old-notes/` into `docs/`
+      (BACKLOG.md, domain.md, source-data.md; the limited-dex arrays note was
+      already absorbed into `game_versions.limited_dex`)
+- [ ] Delete `2026-project-recap.md` once Jordan confirms (kept untracked for
+      now)
 
 Deferred from this phase: autonomous agent loop orchestrator — revisit once
 there is a backlog of well-defined tasks for it.
@@ -68,30 +79,18 @@ January 2026. Remaining work is an audit, not a rewrite:
 
 - [ ] Verify build and tests pass on Windows
 - [ ] Sweep remaining outdated dependencies
-- [ ] One code-quality pass producing a prioritized fix list (appended here)
-
-Early findings parking lot (from phase 1 shakeout):
-
-- Unhandled promise rejection in the UI when the auth check 401s on the
-  logged-out landing page
-- React warning: a component switches an input from uncontrolled to controlled
+- [ ] One code-quality pass; findings go into [BACKLOG.md](BACKLOG.md)
 
 ### Phase 3 — Core issues and planned v1
 
-Known issues carried from the pre-hiatus state:
-
-- [ ] Source variants not counting toward "completion" of a row
-- [ ] Date picker not rendering — consider replacing the 3rd-party library with
-      an in-house solution
-- [ ] Personal source overrides: a user whose general rules exclude (e.g.)
-      shinies should be able to click a source pill on one pokemon's row to
-      require it for that row only
-- [ ] Re-triage the old project board for other v1 items
+Work the "Core v1 issues" section of [BACKLOG.md](BACKLOG.md), starting with a
+re-evaluation of v1 scope against the old MVP definition recorded there.
 
 ### Phase 4 — Source data for gens 1–7 (deadline-critical)
 
-Approach determined by the phase 1.5 spike. Finish gathering source data for
-all gen 1–7 pokemon.
+Approach determined by the phase 1.5 spike; full worklist in
+[source-data.md](source-data.md). Progressive rollout: finish source data one
+gen at a time and enable each gen in the app as its data completes.
 
 ### Phase 5 — Mobile responsive layout
 
