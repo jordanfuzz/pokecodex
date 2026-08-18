@@ -151,6 +151,12 @@ const SourcesList = props => {
       return staticSources.concat(sortedSources)
     }
 
+    const overrideClass = source => {
+      const override = props.usersSourceOverrides?.find(x => x.sourceId === source.id)
+      if (!override) return ''
+      return override.isRequired ? 'override-required' : 'override-excluded'
+    }
+
     const uniqueUsersSourceIds = uniq(props.usersPokemonSources.map(x => x.id))
 
     let rawUnachievedSources = []
@@ -170,17 +176,31 @@ const SourcesList = props => {
       })
     }
 
-    const unachievedSources = rawUnachievedSources.map((source, i) => {
+    const unachievedSources = rawUnachievedSources.map(source => {
       return (
-        <span key={`normal-${i}`} className="locked-source-pill">
+        <span
+          key={source.id}
+          className={`locked-source-pill ${overrideClass(source)}`}
+          onClick={e => {
+            e.stopPropagation()
+            props.handleToggleSourceOverride(source)
+          }}
+        >
           {source.name}
         </span>
       )
     })
 
-    const evolutionAchievedSources = rawEvolutionSources.map((source, i) => {
+    const evolutionAchievedSources = rawEvolutionSources.map(source => {
       return (
-        <span key={`evo-${i}`} className="unlocked-source-pill">
+        <span
+          key={source.id}
+          className={`unlocked-source-pill ${overrideClass(source)}`}
+          onClick={e => {
+            e.stopPropagation()
+            props.handleToggleSourceOverride(source)
+          }}
+        >
           <ArrowBigUpDash className="evolve-icon" color="white" size={30} />
           {source.name}
         </span>
@@ -191,8 +211,15 @@ const SourcesList = props => {
       uniqBy(source => source.id, props.usersPokemonSources)
     )
       .filter(x => !x.isInherited)
-      .map((source, i) => (
-        <span key={`achieved-${i}`} className="unlocked-source-pill">
+      .map(source => (
+        <span
+          key={source.id}
+          className={`unlocked-source-pill ${overrideClass(source)}`}
+          onClick={e => {
+            e.stopPropagation()
+            props.handleToggleSourceOverride(source)
+          }}
+        >
           <Check className="check-icon" color="white" size={25} strokeWidth={3.5} />
           {source.name}
         </span>

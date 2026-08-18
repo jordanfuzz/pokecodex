@@ -85,6 +85,7 @@ const Home = () => {
       pokeballs,
       gameVersions,
       usersPokemonEvolutionSources,
+      usersSourceOverrides,
     } = usersPokemonData
 
     setActivePokemonSources(sources)
@@ -94,7 +95,32 @@ const Home = () => {
       pokeballs,
       gameVersions,
       usersPokemonEvolutionSources,
+      usersSourceOverrides,
     })
+  }
+
+  const typeRequiredByRules = type => {
+    if (type === 'male' || type === 'female') return Boolean(usersRules?.gender)
+    return Boolean(usersRules?.[type])
+  }
+
+  const handleToggleSourceOverride = async source => {
+    const existing = catchData?.usersSourceOverrides?.find(x => x.sourceId === source.id)
+    if (existing) {
+      await axios.delete(`/api/user/source-override/${source.id}`)
+    } else {
+      await axios.put('/api/user/source-override', {
+        sourceId: source.id,
+        isRequired: !typeRequiredByRules(source.source),
+      })
+    }
+    // Refresh both the open drawer and the list checkboxes.
+    const genIdParameter = gameGenForFiltering ? `&generationId=${gameGenForFiltering}` : ''
+    const usersPokemonData = await axios.get(
+      `/api/pokemon?pokemonId=${openDrawerIndex}${genIdParameter}`
+    )
+    if (usersPokemonData.data) setPokemonState(usersPokemonData.data)
+    refreshPokemonList()
   }
 
   const refreshPokemonList = async () => {
@@ -210,6 +236,8 @@ const Home = () => {
             catchData={catchData}
             usersPokemonSources={catchData?.usersPokemonSources}
             usersPokemonEvolutionSources={catchData?.usersPokemonEvolutionSources}
+            usersSourceOverrides={catchData?.usersSourceOverrides}
+            handleToggleSourceOverride={handleToggleSourceOverride}
             handleUpdatePokemonNote={handleUpdatePokemonNote}
             handleUpdateUsersPokemon={handleUpdateUsersPokemon}
             handleDeleteUsersPokemon={handleDeleteUsersPokemon}
