@@ -12,7 +12,7 @@
   "scripts": {
     "start": "node ./src",
     "dev": "nodemon ./src",
-    "test": "node --test test/*.test.js"
+    "test": "node --test --test-concurrency=1 test/*.test.js"
   },
   "dependencies": {
     "camelize": "^1.0.1",

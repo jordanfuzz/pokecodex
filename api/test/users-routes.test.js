@@ -14,9 +14,10 @@ describe('GET /api/user/rules for a user with no rules', () => {
     const saved = await pgPool
       .query('select user_rules from users where id = $1;', [me.body.id])
       .then(r => r.rows[0].user_rules)
-    await pgPool.query('update users set user_rules = null where id = $1;', [me.body.id])
 
     try {
+      await pgPool.query('update users set user_rules = null where id = $1;', [me.body.id])
+
       const res = await agent.get('/api/user/rules')
       assert.equal(res.status, 200)
       assert.deepEqual(res.body.rules, {})

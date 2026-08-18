@@ -41,34 +41,43 @@ describe('data routes with a session', () => {
     assert.ok(res.body.rules !== undefined)
   })
 
-  it('GET /api/all-pokemon ignores a client-supplied userId and uses the session user', async () => {
+  it('a client-supplied userId is ignored on a write — the row lands under the session user', async () => {
     const agent = await loginAgent(app)
     const me = await agent.get('/api/auth/login')
     assert.equal(me.status, 200)
     const sessionUserId = me.body.id
 
-    const other = await pgPool.query('select id from users where id <> $1 limit 1;', [
-      sessionUserId,
-    ])
+    const other = await pgPool.query(
+      'select id from users where id <> $1 order by id limit 1;',
+      [sessionUserId]
+    )
     const otherUserId = other.rows[0]
       ? other.rows[0].id
       : '00000000-0000-0000-0000-000000000000'
 
-    // Fired concurrently (not sequentially) so both land in the same instant
-    // of shared fixture-user state — other test files mutate that user's
-    // rules transiently, and a sequential await gap between these two calls
-    // is wide enough to straddle one of those mutations.
-    const [baseline, res] = await Promise.all([
-      agent.get('/api/all-pokemon'),
-      agent.get('/api/all-pokemon').query({ userId: otherUserId }),
-    ])
-    assert.equal(baseline.status, 200)
-    assert.equal(res.status, 200)
+    const source = await pgPool.query('select id from sources order by id limit 1;')
+    const sourceId = source.rows[0].id
 
-    assert.equal(res.body.pokemon.length, baseline.body.pokemon.length)
-    assert.deepEqual(
-      res.body.pokemon.slice(0, 50).map(p => p.isComplete),
-      baseline.body.pokemon.slice(0, 50).map(p => p.isComplete)
-    )
+    try {
+      const res = await agent
+        .put('/api/user/source-override')
+        .query({ userId: otherUserId })
+        .send({ sourceId, isRequired: true })
+      assert.equal(res.status, 200)
+
+      const override = await pgPool.query(
+        'select user_id from users_source_overrides where source_id = $1;',
+        [sourceId]
+      )
+      assert.equal(override.rows.length, 1)
+      // The query-string userId was ignored — the write landed under the
+      // session user, not the other user id supplied on the request.
+      assert.equal(override.rows[0].user_id, sessionUserId)
+    } finally {
+      await pgPool.query(
+        'delete from users_source_overrides where user_id = $1 and source_id = $2;',
+        [sessionUserId, sourceId]
+      )
+    }
   })
 })
