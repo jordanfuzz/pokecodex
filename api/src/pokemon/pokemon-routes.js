@@ -15,6 +15,7 @@ import {
   getEvolutionSourcesForPokemon,
 } from '../sources/sources-repository.js'
 import { formatGamesForFiltering } from './pokemon-utils.js'
+import { getSourceOverridesForUserAndPokemon } from '../users/source-overrides-repository.js'
 
 router.get('/all-pokemon', async (req, res) => {
   const response = {
@@ -30,6 +31,10 @@ router.get('/pokemon', async (req, res) => {
     usersPokemon: await getAllForUserAndPokemon(userId, req.query.pokemonId),
     usersPokemonSources: await getUsersPokemonSources(userId, req.query.pokemonId),
     usersPokemonEvolutionSources: await getEvolutionSourcesForPokemon(
+      userId,
+      req.query.pokemonId
+    ),
+    usersSourceOverrides: await getSourceOverridesForUserAndPokemon(
       userId,
       req.query.pokemonId
     ),

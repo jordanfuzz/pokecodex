@@ -2,6 +2,7 @@ import pgPool from '../pg-pool.js'
 import camelize from 'camelize'
 import { getUsersSourcesByGen, getSourcesByType, getNeededRules } from './pokemon-utils.js'
 import { buildRequiredSources, checkCompletion } from './completion.js'
+import { getSourceOverridesForUser } from '../users/source-overrides-repository.js'
 
 const pokemonWithSourcesQuery = `
 select p.id, p."name", p.type1, p.type2, p.icon, p.default_image, p.bulbapedia_link, p.has_gender_differences, p.original_gen, p.evolves_to,
@@ -24,16 +25,17 @@ group by p.id, p."name", p.type1, p.type2, p.icon, p.default_image, p.bulbapedia
 order by p.id;`
 
 export const getAllForUser = async (userId, generationId = null) => {
-  const [pokemonRes, rulesRes] = await Promise.all([
+  const [pokemonRes, rulesRes, overrides] = await Promise.all([
     pgPool.query(pokemonWithSourcesQuery, [userId, generationId]),
     pgPool.query(`select user_rules from users where id = $1;`, [userId]),
+    getSourceOverridesForUser(userId),
   ])
   const pokemon = camelize(pokemonRes.rows)
   const rules = rulesRes.rows[0]?.user_rules ?? {}
   const neededRules = getNeededRules(rules)
 
   return pokemon.map(mon => {
-    const requiredSources = buildRequiredSources(mon, neededRules)
+    const requiredSources = buildRequiredSources(mon, neededRules, overrides)
     const isComplete = checkCompletion(mon, requiredSources)
     const [sourcesByType, imagesBySource] = getSourcesByType(mon)
     const usersSourcesByGen = getUsersSourcesByGen(mon)
