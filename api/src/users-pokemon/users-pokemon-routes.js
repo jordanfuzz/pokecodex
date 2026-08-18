@@ -15,7 +15,7 @@ import {
 
 router.get('/users-pokemon', async (req, res) => {
   const response = {
-    usersPokemon: await getAllForUserAndPokemon(req.query.userId, req.query.pokemonId),
+    usersPokemon: await getAllForUserAndPokemon(req.user.id, req.query.pokemonId),
     pokeballs: await getAllPokeballs(),
     gameVersions: await getAllGameVersions(),
   }
@@ -23,14 +23,12 @@ router.get('/users-pokemon', async (req, res) => {
 })
 
 router.put('/users-pokemon', async (req, res) => {
+  const userId = req.user.id
   const response = {
-    usersPokemon: await updateUsersPokemon(req.body),
-    usersPokemonSources: await getUsersPokemonSources(
-      req.body.userId,
-      req.body.pokemonId
-    ),
+    usersPokemon: await updateUsersPokemon({ ...req.body, userId }),
+    usersPokemonSources: await getUsersPokemonSources(userId, req.body.pokemonId),
     usersPokemonEvolutionSources: await getEvolutionSourcesForPokemon(
-      req.body.userId,
+      userId,
       req.body.pokemonId
     ),
   }
@@ -38,14 +36,12 @@ router.put('/users-pokemon', async (req, res) => {
 })
 
 router.delete('/users-pokemon', async (req, res) => {
+  const userId = req.user.id
   const response = {
-    usersPokemon: await deleteUsersPokemon(req.body),
-    usersPokemonSources: await getUsersPokemonSources(
-      req.body.userId,
-      req.body.pokemonId
-    ),
+    usersPokemon: await deleteUsersPokemon({ ...req.body, userId }),
+    usersPokemonSources: await getUsersPokemonSources(userId, req.body.pokemonId),
     usersPokemonEvolutionSources: await getEvolutionSourcesForPokemon(
-      req.body.userId,
+      userId,
       req.body.pokemonId
     ),
   }
@@ -53,21 +49,23 @@ router.delete('/users-pokemon', async (req, res) => {
 })
 
 router.put('/users-pokemon/note', async (req, res) => {
+  const userId = req.user.id
   const response = {
-    usersPokemon: await updateNoteForUsersPokemon(req.body),
+    usersPokemon: await updateNoteForUsersPokemon({ ...req.body, userId }),
   }
   res.status(200).send(response)
 })
 
 router.put('/users-pokemon/evolve', async (req, res) => {
+  const userId = req.user.id
   const response = {
-    usersPokemon: await evolveUsersPokemon(req.body),
+    usersPokemon: await evolveUsersPokemon({ ...req.body, userId }),
     usersPokemonSources: await getUsersPokemonSources(
-      req.body.userId,
+      userId,
       req.body.oldPokemonData.pokemonId
     ),
     usersPokemonEvolutionSources: await getEvolutionSourcesForPokemon(
-      req.body.userId,
+      userId,
       req.body.oldPokemonData.pokemonId
     ),
   }

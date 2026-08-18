@@ -16,6 +16,7 @@ const Login = () => {
       .then(res => {
         if (res.data?.id) setUserData(res.data)
       })
+      .catch(() => {}) // logged out is the expected state here
   }, [])
 
   const isLoggedIn = userData?.id

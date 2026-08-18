@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
 import { Link, Navigate } from 'react-router'
 import './home.scss'
@@ -16,6 +16,10 @@ const Home = () => {
   const [usersRules, setUsersRules] = useState(null)
   const [catchData, setCatchData] = useState(null)
   const [openDrawerIndex, setOpenDrawerIndex] = useState(null)
+  // Mirrors openDrawerIndex for use inside async handlers, where a captured
+  // closure value would go stale if the drawer changes while a request is
+  // in flight. Kept in sync everywhere setOpenDrawerIndex is called.
+  const openDrawerIndexRef = useRef(null)
   const [drawerMode, setDrawerMode] = useState('sources')
   const [shouldRedirect, setShouldRedirect] = useState(false)
   const [filterRange, setFilterRange] = useState(null)
@@ -42,11 +46,15 @@ const Home = () => {
   useEffect(() => {
     const loadUserData = async () => {
       if (!userData?.id) return
-      refreshPokemonList()
-      const rulesResponse = await axios.get(`/api/user/rules?userId=${userData.id}`)
-      setUsersRules(rulesResponse.data.rules)
-      const gameData = await axios.get('/api/game-data')
-      setGameVersions(gameData.data.gameVersions)
+      try {
+        refreshPokemonList()
+        const rulesResponse = await axios.get('/api/user/rules')
+        setUsersRules(rulesResponse.data.rules)
+        const gameData = await axios.get('/api/game-data')
+        setGameVersions(gameData.data.gameVersions)
+      } catch (error) {
+        console.error('Failed to load user data', error)
+      }
     }
     loadUserData()
   }, [userData])
@@ -57,14 +65,17 @@ const Home = () => {
   }, [gameGenForFiltering])
 
   const handleOpenDrawer = async pokemonId => {
-    if (openDrawerIndex === pokemonId) setOpenDrawerIndex(null)
-    else {
+    if (openDrawerIndex === pokemonId) {
+      openDrawerIndexRef.current = null
+      setOpenDrawerIndex(null)
+    } else {
+      openDrawerIndexRef.current = pokemonId
       setOpenDrawerIndex(pokemonId)
       const genIdParameter = gameGenForFiltering
         ? `&generationId=${gameGenForFiltering}`
         : ''
       const usersPokemonData = await axios.get(
-        `/api/pokemon?userId=${userData.id}&pokemonId=${pokemonId}${genIdParameter}`
+        `/api/pokemon?pokemonId=${pokemonId}${genIdParameter}`
       )
       if (!usersPokemonData.data) return
 
@@ -81,6 +92,7 @@ const Home = () => {
       pokeballs,
       gameVersions,
       usersPokemonEvolutionSources,
+      usersSourceOverrides,
     } = usersPokemonData
 
     setActivePokemonSources(sources)
@@ -90,16 +102,54 @@ const Home = () => {
       pokeballs,
       gameVersions,
       usersPokemonEvolutionSources,
+      usersSourceOverrides,
     })
+  }
+
+  const typeRequiredByRules = type => {
+    if (type === 'male' || type === 'female') return Boolean(usersRules?.gender)
+    return Boolean(usersRules?.[type])
+  }
+
+  const handleToggleSourceOverride = async source => {
+    const pokemonId = openDrawerIndex
+    try {
+      const existing = catchData?.usersSourceOverrides?.find(
+        x => x.sourceId === source.id
+      )
+      if (existing) {
+        await axios.delete(`/api/user/source-override/${source.id}`)
+      } else {
+        await axios.put('/api/user/source-override', {
+          sourceId: source.id,
+          isRequired: !typeRequiredByRules(source.source),
+        })
+      }
+      // Refresh both the open drawer and the list checkboxes.
+      const genIdParameter = gameGenForFiltering
+        ? `&generationId=${gameGenForFiltering}`
+        : ''
+      const usersPokemonData = await axios.get(
+        `/api/pokemon?pokemonId=${pokemonId}${genIdParameter}`
+      )
+      // Guard against a stale response: if the drawer moved on (or closed)
+      // while this request was in flight, don't clobber the now-active
+      // drawer's state with data for the pokemon that was open when the
+      // request started.
+      if (usersPokemonData.data && openDrawerIndexRef.current === pokemonId) {
+        setPokemonState(usersPokemonData.data)
+      }
+      refreshPokemonList()
+    } catch (error) {
+      console.error('Failed to toggle source override', error)
+    }
   }
 
   const refreshPokemonList = async () => {
     const genIdParameter = gameGenForFiltering
-      ? `&generationId=${gameGenForFiltering}`
+      ? `?generationId=${gameGenForFiltering}`
       : ''
-    const newPokemonResults = await axios.get(
-      `/api/all-pokemon?userId=${userData?.id}${genIdParameter}`
-    )
+    const newPokemonResults = await axios.get(`/api/all-pokemon${genIdParameter}`)
     setPokemon(newPokemonResults.data.pokemon)
   }
 
@@ -107,7 +157,6 @@ const Home = () => {
     setDrawerMode('sources')
     const newPokemonData = {
       ...pokemonData,
-      userId: userData?.id,
       generationId: gameGenForFiltering,
     }
 
@@ -119,19 +168,14 @@ const Home = () => {
   }
 
   const handleUpdatePokemonNote = async noteData => {
-    const newNoteData = { ...noteData, userId: userData.id }
-    const usersPokemonData = await axios.put('/api/users-pokemon/note', newNoteData)
+    const usersPokemonData = await axios.put('/api/users-pokemon/note', noteData)
     if (!usersPokemonData) return
 
     setUsersPokemon(usersPokemonData.data?.usersPokemon)
   }
 
   const handleUpdateUsersPokemon = async pokemonData => {
-    const newPokemonData = {
-      ...pokemonData,
-      userId: userData.id,
-    }
-    const usersPokemonData = await axios.put('/api/users-pokemon', newPokemonData)
+    const usersPokemonData = await axios.put('/api/users-pokemon', pokemonData)
     if (!usersPokemonData) return
 
     setUsersPokemon(usersPokemonData.data?.usersPokemon)
@@ -144,7 +188,6 @@ const Home = () => {
 
   const handleEvolvePokemon = async (oldPokemonData, evolvedPokemonId) => {
     const newPokemonData = {
-      userId: userData.id,
       evolvedPokemonId,
       oldPokemonData,
     }
@@ -161,12 +204,8 @@ const Home = () => {
   }
 
   const handleDeleteUsersPokemon = async pokemonData => {
-    const newPokemonData = {
-      ...pokemonData,
-      userId: userData.id,
-    }
     const usersPokemonData = await axios.delete('/api/users-pokemon', {
-      data: newPokemonData,
+      data: pokemonData,
     })
     if (!usersPokemonData) return
 
@@ -182,7 +221,6 @@ const Home = () => {
   const handleUpdateUsersRules = async newRules => {
     const newRulesData = {
       rules: newRules,
-      userId: userData.id,
     }
     const usersRulesData = await axios.put('/api/user/rules', newRulesData)
     setUsersRules(usersRulesData.data?.rules)
@@ -214,6 +252,8 @@ const Home = () => {
             catchData={catchData}
             usersPokemonSources={catchData?.usersPokemonSources}
             usersPokemonEvolutionSources={catchData?.usersPokemonEvolutionSources}
+            usersSourceOverrides={catchData?.usersSourceOverrides}
+            handleToggleSourceOverride={handleToggleSourceOverride}
             handleUpdatePokemonNote={handleUpdatePokemonNote}
             handleUpdateUsersPokemon={handleUpdateUsersPokemon}
             handleDeleteUsersPokemon={handleDeleteUsersPokemon}
@@ -260,8 +300,8 @@ const Home = () => {
       ? pokemonFilteredByGen.filter(x => !x.isComplete)
       : pokemonFilteredByGen
 
-    return filteredPokemon.map((mon, i) => (
-      <React.Fragment key={i}>
+    return filteredPokemon.map(mon => (
+      <React.Fragment key={mon.id}>
         <tr
           className={`data-row hover-${mon.type1} ${
             openDrawerIndex === mon.id ? `active-${mon.type1}` : ''

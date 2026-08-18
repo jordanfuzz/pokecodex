@@ -9,14 +9,15 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: Number(process.env.UI_PORT) || 3000,
+    watch: { usePolling: true },
     proxy: {
       '/api': {
         target: process.env.API_PROXY_TARGET || 'http://api:3003',
         changeOrigin: true,
-      }
-    }
+      },
+    },
   },
   build: {
-    outDir: 'build'
-  }
+    outDir: 'build',
+  },
 })

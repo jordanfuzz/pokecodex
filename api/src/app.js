@@ -45,12 +45,24 @@ app.use((req, res, next) => {
 app.use(cookieParser())
 app.use(passport.initialize())
 app.use(passport.session())
+
+const authCheck = (req, res, next) => {
+  if (!req.user) {
+    res.status(401).json({
+      authenticated: false,
+      message: 'User has not been authenticated',
+    })
+  } else {
+    next()
+  }
+}
+
 app.use('/api/auth', authRouter)
-app.use('/api', gameDataRouter)
-app.use('/api', pokemonRouter)
-app.use('/api', usersPokemonRouter)
-app.use('/api', sourcesRouter)
-app.use('/api', usersRouter)
+app.use('/api', authCheck, gameDataRouter)
+app.use('/api', authCheck, pokemonRouter)
+app.use('/api', authCheck, usersPokemonRouter)
+app.use('/api', authCheck, sourcesRouter)
+app.use('/api', authCheck, usersRouter)
 
 passport.serializeUser((user, done) => {
   done(null, user.id)
@@ -89,17 +101,6 @@ passport.use(
     }
   )
 )
-
-const authCheck = (req, res, next) => {
-  if (!req.user) {
-    res.status(401).json({
-      authenticated: false,
-      message: 'User has not been authenticated',
-    })
-  } else {
-    next()
-  }
-}
 
 app.get('/', authCheck, (req, res) => {
   res.status(200).send('Hello world!')

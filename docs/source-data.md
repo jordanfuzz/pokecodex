@@ -52,6 +52,9 @@ catching that follows is the slow part).
 - [ ] What to do with Mew — add an Event or Mystery Gift source type?
 - [ ] Odd Egg: hard to get for all possible pokemon; currently typed `gift`
 - [ ] HOME Pikachu is parked at gen 8 because "Home" isn't a gen option
+- [ ] Kingambit (983), Annihilape (979), Ursaluna (901) have no 'evolved'
+      source row — evolving into them yields no Evolved tag (found 2026-08,
+      phase 3)
 
 ## Open decisions
 

@@ -1,19 +1,20 @@
 import pgPool from '../pg-pool.js'
 import camelize from 'camelize'
 import {
-  checkIfUserHasCompletedRecord,
   getUsersSourcesByGen,
   getSourcesByType,
   getNeededRules,
 } from './pokemon-utils.js'
+import { buildRequiredSources, checkCompletion } from './completion.js'
+import { getSourceOverridesForUser } from '../users/source-overrides-repository.js'
 
 const pokemonWithSourcesQuery = `
 select p.id, p."name", p.type1, p.type2, p.icon, p.default_image, p.bulbapedia_link, p.has_gender_differences, p.original_gen, p.evolves_to,
-json_agg(distinct(s.source)) users_sources, 
+json_agg(distinct(s.source)) users_sources,
 json_agg(distinct(s2.source)) sources,
-json_agg(distinct(s3.source)) users_evolution_sources,
-json_agg(distinct(jsonb_build_object('type', s2.source, 'name', s2.name, 'image', s2.image, 'replace_default', s2.replace_default, 'first_gen', s2.gen))) sources_by_type,
-json_agg(distinct(jsonb_build_object('source', s.source, 'name', s.name, 'gen', gv.generation_id))) users_sources_by_gen
+json_agg(distinct(s3.id)) users_evolution_source_ids,
+json_agg(distinct(jsonb_build_object('id', s2.id, 'type', s2.source, 'name', s2.name, 'image', s2.image, 'replace_default', s2.replace_default, 'first_gen', s2.gen))) sources_by_type,
+json_agg(distinct(jsonb_build_object('id', s.id, 'source', s.source, 'name', s.name, 'gen', gv.generation_id))) users_sources_by_gen
 from pokemon p
 left join pokemon evolution on evolution.id = ANY(p.evolves_to)
 left join users_pokemon up on up.pokemon_id = p.id and up.user_id = $1
@@ -27,28 +28,28 @@ left join game_versions gv on gv.id = up.game_id
 group by p.id, p."name", p.type1, p.type2, p.icon, p.default_image, p.bulbapedia_link, p.has_gender_differences, p.original_gen
 order by p.id;`
 
-export const getAllForUser = (userId, generationId = null) => {
-  return pgPool.query(pokemonWithSourcesQuery, [userId, generationId]).then(res =>
-    pgPool
-      .query(`select user_rules from users where id = $1;`, [userId])
-      .then(rulesRes => {
-        const pokemon = camelize(res.rows)
-        const rules = rulesRes.rows[0].user_rules
-        const neededRules = getNeededRules(rules)
+export const getAllForUser = async (userId, generationId = null) => {
+  const [pokemonRes, rulesRes, overrides] = await Promise.all([
+    pgPool.query(pokemonWithSourcesQuery, [userId, generationId]),
+    pgPool.query(`select user_rules from users where id = $1;`, [userId]),
+    getSourceOverridesForUser(userId),
+  ])
+  const pokemon = camelize(pokemonRes.rows)
+  const rules = rulesRes.rows[0]?.user_rules ?? {}
+  const neededRules = getNeededRules(rules)
 
-        return pokemon.map(mon => {
-          // TODO: might need to change this to userHasCompletedRecordByGen
-          const userHasCompletedRecord = checkIfUserHasCompletedRecord(mon, neededRules)
-          const [sourcesByType, imagesBySource] = getSourcesByType(mon)
-          const usersSourcesByGen = getUsersSourcesByGen(mon)
+  return pokemon.map(mon => {
+    const requiredSources = buildRequiredSources(mon, neededRules, overrides)
+    const isComplete = checkCompletion(mon, requiredSources)
+    const [sourcesByType, imagesBySource] = getSourcesByType(mon)
+    const usersSourcesByGen = getUsersSourcesByGen(mon)
 
-          return Object.assign({}, mon, {
-            isComplete: userHasCompletedRecord,
-            sourcesByType,
-            usersSourcesByGen,
-            imagesBySource,
-          })
-        })
-      })
-  )
+    return Object.assign({}, mon, {
+      isComplete,
+      requiredSources,
+      sourcesByType,
+      usersSourcesByGen,
+      imagesBySource,
+    })
+  })
 }

@@ -36,8 +36,12 @@ const Sources = () => {
   useEffect(() => {
     const loadPokemon = async () => {
       if (!userData?.id) return
-      const response = await axios.get(`/api/all-pokemon?userId=${userData?.id}`)
-      setPokemon(response.data.pokemon)
+      try {
+        const response = await axios.get('/api/all-pokemon')
+        setPokemon(response.data.pokemon)
+      } catch (error) {
+        console.error('Failed to load data', error)
+      }
     }
     loadPokemon()
   }, [userData])
@@ -79,15 +83,14 @@ const Sources = () => {
     const response = await axios.post('/api/sources', {
       source: sourceData,
       pokemonId: activePokemon.id,
-      userId: userData.id,
     })
     setPokemonSources(response.data.sources)
     setIsEditMode(false)
   }
 
   const renderSourceRows = () => {
-    return pokemonSources.map((source, i) => (
-      <tr className={`source-data-row hover-${activePokemon.type1}`} key={i}>
+    return pokemonSources.map(source => (
+      <tr className={`source-data-row hover-${activePokemon.type1}`} key={source.id}>
         <td>
           {source.image ? <img src={source.image} className="source-image" /> : 'X'}
         </td>

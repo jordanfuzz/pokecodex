@@ -96,47 +96,105 @@ export const addPokemonForUser = pokemonData => {
     })
 }
 
-export const evolveUsersPokemon = pokemonData => {
+export const evolveUsersPokemon = async pokemonData => {
   const { userId, evolvedPokemonId, oldPokemonData } = pokemonData
-  const { pokeball, gameId, caughtAt, id: usersPokemonId, pokemonId } = oldPokemonData
+  const {
+    pokeball,
+    gameId,
+    caughtAt,
+    id: usersPokemonId,
+    pokemonId,
+    notes,
+  } = oldPokemonData
 
   const evolvedUsersPokemonId = randomUUID()
+  const client = await pgPool.connect()
 
-  return pgPool
-    .query(
-      `insert into users_pokemon (id, user_id, pokemon_id, game_id, pokeball, caught_at)
-    values($1, $2, $3, $4, $5, $6)
-    returning *;`,
-      [evolvedUsersPokemonId, userId, evolvedPokemonId, gameId, pokeball, caughtAt]
+  try {
+    await client.query('BEGIN')
+
+    await client.query(
+      `insert into users_pokemon (id, user_id, pokemon_id, notes, game_id, pokeball, caught_at)
+      values($1, $2, $3, $4, $5, $6, $7);`,
+      [
+        evolvedUsersPokemonId,
+        userId,
+        evolvedPokemonId,
+        notes ?? null,
+        gameId,
+        pokeball,
+        caughtAt,
+      ]
     )
-    .then(async () => {
-      await pgPool.query(
-        `update users_pokemon_sources
-            set users_pokemon_id = $1, is_inherited = true
-            where users_pokemon_id = $2;`,
-        [evolvedUsersPokemonId, usersPokemonId]
+
+    // Never inherit an old 'evolved' source (prevents double evolved tags).
+    await client.query(
+      `delete from users_pokemon_sources
+      where users_pokemon_id = $1
+      and source_id in (select id from sources where source = 'evolved');`,
+      [usersPokemonId]
+    )
+
+    // A shiny base evolves into a shiny evolution: swap the base's shiny link
+    // for the evolved pokemon's own shiny source, non-inherited.
+    const baseShinyLink = await client
+      .query(
+        `select ups.id from users_pokemon_sources ups
+        join sources s on s.id = ups.source_id
+        where ups.users_pokemon_id = $1 and s.source = 'shiny';`,
+        [usersPokemonId]
       )
+      .then(res => res.rows[0])
 
-      await pgPool.query(`delete from users_pokemon where id = $1;`, [usersPokemonId])
-
-      const evolutionSourceId = await pgPool
-        .query("select id from sources where source = 'evolved' and pokemon_id = $1;", [
+    if (baseShinyLink) {
+      const evolvedShinyId = await client
+        .query(`select id from sources where source = 'shiny' and pokemon_id = $1;`, [
           evolvedPokemonId,
         ])
-        .then(res => res.rows[0].id)
+        .then(res => res.rows[0]?.id)
 
-      const evolutionUsersPokemonSourcesId = randomUUID()
+      await client.query(`delete from users_pokemon_sources where id = $1;`, [
+        baseShinyLink.id,
+      ])
+      if (evolvedShinyId)
+        await client.query(
+          `insert into users_pokemon_sources(id, users_pokemon_id, source_id)
+          values($1, $2, $3);`,
+          [randomUUID(), evolvedUsersPokemonId, evolvedShinyId]
+        )
+    }
 
-      return await pgPool.query(
-        'insert into users_pokemon_sources(id, users_pokemon_id, source_id) values($1, $2, $3);',
-        [evolutionUsersPokemonSourcesId, evolvedUsersPokemonId, evolutionSourceId]
+    // Everything else moves to the evolution as inherited.
+    await client.query(
+      `update users_pokemon_sources
+      set users_pokemon_id = $1, is_inherited = true
+      where users_pokemon_id = $2;`,
+      [evolvedUsersPokemonId, usersPokemonId]
+    )
+
+    await client.query(`delete from users_pokemon where id = $1;`, [usersPokemonId])
+
+    const evolutionSourceId = await client
+      .query(`select id from sources where source = 'evolved' and pokemon_id = $1;`, [
+        evolvedPokemonId,
+      ])
+      .then(res => res.rows[0]?.id)
+    if (evolutionSourceId)
+      await client.query(
+        `insert into users_pokemon_sources(id, users_pokemon_id, source_id)
+        values($1, $2, $3);`,
+        [randomUUID(), evolvedUsersPokemonId, evolutionSourceId]
       )
-    })
-    .then(() => {
-      return pgPool
-        .query(selectQuery, [userId, pokemonId])
-        .then(res => camelize(res.rows))
-    })
+
+    await client.query('COMMIT')
+  } catch (err) {
+    await client.query('ROLLBACK')
+    throw err
+  } finally {
+    client.release()
+  }
+
+  return pgPool.query(selectQuery, [userId, pokemonId]).then(res => camelize(res.rows))
 }
 
 export const deleteUsersPokemon = pokemonData => {

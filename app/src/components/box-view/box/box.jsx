@@ -35,7 +35,7 @@ const Box = ({
     const boxDataForVersion = usersBoxData.find(
       gameVersion => gameVersion.gameId === selectedVersion.id
     )
-    setCompleteRecords(boxDataForVersion.completeRecords)
+    setCompleteRecords(boxDataForVersion?.completeRecords ?? [])
   }, [usersBoxData, selectedVersion])
 
   const getWallpaper = () => {
@@ -55,13 +55,11 @@ const Box = ({
     return (
       <div className={`box-flex-container-${boxSize}`}>
         {pokemon.slice(firstSlot, lastSlot).map((mon, i) => {
-          const recordIsCompleteInBox = mon.variant
-            ? completeRecords.includes(`${mon.id}:${mon.variant}`)
-            : completeRecords.includes(mon.id)
+          const recordIsCompleteInBox = completeRecords.includes(mon.recordKey)
           const transparent = recordIsCompleteInBox ? '' : 'transparent'
           const hovered = hoveredPokemonIndex === i ? 'hovered' : ''
           return (
-            <div key={i} className={`box-pokemon-${boxSize} ${hovered}`}>
+            <div key={mon.recordKey} className={`box-pokemon-${boxSize} ${hovered}`}>
               <img className={transparent} src={mon.image} />
             </div>
           )

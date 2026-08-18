@@ -1,16 +1,8 @@
 import { useState, useEffect } from 'react'
 import Select from 'react-select'
 import { DateTime } from 'luxon'
-import { ThemeProvider, createTheme } from '@mui/material/styles'
-import { DateTimePicker } from '@mui/x-date-pickers'
 import { multiSelectStyles, singleSelectStyles } from './catch.logic'
 import './catch.scss'
-
-const darkTheme = createTheme({
-  palette: {
-    mode: 'dark',
-  },
-})
 
 const Catch = props => {
   const [selectedSources, setSelectedSources] = useState([])
@@ -32,10 +24,8 @@ const Catch = props => {
     handleCancel,
   } = props
 
-  if (!activePokemonSources || !catchData) return null
-
   useEffect(() => {
-    if (!isEditMode) return
+    if (!isEditMode || !usersPokemonSources || !catchData) return
 
     setSelectedSources(
       usersPokemonSources
@@ -43,11 +33,14 @@ const Catch = props => {
         .map(x => x.id)
     )
     setSelectedGameVersion(
-      catchData.gameVersions.find(x => x.name === activeUsersPokemon.gameVersion).id
+      catchData.gameVersions.find(x => x.name === activeUsersPokemon.gameVersion)?.id ??
+        null
     )
     setSelectedPokeball(activeUsersPokemon.pokeball)
     setUpdatedDate(activeUsersPokemon.caughtAt)
   }, [])
+
+  if (!activePokemonSources || !catchData) return null
 
   const sourceOptions = activePokemonSources.map((x, i) => {
     const label = (
@@ -149,6 +142,7 @@ const Catch = props => {
             styles={multiSelectStyles}
             isSearchable={false}
             isMulti={true}
+            closeMenuOnSelect={false}
             onChange={options => setSelectedSources(options.map(x => x.value))}
             value={sourceOptions.filter(x => selectedSources?.includes(x.value))}
           />
@@ -176,24 +170,16 @@ const Catch = props => {
         <>
           <span className="edit-date-container">
             <span className="edit-date-label">Date:</span>
-            <ThemeProvider theme={darkTheme}>
-              <DateTimePicker
-                className="edit-date-picker"
-                slotProps={{
-                  textField: {
-                    className: 'no-border',
-                    style: {
-                      padding: '0 10px 0 15px',
-                      maxWidth: '205px',
-                      color: 'black',
-                    },
-                    variant: 'standard',
-                  },
-                }}
-                value={updatedDate ? DateTime.fromISO(updatedDate) : null}
-                onChange={newDate => setUpdatedDate(newDate.toISO())}
-              />
-            </ThemeProvider>
+            <input
+              type="datetime-local"
+              className="edit-date-picker"
+              value={
+                updatedDate
+                  ? DateTime.fromISO(updatedDate).toFormat("yyyy-MM-dd'T'HH:mm")
+                  : ''
+              }
+              onChange={e => setUpdatedDate(e.target.value || null)}
+            />
             {isDateError ? (
               <span className="edit-date-error">Date is invalid!</span>
             ) : null}
