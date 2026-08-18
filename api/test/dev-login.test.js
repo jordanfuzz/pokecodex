@@ -1,16 +1,15 @@
 import './setup.js'
 import assert from 'node:assert/strict'
-import { describe, it, after } from 'mocha'
+import { describe, it } from 'mocha'
 import request from 'supertest'
 import app from '../src/app.js'
-import pgPool from '../src/pg-pool.js'
 import config from '../config.js'
 
 // These tests run against the compose dev database (real data, no mocks).
 // Start it with `npm start` at the repo root before running tests.
+// Pool teardown is a single root hook in setup.js, shared with every other
+// test file.
 describe('GET /api/auth/dev-login', () => {
-  after(() => pgPool.end())
-
   it('logs the client in and redirects to the app', async () => {
     const res = await request(app).get('/api/auth/dev-login')
 
