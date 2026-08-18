@@ -6,7 +6,6 @@ import BoxChecklist from './box-checklist/box-checklist'
 import './box-view.scss'
 
 const BoxView = () => {
-  const [usersRules, setUsersRules] = useState(null)
   const [userData, setUserData] = useState(null)
   const [pokemon, setPokemon] = useState([])
   const [usersBoxData, setUsersBoxData] = useState(null)
@@ -37,8 +36,6 @@ const BoxView = () => {
     const loadUserData = async () => {
       if (!userData?.id) return
       refreshPokemonList()
-      const rulesResponse = await axios.get('/api/user/rules')
-      setUsersRules(rulesResponse.data.rules)
       const boxDataResponse = await axios.get('/api/pokemon/box-data')
       setGameData(boxDataResponse.data.gameVersions)
       if (!boxDataResponse.data.usersBoxData || !boxDataResponse.data.usersBoxData.length) {
@@ -51,7 +48,7 @@ const BoxView = () => {
 
   useEffect(() => {
     if (selectedVersion) handleFilterPokemon(pokemon)
-  }, [selectedVersion, pokemon, usersRules])
+  }, [selectedVersion, pokemon])
 
   useEffect(() => {
     setSelectedVersion(gameData?.[0]?.[1])
