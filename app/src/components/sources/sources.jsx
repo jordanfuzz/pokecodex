@@ -36,7 +36,7 @@ const Sources = () => {
   useEffect(() => {
     const loadPokemon = async () => {
       if (!userData?.id) return
-      const response = await axios.get(`/api/all-pokemon?userId=${userData?.id}`)
+      const response = await axios.get('/api/all-pokemon')
       setPokemon(response.data.pokemon)
     }
     loadPokemon()
@@ -79,7 +79,6 @@ const Sources = () => {
     const response = await axios.post('/api/sources', {
       source: sourceData,
       pokemonId: activePokemon.id,
-      userId: userData.id,
     })
     setPokemonSources(response.data.sources)
     setIsEditMode(false)

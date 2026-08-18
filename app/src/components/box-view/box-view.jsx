@@ -37,14 +37,12 @@ const BoxView = () => {
     const loadUserData = async () => {
       if (!userData?.id) return
       refreshPokemonList()
-      const rulesResponse = await axios.get(`/api/user/rules?userId=${userData.id}`)
+      const rulesResponse = await axios.get('/api/user/rules')
       setUsersRules(rulesResponse.data.rules)
-      const boxDataResponse = await axios.get(`/api/pokemon/box-data?userId=${userData.id}`)
+      const boxDataResponse = await axios.get('/api/pokemon/box-data')
       setGameData(boxDataResponse.data.gameVersions)
       if (!boxDataResponse.data.usersBoxData || !boxDataResponse.data.usersBoxData.length) {
-        const newUserBoxData = await axios.post(
-          `/api/pokemon/box-data/setup?userId=${userData.id}`
-        )
+        const newUserBoxData = await axios.post('/api/pokemon/box-data/setup')
         setUsersBoxData(newUserBoxData.data.usersBoxData)
       } else setUsersBoxData(boxDataResponse.data.usersBoxData)
     }
@@ -62,7 +60,6 @@ const BoxView = () => {
   const handleUpdateUsersBoxData = async completeRecords => {
     const newUsersBoxData = {
       completeRecords,
-      userId: userData.id,
       gameId: selectedVersion.id,
     }
     const updatedUsersBoxData = await axios.put('/api/pokemon/box-data', newUsersBoxData)
@@ -70,7 +67,7 @@ const BoxView = () => {
   }
 
   const refreshPokemonList = async () => {
-    const newPokemonResults = await axios.get(`/api/all-pokemon?userId=${userData?.id}`)
+    const newPokemonResults = await axios.get('/api/all-pokemon')
     setPokemon(newPokemonResults.data.pokemon)
   }
 

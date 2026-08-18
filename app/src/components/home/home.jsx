@@ -43,7 +43,7 @@ const Home = () => {
     const loadUserData = async () => {
       if (!userData?.id) return
       refreshPokemonList()
-      const rulesResponse = await axios.get(`/api/user/rules?userId=${userData.id}`)
+      const rulesResponse = await axios.get('/api/user/rules')
       setUsersRules(rulesResponse.data.rules)
       const gameData = await axios.get('/api/game-data')
       setGameVersions(gameData.data.gameVersions)
@@ -64,7 +64,7 @@ const Home = () => {
         ? `&generationId=${gameGenForFiltering}`
         : ''
       const usersPokemonData = await axios.get(
-        `/api/pokemon?userId=${userData.id}&pokemonId=${pokemonId}${genIdParameter}`
+        `/api/pokemon?pokemonId=${pokemonId}${genIdParameter}`
       )
       if (!usersPokemonData.data) return
 
@@ -95,11 +95,9 @@ const Home = () => {
 
   const refreshPokemonList = async () => {
     const genIdParameter = gameGenForFiltering
-      ? `&generationId=${gameGenForFiltering}`
+      ? `?generationId=${gameGenForFiltering}`
       : ''
-    const newPokemonResults = await axios.get(
-      `/api/all-pokemon?userId=${userData?.id}${genIdParameter}`
-    )
+    const newPokemonResults = await axios.get(`/api/all-pokemon${genIdParameter}`)
     setPokemon(newPokemonResults.data.pokemon)
   }
 
@@ -107,7 +105,6 @@ const Home = () => {
     setDrawerMode('sources')
     const newPokemonData = {
       ...pokemonData,
-      userId: userData?.id,
       generationId: gameGenForFiltering,
     }
 
@@ -119,8 +116,7 @@ const Home = () => {
   }
 
   const handleUpdatePokemonNote = async noteData => {
-    const newNoteData = { ...noteData, userId: userData.id }
-    const usersPokemonData = await axios.put('/api/users-pokemon/note', newNoteData)
+    const usersPokemonData = await axios.put('/api/users-pokemon/note', noteData)
     if (!usersPokemonData) return
 
     setUsersPokemon(usersPokemonData.data?.usersPokemon)
@@ -129,7 +125,6 @@ const Home = () => {
   const handleUpdateUsersPokemon = async pokemonData => {
     const newPokemonData = {
       ...pokemonData,
-      userId: userData.id,
     }
     const usersPokemonData = await axios.put('/api/users-pokemon', newPokemonData)
     if (!usersPokemonData) return
@@ -144,7 +139,6 @@ const Home = () => {
 
   const handleEvolvePokemon = async (oldPokemonData, evolvedPokemonId) => {
     const newPokemonData = {
-      userId: userData.id,
       evolvedPokemonId,
       oldPokemonData,
     }
@@ -163,7 +157,6 @@ const Home = () => {
   const handleDeleteUsersPokemon = async pokemonData => {
     const newPokemonData = {
       ...pokemonData,
-      userId: userData.id,
     }
     const usersPokemonData = await axios.delete('/api/users-pokemon', {
       data: newPokemonData,
@@ -182,7 +175,6 @@ const Home = () => {
   const handleUpdateUsersRules = async newRules => {
     const newRulesData = {
       rules: newRules,
-      userId: userData.id,
     }
     const usersRulesData = await axios.put('/api/user/rules', newRulesData)
     setUsersRules(usersRulesData.data?.rules)
