@@ -71,6 +71,10 @@ const Home = () => {
     } else {
       openDrawerIndexRef.current = pokemonId
       setOpenDrawerIndex(pokemonId)
+      // Clear the previous pokemon's data so the drawer never flashes it.
+      setActivePokemonSources(null)
+      setUsersPokemon([])
+      setCatchData(null)
       const genIdParameter = gameGenForFiltering
         ? `&generationId=${gameGenForFiltering}`
         : ''
@@ -255,6 +259,16 @@ const Home = () => {
 
     switch (drawerMode) {
       case 'sources':
+        if (!activePokemonSources || !catchData) {
+          drawerContents = (
+            <div className="sources-loading">
+              {[0, 1, 2, 3].map(i => (
+                <span key={i} className="skeleton-pill" />
+              ))}
+            </div>
+          )
+          break
+        }
         drawerContents = (
           <SourcesList
             activePokemonSources={activePokemonSources}
