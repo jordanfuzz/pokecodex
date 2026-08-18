@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import './rules.scss'
 
 const Rules = ({ usersRules, updateUsersRules }) => {

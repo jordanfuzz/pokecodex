@@ -7,7 +7,7 @@ export const multiSelectStyles = {
     textAlign: 'left',
     minHeight: '55px',
   }),
-  option: (provided, state) => ({
+  option: provided => ({
     ...provided,
     color: 'black',
     cursor: 'pointer',
@@ -54,7 +54,7 @@ export const singleSelectStyles = {
     textAlign: 'left',
     minHeight: '55px',
   }),
-  option: (provided, state) => ({
+  option: provided => ({
     ...provided,
     color: 'black',
     cursor: 'pointer',

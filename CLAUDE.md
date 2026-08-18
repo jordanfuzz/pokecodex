@@ -34,6 +34,8 @@ npm stop
   events don't cross Windows bind mounts. UI hot reload is handled by Vite.
 - Postgres uses a **named volume**, not a bind mount — reset the DB with
   `docker compose -f compose.dev.yml down -v` then re-restore.
+- Host-side UI dev server without touching containers:
+  `cd app && UI_PORT=3001 API_PROXY_TARGET=http://localhost:3003 npm run dev:host`
 
 ### Restoring data
 

@@ -105,4 +105,11 @@ app.get('/', authCheck, (req, res) => {
   res.status(200).send('Hello world!')
 })
 
+// Express 5 forwards async-handler rejections here; without this, the default
+// handler leaks stack traces to clients whenever NODE_ENV !== 'production'.
+app.use((err, req, res, next) => {
+  console.error(err)
+  res.status(500).json({ message: 'Internal server error' })
+})
+
 export default app

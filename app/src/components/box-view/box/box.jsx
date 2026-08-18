@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { wallpapers, largeWallpaper } from '../box-view.logic'
 import './box.scss'
 
