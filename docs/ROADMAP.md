@@ -46,13 +46,12 @@ Nothing else touches data until this is done.
       can still be used via `.env` when needed
 - [x] Write `CLAUDE.md`: architecture, how to run, data model, the "source"
       concept, gotchas
-- [ ] Decide whether any agent skills are worth adding now that docs are
+- [x] Decide whether any agent skills are worth adding now that docs are
       consolidated (deferred; CLAUDE.md may be sufficient)
 - [x] Distill still-relevant material from `old-notes/` into `docs/`
       (BACKLOG.md, domain.md, source-data.md; the limited-dex arrays note was
       already absorbed into `game_versions.limited_dex`)
-- [ ] Delete `2026-project-recap.md` once Jordan confirms (kept untracked for
-      now)
+- [x] Delete `2026-project-recap.md`
 
 Deferred from this phase: autonomous agent loop orchestrator — revisit once
 there is a backlog of well-defined tasks for it.
@@ -71,6 +70,7 @@ semi-automated? Output is a short feasibility doc informing phase 4's approach.
 - [ ] Stand up a local PokeAPI instance (official self-host docker-compose) to
       permanently remove the rate-limit/IP-ban risk
 - [ ] Write up feasibility findings in `docs/`
+- [ ] Revisit agent skills at this point
 
 ### Phase 2 — Audit-driven cleanup
 
