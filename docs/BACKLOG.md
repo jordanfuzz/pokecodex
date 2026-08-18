@@ -153,6 +153,30 @@ priority. Data-gathering work lives in [source-data.md](source-data.md).
 - [ ] `docker-compose.production.yml` (referenced by
       `.github/workflows/main.yml:77`) lives only on the deploy runner, not in
       the repo — bring it into the repo with host paths parameterized
+- [ ] `GET /api/pokemon` (`pokemon-routes.js`) fires six serial `await`s where
+      the queries are independent — `Promise.all` them (found 2026-08
+      phase-3 final review)
+- [ ] Drop the now-consumerless `json_agg(distinct(s2.source)) sources`
+      aggregate and the `sourcesByType` payload field — nothing reads them
+      anymore and they're not free on a perf-sensitive query/payload (found
+      2026-08 phase-3 final review)
+- [ ] The evolution pill display type list in `sources-repository.js` (3
+      types) disagrees with the completion engine's
+      `evolutionSatisfiableTypes` (9 types, `completion.js`) — clicking a
+      grey pill the engine already treats as satisfied via evolution creates
+      a pointless override, since the UI doesn't know that type is
+      evolution-satisfiable (found 2026-08 phase-3 final review)
+- [ ] `users_box_data` has no `unique(user_id, game_id)` constraint and the
+      setup route that creates rows isn't idempotent — a repeat call (or a
+      race) can create duplicate rows for the same user/game (found 2026-08
+      phase-3 final review)
+- [ ] Evolve regression tests to add: inherited id-preservation invariant,
+      old-row deletion, chained-evolve dedupe (found 2026-08 phase-3 final
+      review)
+- [ ] `ROLLBACK` failure in `evolveUsersPokemon` can mask the original error
+      that triggered the rollback — the caught error from `ROLLBACK` itself
+      propagates instead of the real failure (found 2026-08 phase-3 final
+      review)
 
 ## Features (post-v1 candidates)
 
