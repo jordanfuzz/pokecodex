@@ -8,6 +8,11 @@
 import pgPool from '../pg-pool.js'
 
 const main = async () => {
+  const dryRun = process.argv.includes('--dry-run')
+  if (dryRun) {
+    console.log('DRY RUN — no rows will be written.\n')
+  }
+
   const sources = (await pgPool.query('select id, pokemon_id, name, source from sources;'))
     .rows
 
@@ -74,10 +79,15 @@ const main = async () => {
       if (isUnchanged) continue
 
       changedRows++
-      await pgPool.query('update users_box_data set complete_records = $1 where id = $2;', [
-        JSON.stringify(deduped),
-        row.id,
-      ])
+      console.log(
+        `  box row ${row.id}: ${JSON.stringify(records)} -> ${JSON.stringify(deduped)}`
+      )
+      if (!dryRun) {
+        await pgPool.query('update users_box_data set complete_records = $1 where id = $2;', [
+          JSON.stringify(deduped),
+          row.id,
+        ])
+      }
     } catch (err) {
       console.error(`Error processing users_box_data.id=${row.id}`)
       throw err
@@ -90,7 +100,10 @@ const main = async () => {
   }
   if (unmatched.length) {
     console.log('UNMATCHED entries (left as-is, review manually):')
-    unmatched.forEach(u => console.log(`  box row ${u.boxRow}: ${u.record}`))
+    unmatched.forEach(u => console.log(`  box row ${u.boxRow}: ${JSON.stringify(u.record)}`))
+  }
+  if (dryRun) {
+    console.log('\nDRY RUN — no rows written.')
   }
   await pgPool.end()
 }
