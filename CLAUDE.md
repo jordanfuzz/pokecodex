@@ -28,7 +28,7 @@ npm stop
   (dev-only route, no Discord round-trip; logs in as the most recently seen user).
 - Real Discord OAuth needs `CLIENT_ID`/`CLIENT_SECRET` in `.env` (see
   `.env.example`; values live in the production `.env`).
-- API tests: `cd api && npm test` (mocha + supertest). Tests hit the compose
+- API tests: `cd api && npm test` (node:test + supertest). Tests hit the compose
   Postgres on localhost:5432, so the dev stack must be up.
 - The api container runs nodemon with `--legacy-watch` (polling) because file
   events don't cross Windows bind mounts. UI hot reload is handled by Vite.

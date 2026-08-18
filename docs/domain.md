@@ -81,7 +81,7 @@ female Salandit → Salazzle, Nincada's double evolution) aren't modeled.
 ### Performance trade-off (deliberate, documented pre-hiatus)
 
 Moving sources to the evolved record makes display easy but aggregation hard:
-adding `users_evolution_sources` to the main query in
+adding `users_evolution_source_ids` to the main query in
 `pokemon-repository.js` raised it from ~70ms to ~300ms. The written
 optimization plan, if it becomes necessary: keep the base pokemon's record and
 sources in place on evolve (marking them instead of moving), display from the

@@ -7,13 +7,13 @@ priority. Data-gathering work lives in [source-data.md](source-data.md).
 
 ## Core v1 issues (roadmap phase 3)
 
-- [ ] `isComplete` for variant forms is broken: rules check whether the user
+- [x] `isComplete` for variant forms is broken: rules check whether the user
       has *any* variant form instead of *all* of them (e.g. one Unown letter
       marks the whole record complete)
-- [ ] Personal source overrides: a user whose general rules exclude a source
+- [x] Personal source overrides: a user whose general rules exclude a source
       type (e.g. shiny) can click that source pill on one pokemon's row to
       require it for that row only. Box view checklist must respect overrides.
-- [ ] Date picker is wonky/not rendering (MUI styling; consider replacing MUI
+- [x] Date picker is wonky/not rendering (MUI styling; consider replacing MUI
       with an in-house picker — decide during fix). Likely origin found
       2026-08: two rules in `catch.scss` (`.edit-date-picker input` line 83,
       `.no-border .MuiInput-underline:before` line 91) target the old
@@ -26,75 +26,81 @@ priority. Data-gathering work lives in [source-data.md](source-data.md).
 
 ## Bugs
 
-- [ ] `catch.jsx` calls `useEffect` (line 37) *after* the
+- [x] `catch.jsx` calls `useEffect` (line 37) *after* the
       `if (!activePokemonSources || !catchData) return null` guard (line 35).
       The hook count changes between renders as soon as catch data arrives,
       which React throws on. Fixing means moving the guard below the hook and
       guarding inside the effect instead (found 2026-08)
-- [ ] Logged-out `/box-view` renders a blank page: `box-view.jsx:228` returns
+- [x] Logged-out `/box-view` renders a blank page: `box-view.jsx:228` returns
       null on missing data before the `shouldRedirect` `<Navigate>` at line
       230, so the redirect to `/login` never happens (found 2026-08)
-- [ ] Notes aren't copied to the evolved pokemon on evolve — the note is lost
-- [ ] Complete source pills still show in gens they shouldn't
-- [ ] New users are broken until they set rules (mechanism found 2026-08:
+- [x] Notes aren't copied to the evolved pokemon on evolve — the note is lost
+- [x] Complete source pills still show in gens they shouldn't
+- [x] New users are broken until they set rules (mechanism found 2026-08:
       `users-routes.js:8` can't tell "no rules yet" from a query failure and
       500s either way; the 500 rejects `loadUserData` in `home.jsx:42`, which
       has no catch, so the rest of the page load is abandoned.
       `pokemon-repository.js:34` also throws on `rows[0].user_rules` for a
       userId with no row)
-- [ ] Uncontrolled component error in Rules component (confirmed still present
+- [x] Uncontrolled component error in Rules component (confirmed still present
       2026-08: React warns about uncontrolled→controlled input on load —
       `ruleState` starts null, so `checked={ruleState && ruleState['gender']}`
       is null on the first render; `rules.jsx` lines 48, 61, 72, 83, 94, 105,
       116, 127)
-- [ ] Unhandled promise rejection in UI when the auth check 401s on the
+- [x] Unhandled promise rejection in UI when the auth check 401s on the
       logged-out landing page (found 2026-08 — `login.jsx:12`, an
       `axios.get('/api/auth/login').then(...)` with no `.catch()`. The same
       pattern without try/catch is in `home.jsx:42`, `box-view.jsx:36` and
       `sources.jsx:36`)
-- [ ] Box view can crash on a game with no `users_box_data` row: `box.jsx:38`
+- [x] Box view can crash on a game with no `users_box_data` row: `box.jsx:38`
       and `box-checklist.jsx:25` dereference `boxDataForVersion
       .completeRecords` without a guard, and rows are only created by the
       one-time setup call (found 2026-08)
-- [ ] Box view drops gender/regional/variant entries when rules arrive after
+- [x] Box view drops gender/regional/variant entries when rules arrive after
       the pokemon list: the filter effect at `box-view.jsx:54` omits
       `usersRules` from its dependencies and never re-runs (found 2026-08)
-- [ ] Editing a catch whose game version isn't in the dropdown list throws —
+- [x] Editing a catch whose game version isn't in the dropdown list throws —
       `catch.jsx:46` reads `.id` off an unchecked `.find()` (found 2026-08)
-- [ ] Clearing the date field in the catch editor throws: `catch.jsx:194` calls
+- [x] Clearing the date field in the catch editor throws: `catch.jsx:194` calls
       `newDate.toISO()` and the picker passes null on clear (found 2026-08)
-- [ ] Clicking between records briefly shows the sources for the wrong pokemon
+- [x] Clicking between records briefly shows the sources for the wrong pokemon
       (likely worsened by array-index React keys — `home.jsx:264`,
       `sources-list.jsx:353`, `box.jsx:64`, `box-checklist.jsx:66`,
       `sources.jsx:90` — which keep row state attached to a position rather
       than a pokemon when the filtered list changes)
-- [ ] Multiselect source dropdown is closing itself
-- [ ] Shiny tag should not be grayed out after evolve
-- [ ] When evolving a shiny pokemon, the evolution should be shiny
-- [ ] Shouldn't have double evolved tags
-- [ ] Game list dropdown is not sorting games correctly
-- [ ] Changing gens in box view should reset to box 1 (`box-view.jsx:219`
+- [x] Multiselect source dropdown is closing itself
+- [x] Shiny tag should not be grayed out after evolve
+- [x] When evolving a shiny pokemon, the evolution should be shiny
+- [x] Shouldn't have double evolved tags
+- [x] Game list dropdown is not sorting games correctly
+- [x] Changing gens in box view should reset to box 1 (`box-view.jsx:219`
       `handleVersionChange` never touches `selectedBox`; the game `<select>` at
       line 240 also has no `value`, so it can drift out of sync with
       `selectedVersion`)
-- [ ] In box view, caught pokemon shouldn't be available between gens 2–3
+- [x] In box view, caught pokemon shouldn't be available between gens 2–3
 - [ ] Add limits to text inputs that don't save if they're too long
-- [ ] Account for Nincada's evolution (two evolutions from one)
+      (deferred from phase 3)
+- [ ] Account for Nincada's evolution (two evolutions from one) (deferred from
+      phase 3)
 - [ ] Conditional evolution requirements: Basculin→Basculegion only if
-      white-striped; Salandit→Salazzle only if female; etc.
+      white-striped; Salandit→Salazzle only if female; etc. (deferred from
+      phase 3)
 
 ## Tech debt
 
-- [ ] No `authCheck` on any data route: `app.js:93` defines it but only
+- [x] No `authCheck` on any data route: `app.js:93` defines it but only
       `GET /` (line 104) uses it. Every `/api` route takes the userId from the
       query string or body and trusts it, so an unauthenticated request can
       read or write any user's data given an id. Fix is to mount `authCheck`
       on the routers and take the userId from `req.user` instead of the client
       (found 2026-08)
-- [ ] No error-handling middleware in `app.js`: a thrown repository error
-      falls through to Express's default handler, which returns an HTML page
-      with the stack trace whenever `NODE_ENV` isn't `production`. Routes
-      should catch and return JSON
+- [x] Error-handling middleware in `app.js`: a thrown repository error falls
+      through to Express's default handler, which returns an HTML page with
+      the stack trace whenever `NODE_ENV` isn't `production`. Routes should
+      catch and return JSON. (Verified 2026-08 during phase 3: the JSON error
+      middleware already existed since phase 2 — `app.js:110-113` — routes
+      just needed to propagate errors to it, which the authCheck work above
+      now does)
 - [ ] Handlers dereference request data that may not be there: `req.body.*` in
       `sources-routes.js:14-17`, `users-routes.js:14` and
       `users-pokemon-routes.js:27,42,57,64` (under Express 5 a body-less
@@ -138,9 +144,10 @@ priority. Data-gathering work lives in [source-data.md](source-data.md).
       Migrating to `@use` means namespacing the variable references
 - [ ] Main JS chunk is ~900 kB minified (286 kB gzipped), over Vite's 500 kB
       warning threshold. Route-level code splitting would help most
-- [ ] `npm audit`: app is clean; api reports 3 (1 low, 1 moderate, 1 high) all
-      via mocha's `diff`/`serialize-javascript` — dev-only, and the offered
-      fix downgrades mocha. Recheck when mocha releases
+- [x] `npm audit`: app is clean; api now reports 0 vulnerabilities (was 3 —
+      1 low, 1 moderate, 1 high — all via mocha's `diff`/`serialize-javascript`;
+      resolved by the phase-3 test-runner swap to node's built-in `node:test`,
+      which dropped the mocha dependency)
 - [ ] Verify: "Finish up DNS routing and SSL" (believed done — site was live
       at pokecodex.com)
 - [ ] `docker-compose.production.yml` (referenced by
