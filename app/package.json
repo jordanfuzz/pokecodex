@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Web UI for the Pokecodex app",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "vite",
     "build": "vite build",
@@ -29,7 +30,7 @@
     "validator": "^13.15.35"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^5.2.0",
-    "vite": "^7.3.6"
+    "@vitejs/plugin-react": "^6.0.5",
+    "vite": "^8.2.1"
   }
 }
