@@ -120,7 +120,7 @@ priority. Data-gathering work lives in [source-data.md](source-data.md).
       redirect URI before changing
 - [ ] Admin status isn't stored in cookies/JWT (front+back end check exists,
       but re-derived per request)
-- [ ] `home.jsx` is a 339-line component holding ten `useState`s, all fetching
+- [ ] `home.jsx` is a 338-line component holding ten `useState`s, all fetching
       and all rendering; every handler re-fetches the whole list. Split the
       data layer out of the view. It also fetches `/api/all-pokemon` twice on
       load — once from `loadUserData` (line 45) and once from the
@@ -141,9 +141,11 @@ priority. Data-gathering work lives in [source-data.md](source-data.md).
 - [ ] `npm audit`: app is clean; api reports 3 (1 low, 1 moderate, 1 high) all
       via mocha's `diff`/`serialize-javascript` — dev-only, and the offered
       fix downgrades mocha. Recheck when mocha releases
-- [ ] `validator` is in `app/package.json` but imported nowhere — drop it
 - [ ] Verify: "Finish up DNS routing and SSL" (believed done — site was live
       at pokecodex.com)
+- [ ] `docker-compose.production.yml` (referenced by
+      `.github/workflows/main.yml:77`) lives only on the deploy runner, not in
+      the repo — bring it into the repo with host paths parameterized
 
 ## Features (post-v1 candidates)
 

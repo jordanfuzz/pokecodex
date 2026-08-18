@@ -1,0 +1,4 @@
+node_modules
+.env
+bulbapedia-cache
+pokeapi-data

@@ -1,8 +1,9 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// API_PROXY_TARGET lets a host-side dev server (outside compose) reach the
-// api container via its published port instead of the compose DNS name.
+// UI_PORT and API_PROXY_TARGET let a host-side dev server (outside compose)
+// run on an alternate port and reach the api container via its published
+// port instead of the compose DNS name.
 export default defineConfig({
   plugins: [react()],
   server: {

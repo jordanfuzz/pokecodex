@@ -465,6 +465,8 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>'
 
 Run: `docker logs --tail 20 pokecodex-adhoc-1` and check `adhoc/bulbapedia-cache/` page count vs the pokemon table count, plus `adhoc/bulbapedia-cache/failures.json`. Confirm with Jordan before proceeding — the script is resumable, but only Jordan decides whether failures need a re-run first.
 
+Also confirm the production server's `.env` sets `NODE_ENV=production` before deploying — Express 5's error handler checks it, and it's also required so dev-login stays disabled. The file lives on the TrueNAS box; coordinate with Jordan.
+
 - [ ] **Step 2: Rebuild and recreate the dev stack**
 
 Run: `docker compose -f compose.dev.yml up -d --build --force-recreate`
@@ -475,6 +477,9 @@ Expected: four containers up, api/ui images now containing the new deps.
 - `cd api && npm test` → `2 passing`.
 - Browse http://localhost:3000/api/auth/dev-login → app renders through the container stack (Vite 7 + new deps inside the container).
 - Exercise: list view, box view, catch modal with date picker, evolve flow.
+- Open the catch modal and confirm the date field renders as a standard-variant
+  (underline) input — the slotProps variant path was never exercised beyond
+  the build during the MUI 9 migration.
 
 - [ ] **Step 4: Tick Phase 2 in ROADMAP.md**
 
