@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
 import { Link, Navigate } from 'react-router'
 import './home.scss'
@@ -16,6 +16,10 @@ const Home = () => {
   const [usersRules, setUsersRules] = useState(null)
   const [catchData, setCatchData] = useState(null)
   const [openDrawerIndex, setOpenDrawerIndex] = useState(null)
+  // Mirrors openDrawerIndex for use inside async handlers, where a captured
+  // closure value would go stale if the drawer changes while a request is
+  // in flight. Kept in sync everywhere setOpenDrawerIndex is called.
+  const openDrawerIndexRef = useRef(null)
   const [drawerMode, setDrawerMode] = useState('sources')
   const [shouldRedirect, setShouldRedirect] = useState(false)
   const [filterRange, setFilterRange] = useState(null)
@@ -61,8 +65,11 @@ const Home = () => {
   }, [gameGenForFiltering])
 
   const handleOpenDrawer = async pokemonId => {
-    if (openDrawerIndex === pokemonId) setOpenDrawerIndex(null)
-    else {
+    if (openDrawerIndex === pokemonId) {
+      openDrawerIndexRef.current = null
+      setOpenDrawerIndex(null)
+    } else {
+      openDrawerIndexRef.current = pokemonId
       setOpenDrawerIndex(pokemonId)
       const genIdParameter = gameGenForFiltering
         ? `&generationId=${gameGenForFiltering}`
@@ -105,22 +112,33 @@ const Home = () => {
   }
 
   const handleToggleSourceOverride = async source => {
-    const existing = catchData?.usersSourceOverrides?.find(x => x.sourceId === source.id)
-    if (existing) {
-      await axios.delete(`/api/user/source-override/${source.id}`)
-    } else {
-      await axios.put('/api/user/source-override', {
-        sourceId: source.id,
-        isRequired: !typeRequiredByRules(source.source),
-      })
+    const pokemonId = openDrawerIndex
+    try {
+      const existing = catchData?.usersSourceOverrides?.find(x => x.sourceId === source.id)
+      if (existing) {
+        await axios.delete(`/api/user/source-override/${source.id}`)
+      } else {
+        await axios.put('/api/user/source-override', {
+          sourceId: source.id,
+          isRequired: !typeRequiredByRules(source.source),
+        })
+      }
+      // Refresh both the open drawer and the list checkboxes.
+      const genIdParameter = gameGenForFiltering ? `&generationId=${gameGenForFiltering}` : ''
+      const usersPokemonData = await axios.get(
+        `/api/pokemon?pokemonId=${pokemonId}${genIdParameter}`
+      )
+      // Guard against a stale response: if the drawer moved on (or closed)
+      // while this request was in flight, don't clobber the now-active
+      // drawer's state with data for the pokemon that was open when the
+      // request started.
+      if (usersPokemonData.data && openDrawerIndexRef.current === pokemonId) {
+        setPokemonState(usersPokemonData.data)
+      }
+      refreshPokemonList()
+    } catch (error) {
+      console.error('Failed to toggle source override', error)
     }
-    // Refresh both the open drawer and the list checkboxes.
-    const genIdParameter = gameGenForFiltering ? `&generationId=${gameGenForFiltering}` : ''
-    const usersPokemonData = await axios.get(
-      `/api/pokemon?pokemonId=${openDrawerIndex}${genIdParameter}`
-    )
-    if (usersPokemonData.data) setPokemonState(usersPokemonData.data)
-    refreshPokemonList()
   }
 
   const refreshPokemonList = async () => {
