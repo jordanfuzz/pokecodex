@@ -16,6 +16,7 @@ const Review = () => {
   const [filters, setFilters] = useState(DEFAULT_FILTERS)
   const [rows, setRows] = useState([])
   const [selectedIds, setSelectedIds] = useState(new Set())
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -31,14 +32,26 @@ const Review = () => {
   }, [])
 
   const loadSummary = useCallback(async () => {
-    const response = await axios.get('/api/staged-sources/summary')
-    setSummary(response.data.summary)
+    try {
+      const response = await axios.get('/api/staged-sources/summary')
+      setSummary(response.data.summary)
+      setError(null)
+    } catch (error) {
+      console.error('Failed to load review data', error)
+      setError('Failed to load review data')
+    }
   }, [])
 
   const loadRows = useCallback(async () => {
-    const response = await axios.get(`/api/staged-sources?${buildListQuery(gen, filters)}`)
-    setRows(response.data.stagedSources)
-    setSelectedIds(new Set())
+    try {
+      const response = await axios.get(`/api/staged-sources?${buildListQuery(gen, filters)}`)
+      setRows(response.data.stagedSources)
+      setSelectedIds(new Set())
+      setError(null)
+    } catch (error) {
+      console.error('Failed to load review data', error)
+      setError('Failed to load review data')
+    }
   }, [gen, filters])
 
   useEffect(() => {
@@ -68,9 +81,17 @@ const Review = () => {
     .filter(row => row.rowKind === 'new' && row.status === 'pending')
     .map(row => row.id)
 
+  const selectedSelectable = selectableIds.filter(id => selectedIds.has(id))
+
   const handleBulkApprove = async () => {
-    await axios.post('/api/staged-sources/bulk-approve', { ids: [...selectedIds] })
-    await refresh()
+    try {
+      await axios.post('/api/staged-sources/bulk-approve', { ids: selectedSelectable })
+      await refresh()
+      setError(null)
+    } catch (error) {
+      console.error('Failed to load review data', error)
+      setError('Bulk approve failed')
+    }
   }
 
   const pendingCounts = pendingCountsByGen(summary, filters.includeExpected)
@@ -81,11 +102,14 @@ const Review = () => {
   ) : (
     <div className="review-container">
       <h1 className="review-header">Source review</h1>
+      {error && <p className="review-error">{error}</p>}
       <div className="gen-tabs">
         {GENS.map(g => (
           <button
+            type="button"
             key={g}
             className={`gen-tab ${g === gen ? 'active' : ''}`}
+            aria-current={g === gen ? 'true' : undefined}
             onClick={() => setGen(g)}
           >
             Gen {g} ({pendingCounts.get(g) ?? 0})
@@ -95,7 +119,7 @@ const Review = () => {
       <div className="filter-bar">
         <select
           value={filters.status}
-          onChange={e => setFilters({ ...filters, status: e.target.value })}
+          onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}
         >
           <option value="pending">Pending</option>
           <option value="approved">Approved</option>
@@ -104,7 +128,7 @@ const Review = () => {
         </select>
         <select
           value={filters.rowKind ?? ''}
-          onChange={e => setFilters({ ...filters, rowKind: e.target.value || null })}
+          onChange={e => setFilters(f => ({ ...f, rowKind: e.target.value || null }))}
         >
           <option value="">All kinds</option>
           <option value="new">New</option>
@@ -113,7 +137,7 @@ const Review = () => {
         </select>
         <select
           value={filters.confidence ?? ''}
-          onChange={e => setFilters({ ...filters, confidence: e.target.value || null })}
+          onChange={e => setFilters(f => ({ ...f, confidence: e.target.value || null }))}
         >
           <option value="">All confidence</option>
           <option value="high">High</option>
@@ -124,7 +148,7 @@ const Review = () => {
           <input
             type="checkbox"
             checked={filters.includeExpected}
-            onChange={e => setFilters({ ...filters, includeExpected: e.target.checked })}
+            onChange={e => setFilters(f => ({ ...f, includeExpected: e.target.checked }))}
           />
           Show expected-absent
         </label>
@@ -134,7 +158,7 @@ const Review = () => {
           <label>
             <input
               type="checkbox"
-              checked={selectedIds.size === selectableIds.length && selectableIds.length > 0}
+              checked={selectedSelectable.length === selectableIds.length && selectableIds.length > 0}
               onChange={e =>
                 setSelectedIds(e.target.checked ? new Set(selectableIds) : new Set())
               }
@@ -142,16 +166,17 @@ const Review = () => {
             Select all new rows in view ({selectableIds.length})
           </label>
           <button
+            type="button"
             className="bulk-approve-button"
-            disabled={selectedIds.size === 0}
+            disabled={selectedSelectable.length === 0}
             onClick={handleBulkApprove}
           >
-            Approve selected ({selectedIds.size})
+            Approve selected ({selectedSelectable.length})
           </button>
         </div>
       )}
       {groups.map(group => (
-        <div className="pokemon-group" key={`${group.pokemonId}`}>
+        <div className="pokemon-group" key={`${group.pokemonId}-${group.rows[0].id}`}>
           <h2 className="pokemon-group-header">
             #{group.pokemonId} {group.pokemonName}
           </h2>

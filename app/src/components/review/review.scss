@@ -1,6 +1,11 @@
 .review-container {
   padding: 1rem 2rem;
 
+  .review-error {
+    color: #c00;
+    font-weight: bold;
+  }
+
   .gen-tabs {
     display: flex;
     gap: 0.5rem;
