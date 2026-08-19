@@ -95,3 +95,55 @@ test('parseTrades handles MSP/6 templates with a proper-case nickname (gen 6+)',
   assert.deepEqual(trade.receives, { ndex: 83, name: "Farfetch'd" })
   assert.equal(trade.nickname, "Quacklin'")
 })
+
+test('parseTrades picks the plain-text nickname over species+gender, Japanese, item, and image cells', () => {
+  const wikitext = `====Pokémon Diamond and Pearl====
+{| class="roundtable"
+|-
+! Location
+! Player's Pokémon
+! NPC's Pokémon
+! Nickname
+! Japanese Nickname
+! Held Item
+! OT
+|-
+| {{OBP|Route 210|Sinnoh Route 210|Route 210}}
+| {{MSP/4|095|Onix}}
+| {{p|Onix}}{{male}}
+| {{MSP/4|208|Steelix}}
+| {{p|Steelix}}
+| Rocky
+| {{j|ロッキー}}
+| [[Bitter Berry]]
+| [[File:Foo.png|50px]]
+|}`
+  const { trades, unparsed } = parseTrades(wikitext)
+  assert.equal(unparsed.length, 0)
+  assert.equal(trades.length, 1)
+  assert.equal(trades[0].nickname, 'Rocky')
+})
+
+test('parseTrades falls back to null when every nickname-ish cell carries markup', () => {
+  const wikitext = `====Pokémon Diamond and Pearl====
+{| class="roundtable"
+|-
+! Location
+! Player's Pokémon
+! NPC's Pokémon
+! Japanese Nickname
+! Held Item
+|-
+| {{OBP|Route 210|Sinnoh Route 210|Route 210}}
+| {{MSP/4|100|Voltorb}}
+| {{p|Voltorb}}
+| {{MSP/4|101|Electrode}}
+| {{p|Electrode}}
+| {{j|ボルトロス}}
+| [[Berry]]
+|}`
+  const { trades, unparsed } = parseTrades(wikitext)
+  assert.equal(unparsed.length, 0)
+  assert.equal(trades.length, 1)
+  assert.equal(trades[0].nickname, null)
+})

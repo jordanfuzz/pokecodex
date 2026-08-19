@@ -41,15 +41,24 @@ export const parseTrades = (wikitext) => {
     if (msp.length >= 2) {
       const gives = { ndex: parseInt(msp[0][1], 10), name: msp[0][2].trim() }
       const receives = { ndex: parseInt(msp[1][1], 10), name: msp[1][2].trim() }
+      // Genuine nicknames are plain text. Every measured false-positive class
+      // (species+gender like {{p|Onix}}{{male}}, [[File:...|50px]] OT images,
+      // held-item links like [[Bitter Berry]], {{a|...}} ability names,
+      // {{j|...}} Japanese-only columns) carries wiki markup, so disqualify a
+      // cell pre-clean if it contains a template or link. Wiki italics quotes
+      // ('') are not markup for this purpose — ''N/A'' must still reach the
+      // character-class check below and get rejected by its '/'.
       const nickname = cells
         .slice(firstMspCell)
+        .filter((cell) => !cell.includes('{{') && !cell.includes('[['))
         .map(cleanWikitext)
         .find(
           (cell) =>
             NICKNAME.test(cell) &&
             /[A-Za-zÀ-ÿ]/.test(cell) &&
             cell.toLowerCase() !== gives.name.toLowerCase() &&
-            cell.toLowerCase() !== receives.name.toLowerCase(),
+            cell.toLowerCase() !== receives.name.toLowerCase() &&
+            cell.toLowerCase() !== 'none',
         )
       trades.push({
         heading,
