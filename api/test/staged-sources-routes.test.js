@@ -47,6 +47,8 @@ describe('staged-sources routes', () => {
         assert.equal((await agent.patch('/api/staged-sources/x')).status, 401)
         assert.equal((await agent.post('/api/staged-sources/x/reject')).status, 401)
         assert.equal((await agent.post('/api/staged-sources/x/approve')).status, 401)
+        assert.equal((await agent.post('/api/staged-sources/x/pairing')).status, 401)
+        assert.equal((await agent.post('/api/staged-sources/bulk-approve')).status, 401)
       } finally {
         await setAdmin(true)
       }
@@ -275,6 +277,64 @@ describe('staged-sources routes', () => {
       assert.equal(res.status, 400)
       const stillPending = await pgPool.query(`select status from staged_sources where id = $1;`, [row.id])
       assert.equal(stillPending.rows[0].status, 'pending')
+    })
+  })
+
+  describe('POST /api/staged-sources/:id/pairing', () => {
+    it('confirm promotes the suggestion to a confirmed audit pairing and resolves the partner', async () => {
+      const source = await insertTestSource()
+      const partner = await insertStagedRow({ rowKind: 'existing-unmatched', matchedSourceId: source.id, name: null, source: null, confidence: null, origin: null, games: null })
+      const row = await insertStagedRow({ suggestedSourceId: source.id, suggestionReason: 'nickname' })
+
+      const res = await agent.post(`/api/staged-sources/${row.id}/pairing`).send({ confirm: true })
+      assert.equal(res.status, 200)
+      assert.equal(res.body.stagedSource.rowKind, 'audit')
+      assert.equal(res.body.stagedSource.matchedSourceId, source.id)
+      assert.equal(res.body.stagedSource.suggestedSourceId, null)
+      assert.equal(res.body.stagedSource.pairingConfirmed, true)
+
+      const resolved = await pgPool.query(`select status, resolution from staged_sources where id = $1;`, [partner.id])
+      assert.equal(resolved.rows[0].status, 'approved')
+      assert.equal(resolved.rows[0].resolution, 'paired')
+    })
+
+    it('reject clears the suggestion and leaves both rows pending', async () => {
+      const source = await insertTestSource()
+      const partner = await insertStagedRow({ rowKind: 'existing-unmatched', matchedSourceId: source.id, name: null, source: null, confidence: null, origin: null, games: null })
+      const row = await insertStagedRow({ suggestedSourceId: source.id, suggestionReason: 'fuzzy:0.20' })
+
+      const res = await agent.post(`/api/staged-sources/${row.id}/pairing`).send({ confirm: false })
+      assert.equal(res.body.stagedSource.suggestedSourceId, null)
+      assert.equal(res.body.stagedSource.rowKind, 'new')
+      const untouched = await pgPool.query(`select status from staged_sources where id = $1;`, [partner.id])
+      assert.equal(untouched.rows[0].status, 'pending')
+    })
+
+    it('404s on a row without a suggestion', async () => {
+      const row = await insertStagedRow()
+      assert.equal((await agent.post(`/api/staged-sources/${row.id}/pairing`).send({ confirm: true })).status, 404)
+    })
+  })
+
+  describe('POST /api/staged-sources/bulk-approve', () => {
+    it('approves pending new rows and skips everything else', async () => {
+      const a = await insertStagedRow({ name: 'staged-api-test-bulk-a' })
+      const b = await insertStagedRow({ name: 'staged-api-test-bulk-b' })
+      const source = await insertTestSource()
+      const audit = await insertStagedRow({ rowKind: 'audit', matchedSourceId: source.id })
+      const rejected = await insertStagedRow({ status: 'rejected' })
+
+      const res = await agent
+        .post('/api/staged-sources/bulk-approve')
+        .send({ ids: [a.id, b.id, audit.id, rejected.id] })
+      assert.equal(res.status, 200)
+      assert.deepEqual(new Set(res.body.approvedIds), new Set([a.id, b.id]))
+      assert.deepEqual(new Set(res.body.skippedIds), new Set([audit.id, rejected.id]))
+
+      const created = await pgPool.query(
+        `select name from sources where name in ('staged-api-test-bulk-a', 'staged-api-test-bulk-b');`
+      )
+      assert.equal(created.rows.length, 2)
     })
   })
 })

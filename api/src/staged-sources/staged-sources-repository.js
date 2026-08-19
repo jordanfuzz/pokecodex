@@ -208,3 +208,115 @@ export const approveStagedSource = async (id, { action = null, confirmReferenced
     client.release()
   }
 }
+
+export const resolvePairing = async (id, confirm) => {
+  const client = await pgPool.connect()
+  try {
+    await client.query('begin')
+    const staged = camelize(
+      (
+        await client.query(
+          `select * from staged_sources
+           where id = $1 and status = 'pending' and row_kind = 'new'
+             and suggested_source_id is not null
+           for update;`,
+          [id]
+        )
+      ).rows[0] ?? null
+    )
+    if (!staged) {
+      await client.query('rollback')
+      return null
+    }
+    let updated
+    if (confirm) {
+      updated = camelize(
+        (
+          await client.query(
+            `update staged_sources set
+              matched_source_id = suggested_source_id,
+              suggested_source_id = null, suggestion_reason = null,
+              row_kind = 'audit', pairing_confirmed = true
+             where id = $1 returning *;`,
+            [id]
+          )
+        ).rows[0]
+      )
+      await client.query(
+        `update staged_sources set status = 'approved', resolution = 'paired', reviewed_at = now()
+         where row_kind = 'existing-unmatched' and matched_source_id = $1 and status = 'pending';`,
+        [staged.suggestedSourceId]
+      )
+    } else {
+      updated = camelize(
+        (
+          await client.query(
+            `update staged_sources set suggested_source_id = null, suggestion_reason = null
+             where id = $1 returning *;`,
+            [id]
+          )
+        ).rows[0]
+      )
+    }
+    await client.query('commit')
+    return updated
+  } catch (error) {
+    try {
+      await client.query('rollback')
+    } catch {
+      // Swallow rollback failures so the original error is what propagates.
+    }
+    throw error
+  } finally {
+    client.release()
+  }
+}
+
+export const bulkApproveStagedSources = async (ids) => {
+  const client = await pgPool.connect()
+  try {
+    await client.query('begin')
+    const approvedIds = []
+    const skippedIds = []
+    for (const id of ids) {
+      const staged = camelize(
+        (
+          await client.query(
+            `select * from staged_sources
+             where id = $1 and status = 'pending' and row_kind = 'new' for update;`,
+            [id]
+          )
+        ).rows[0] ?? null
+      )
+      if (!staged) {
+        skippedIds.push(id)
+        continue
+      }
+      const sourceId = randomUUID()
+      await client.query(
+        `insert into sources (id, pokemon_id, name, description, image, gen, source, replace_default)
+         values ($1,$2,$3,$4,$5,$6,$7,$8);`,
+        [sourceId, staged.pokemonId, staged.name, staged.description, staged.image,
+          staged.gen, staged.source, staged.replaceDefault ?? false]
+      )
+      await client.query(
+        `update staged_sources set status = 'approved', resolution = 'created',
+          created_source_id = $2, reviewed_at = now()
+         where id = $1;`,
+        [id, sourceId]
+      )
+      approvedIds.push(id)
+    }
+    await client.query('commit')
+    return { approvedIds, skippedIds }
+  } catch (error) {
+    try {
+      await client.query('rollback')
+    } catch {
+      // Swallow rollback failures so the original error is what propagates.
+    }
+    throw error
+  } finally {
+    client.release()
+  }
+}

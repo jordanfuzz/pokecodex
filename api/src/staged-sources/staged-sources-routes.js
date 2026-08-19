@@ -3,6 +3,7 @@ const router = express.Router()
 import {
   isUserAdmin, listStagedSources, getStagedSummary, updateStagedSource, rejectStagedSource,
   approveStagedSource, InvalidActionError, ReferencedSourceError,
+  resolvePairing, bulkApproveStagedSources,
 } from './staged-sources-repository.js'
 
 // Path-scoped: this router is mounted at /api alongside the others, and an
@@ -60,6 +61,19 @@ router.post('/staged-sources/:id/approve', async (req, res) => {
     }
     throw error
   }
+})
+
+router.post('/staged-sources/:id/pairing', async (req, res) => {
+  const stagedSource = await resolvePairing(req.params.id, req.body?.confirm === true)
+  if (!stagedSource) {
+    return res.status(404).send({ message: 'No pending new staged source with a suggestion for that id' })
+  }
+  res.status(200).send({ stagedSource })
+})
+
+router.post('/staged-sources/bulk-approve', async (req, res) => {
+  const ids = Array.isArray(req.body?.ids) ? req.body.ids : []
+  res.status(200).send(await bulkApproveStagedSources(ids))
 })
 
 export default router
