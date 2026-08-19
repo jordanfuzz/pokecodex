@@ -28,6 +28,19 @@ catching that follows is the slow part).
   below-threshold match (including 1-token names hit by the min-token guard)
   lists the same fact in both; reconcile per pokemon before creating rows.
   See the report's Summary caveat.
+- Reconciliation notes (Jordan review, 2026-08-18): much of the in-scope
+  unmatched/missing split is naming-convention noise, not real gaps — the
+  original hand pass followed no fixed convention, and npc-trade rows are
+  often named after the traded pokemon's nickname ("Ms. Nido" = the FRLG
+  Nidoran♀ in-game trade; exact nickname matching against the parsed trades
+  table already reconciles 6 of 17 unmatched npc-trade rows). Of the 248
+  in-scope unmatched rows, 120 are `pokewalker` (gen 4) — hand-gathered from
+  Serebii, absent from Bulbapedia availability sections by nature, so they
+  will never match and are not errors; that fully explains gen 4's outlier
+  (144 = 120 pokewalker + 24 ordinary). Increment 2 should (a) exclude or
+  label expected-non-Bulbapedia types (pokewalker) in the unmatched view and
+  (b) add nickname-based matching to the differ/staging `matched_source_id`
+  logic.
 
 ## Reference sources used
 
