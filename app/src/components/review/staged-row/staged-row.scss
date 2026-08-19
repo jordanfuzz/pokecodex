@@ -1,0 +1,51 @@
+.staged-row {
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+
+  .staged-row-header {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.25rem;
+  }
+
+  .kind-badge,
+  .confidence-chip,
+  .expected-chip,
+  .resolution-chip {
+    font-size: 0.75rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    border: 1px solid currentColor;
+  }
+
+  .staged-fields,
+  .staged-fields-edit {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+
+    .staged-name { font-weight: bold; }
+    .staged-desc { opacity: 0.85; }
+    textarea { min-width: 20rem; }
+  }
+
+  .provenance .raw-snippet {
+    white-space: pre-wrap;
+    font-size: 0.8rem;
+    max-height: 12rem;
+    overflow-y: auto;
+  }
+
+  .row-actions {
+    margin-top: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  &.status-approved { opacity: 0.6; }
+  &.status-rejected { opacity: 0.45; }
+}
