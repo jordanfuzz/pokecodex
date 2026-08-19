@@ -5,7 +5,8 @@ import StagedRow from './staged-row/staged-row'
 import { pendingCountsByGen, groupByPokemon, buildListQuery } from './review.logic'
 import './review.scss'
 
-const GENS = [1, 2, 3, 4, 5, 6, 7]
+// gen 0 = all-gens sources (26 unmatched rows live there)
+const GENS = [0, 1, 2, 3, 4, 5, 6, 7]
 const DEFAULT_FILTERS = { status: 'pending', rowKind: null, confidence: null, includeExpected: false }
 
 const Review = () => {
@@ -112,7 +113,7 @@ const Review = () => {
             aria-current={g === gen ? 'true' : undefined}
             onClick={() => setGen(g)}
           >
-            Gen {g} ({pendingCounts.get(g) ?? 0})
+            {g === 0 ? 'Multi-gen' : `Gen ${g}`} ({pendingCounts.get(g) ?? 0})
           </button>
         ))}
       </div>

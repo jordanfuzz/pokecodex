@@ -228,6 +228,21 @@ describe('staged-sources routes', () => {
       assert.equal(updated.rows[0].source, source.source, 'null staged fields fall back to existing')
     })
 
+    it('existing-unmatched update preserves gen 0 (multi-gen) sources instead of narrowing to the staged gen', async () => {
+      const source = await insertTestSource({ gen: 0 })
+      const row = await insertStagedRow({
+        rowKind: 'existing-unmatched', matchedSourceId: source.id,
+        name: 'staged-api-test-unmatched-gen0', description: null, gen: 0,
+        source: null, confidence: null, origin: null, games: null,
+      })
+      const res = await agent.post(`/api/staged-sources/${row.id}/approve`).send({ action: 'update' })
+      assert.equal(res.body.stagedSource.resolution, 'updated')
+      const updated = await pgPool.query(`select name, description, gen from sources where id = $1;`, [source.id])
+      assert.equal(updated.rows[0].name, 'staged-api-test-unmatched-gen0')
+      assert.equal(updated.rows[0].description, source.description, 'null staged description falls back to existing')
+      assert.equal(updated.rows[0].gen, 0, 'gen 0 (multi-gen) must not be narrowed by update')
+    })
+
     it('unreferenced delete removes the source outright', async () => {
       const source = await insertTestSource()
       const row = await insertStagedRow({ rowKind: 'existing-unmatched', matchedSourceId: source.id, name: null, source: null, confidence: null, origin: null, games: null })
