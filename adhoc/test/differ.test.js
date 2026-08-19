@@ -1,4 +1,4 @@
-import { test } from 'node:test'
+import { test, describe, it } from 'node:test'
 import assert from 'node:assert/strict'
 import { diffCandidates, similarity } from '../src/bulbapedia/differ.js'
 
@@ -76,4 +76,69 @@ test('diffCandidates lets multiple same-gen candidates legitimately match one so
   assert.equal(matched.length, 2)
   assert.equal(matched[0].source.id, matched[1].source.id)
   assert.deepEqual(unmatchedExisting, [])
+})
+
+describe('nickname matching', () => {
+  const source = { id: 's1', pokemonId: 122, name: 'Marcel', description: 'FRLG trade', gen: 1, source: 'npc-trade' }
+  const candidate = {
+    pokemonId: 122, gen: 1, area: 'In-game trade: receive Mr. Mime for Abra',
+    origin: 'trades', reasons: ['npc trade'], nickname: 'Marcel',
+  }
+
+  it('an exact nickname hit is a full match with matchKind nickname', () => {
+    const { matched, missing, unmatchedExisting } = diffCandidates([candidate], [source])
+    assert.equal(matched.length, 1)
+    assert.equal(matched[0].matchKind, 'nickname')
+    assert.equal(matched[0].source.id, 's1')
+    assert.equal(missing.length, 0)
+    assert.equal(unmatchedExisting.length, 0)
+  })
+
+  it('nickname matching normalizes case and punctuation', () => {
+    const dotted = { ...source, name: 'ms. nido' }
+    const { matched } = diffCandidates([{ ...candidate, nickname: 'Ms. Nido' }], [dotted])
+    assert.equal(matched.length, 1)
+    assert.equal(matched[0].matchKind, 'nickname')
+  })
+
+  it('a token-overlap nickname near-miss becomes a suggestion, not a match', () => {
+    // area/description deliberately share zero tokens so only the nickname
+    // fallback can propose the pairing.
+    const renamed = { ...source, name: 'Marcel the Mime', description: null }
+    const { matched, missing, suggestions } = diffCandidates(
+      [{ ...candidate, nickname: 'Marcel Mime', area: 'Cerulean City swap' }], [renamed])
+    assert.equal(matched.length, 0)
+    assert.equal(missing.length, 1)
+    assert.equal(suggestions.length, 1)
+    assert.equal(suggestions[0].reason, 'nickname')
+  })
+})
+
+describe('suggestion band', () => {
+  it('a sub-threshold fuzzy score in [floor, threshold) is suggested', () => {
+    // 1 shared token of 4/5 -> score 0.25: below 0.34, above 0.15
+    const source = { id: 's2', pokemonId: 1, name: 'Celadon Mansion visitor gift', description: null, gen: 1, source: 'gift' }
+    const candidate = { pokemonId: 1, gen: 1, area: 'Received from woman inside Celadon', origin: 'availability', reasons: ['gift language'], nickname: null }
+    const { missing, suggestions } = diffCandidates([candidate], [source])
+    assert.equal(missing.length, 1)
+    assert.equal(suggestions.length, 1)
+    assert.match(suggestions[0].reason, /^fuzzy:0\.2/)
+  })
+
+  it('1-token names zeroed by the min-token guard can still suggest', () => {
+    const source = { id: 's3', pokemonId: 140, name: 'Fossil', description: null, gen: 1, source: 'fossil' }
+    const candidate = { pokemonId: 140, gen: 1, area: 'Fossil revived (Cinnabar)', origin: 'availability', reasons: ['fossil'], nickname: null }
+    const { matched, suggestions } = diffCandidates([candidate], [source])
+    assert.equal(matched.length, 0) // strict guard still blocks the match
+    assert.equal(suggestions.length, 1)
+    assert.match(suggestions[0].reason, /^fuzzy-short:/)
+  })
+
+  it('fuzzy matches at/above threshold carry matchKind fuzzy', () => {
+    const source = { id: 's4', pokemonId: 130, name: 'Red Gyarados', description: 'Lake of Rage static', gen: 2, source: 'static-default' }
+    const candidate = { pokemonId: 130, gen: 2, area: 'Lake of Rage (Red Gyarados, only one)', origin: 'availability', reasons: ['explicit only-one'], nickname: null }
+    const { matched } = diffCandidates([candidate], [source])
+    assert.equal(matched.length, 1)
+    assert.equal(matched[0].matchKind, 'fuzzy')
+  })
 })
