@@ -1,13 +1,19 @@
 import { cleanWikitext } from './wikitext.js'
 
-const MSP = /\{\{MSP\/3\|(\d+)\|([^}|]+)(?:\|[^}]*)?\}\}/g
-// ALLCAPS-ish nicknames, max 12 chars in-game (accented caps included)
-const NICKNAME = /^[A-Z0-9ÉÀ-Þ .'♀♂-]{2,12}$/
+// MSP/3, MSP/6, MSP/8c, MSP/9, MSP/PE, MSP/BDSP, MSP/ZA, etc. — the template
+// is per-generation. The optional letter after the ndex tolerates
+// form-suffixed dex numbers like 550B|Basculin, keeping the numeric part.
+const MSP = /\{\{MSP\/[^|]+\|(\d+)[A-Za-z]?\|([^}|]+)(?:\|[^}]*)?\}\}/g
+const MSP_ANY = /\{\{MSP\//
+// Nicknames can be proper-case from gen III+ on, not just ALLCAPS; must
+// contain a letter (excludes Trainer-ID/Level cells that are pure digits)
+// and must not just be the species name repeated in a later cell.
+const NICKNAME = /^[A-Za-zÀ-ÿ0-9 .'♀♂-]{2,12}$/
 
 // Best-effort parse of the "List of in-game trades" page. One record per
-// table row naming two pokemon via {{MSP/3|ndex|Name}}: the first is what
-// the player gives, the second what they receive. Rows that mention MSP/3
-// but don't parse go to `unparsed` — never silently dropped.
+// table row naming two pokemon via {{MSP/<gen>|ndex|Name}}: the first is
+// what the player gives, the second what they receive. Rows that mention
+// MSP/ but don't parse go to `unparsed` — never silently dropped.
 export const parseTrades = (wikitext) => {
   const trades = []
   const unparsed = []
@@ -19,27 +25,40 @@ export const parseTrades = (wikitext) => {
     if (row.length === 0) return
     const cells = row
       .flatMap((line) => line.split('||'))
-      .map((cell) => cell.replace(/^[|!]\s*/, '').replace(/^[^|]*\|\s*(?=\{\{|\[\[)/, '').trim())
+      .map((cell) =>
+        cell
+          .replace(/^[|!]\s*/, '')
+          .replace(/^(?:[\w-]+=(?:"[^"]*"|\S+)\s*)+\|\s*/, '')
+          .trim(),
+      )
     const rowText = cells.join(' | ')
     const msp = [...rowText.matchAll(MSP)]
-    const firstMspCell = cells.findIndex((cell) => /MSP\/3/.test(cell))
+    const firstMspCell = cells.findIndex((cell) => MSP_ANY.test(cell))
     if (firstMspCell > 0) {
       const before = cells.slice(0, firstMspCell).map(cleanWikitext).filter(Boolean)
       if (before.length) location = before.join(', ')
     }
     if (msp.length >= 2) {
+      const gives = { ndex: parseInt(msp[0][1], 10), name: msp[0][2].trim() }
+      const receives = { ndex: parseInt(msp[1][1], 10), name: msp[1][2].trim() }
       const nickname = cells
         .slice(firstMspCell)
         .map(cleanWikitext)
-        .find((cell) => NICKNAME.test(cell))
+        .find(
+          (cell) =>
+            NICKNAME.test(cell) &&
+            /[A-Za-zÀ-ÿ]/.test(cell) &&
+            cell.toLowerCase() !== gives.name.toLowerCase() &&
+            cell.toLowerCase() !== receives.name.toLowerCase(),
+        )
       trades.push({
         heading,
         location,
-        gives: { ndex: parseInt(msp[0][1], 10), name: msp[0][2].trim() },
-        receives: { ndex: parseInt(msp[1][1], 10), name: msp[1][2].trim() },
+        gives,
+        receives,
         nickname: nickname ?? null,
       })
-    } else if (/MSP\/3/.test(rowText)) {
+    } else if (MSP_ANY.test(rowText)) {
       unparsed.push({ heading, rowText })
     }
     row = []
@@ -53,7 +72,12 @@ export const parseTrades = (wikitext) => {
       location = null
       continue
     }
-    if (/^(\|-|\|\}|\{\|)/.test(line)) {
+    if (/^\{\|/.test(line)) {
+      flushRow()
+      location = null
+      continue
+    }
+    if (/^(\|-|\|\})/.test(line)) {
       flushRow()
       continue
     }
