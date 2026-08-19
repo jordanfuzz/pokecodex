@@ -38,6 +38,16 @@ const AUX_GENS = [
 ]
 const auxGen = (filename) => AUX_GENS.find(([fragment]) => filename.includes(fragment))?.[1] ?? null
 
+// Trade headings for gen 8+ games/spinoffs — trades aren't gen-filtered like
+// candidates (parseTrades has no gen field), so unmatched trades need this to
+// separate in-scope (gen 1–7) misses from out-of-scope noise.
+const OUT_OF_SCOPE_HEADINGS = [
+  /Sword and Shield/, /Isle of Armor/, /Crown Tundra/,
+  /Brilliant Diamond and Shining Pearl/, /Legends: Z-A/, /Scarlet and Violet/,
+  /^Mega Dimension$/,
+]
+const isOutOfScopeTrade = (trade) => OUT_OF_SCOPE_HEADINGS.some((rx) => rx.test(trade.heading))
+
 const readJson = async (file) => JSON.parse(await fs.readFile(file, 'utf8'))
 
 // ---- parse pokemon pages -------------------------------------------------
@@ -171,7 +181,10 @@ lines.push(`- Availability entries: ${Object.values(tallies).reduce((a, b) => a 
 lines.push(`- Total candidates gens 1–7: ${inScope.length} (${outOfScope} out-of-scope gen 8+ candidates set aside)`)
 lines.push(`- Matched to existing rows: ${matched.length}; missing (no existing row): ${missing.length}`)
 lines.push(`- Existing unique rows with no candidate: ${unmatchedExisting.length} of ${sources.filter((s) => UNIQUE_SOURCE_TYPES.includes(s.source)).length}`)
-lines.push(`- Trades parsed: ${trades.trades.length} (${trades.unparsed.length} unparsed rows); nickname-matched to npc-trade rows: ${tradeMatches.length}, unmatched: ${tradeMisses.length}`, '')
+lines.push(`- Caveat: 'missing' and 'existing unmatched' are NOT disjoint — a below-threshold match (including 1-token names hit by the min-token guard) lists the same fact in both; reconcile per pokemon before creating rows.`)
+const tradeMissesOutOfScope = tradeMisses.filter(({ trade }) => isOutOfScopeTrade(trade)).length
+const tradeMissesInScope = tradeMisses.length - tradeMissesOutOfScope
+lines.push(`- Trades parsed: ${trades.trades.length} (${trades.unparsed.length} unparsed rows); nickname-matched to npc-trade rows: ${tradeMatches.length}, unmatched: ${tradeMisses.length} (${tradeMissesInScope} in-scope gen 1–7, ${tradeMissesOutOfScope} out-of-scope gen 8+)`, '')
 
 lines.push('## Sanity checks', '')
 for (const { check, pass } of sanity) lines.push(`- [${pass ? 'x' : ' '}] ${check}`)
@@ -198,7 +211,7 @@ for (let gen = 1; gen <= 7; gen++) {
 }
 
 lines.push('## Existing unique rows with no Bulbapedia candidate', '')
-lines.push('(Parser misses or data errors — the gen 1 audit starts here.)', '')
+lines.push('(Parser misses or data errors — the gen 1 audit starts here. Some of these also appear in "Missing candidates" above — see the overlap caveat in Summary.)', '')
 for (const source of unmatchedExisting.slice(0, CAP)) {
   lines.push(`- #${source.pokemonId} ${pokemonName.get(source.pokemonId) ?? '?'} gen ${source.gen} [${source.source}] ${source.name}`)
 }
@@ -207,8 +220,10 @@ lines.push('')
 
 lines.push('## Unmatched trades', '')
 for (const { trade } of tradeMisses.slice(0, CAP)) {
-  lines.push(`- ${trade.receives.name} for ${trade.gives.name}${trade.nickname ? ` "${trade.nickname}"` : ''} (${trade.heading})`)
+  const scopeLabel = isOutOfScopeTrade(trade) ? ' [gen 8+/out of scope]' : ''
+  lines.push(`- ${trade.receives.name} for ${trade.gives.name}${trade.nickname ? ` "${trade.nickname}"` : ''} (${trade.heading})${scopeLabel}`)
 }
+if (tradeMisses.length > CAP) lines.push(`- ... and ${tradeMisses.length - CAP} more (see candidates.json)`)
 lines.push('')
 
 lines.push('## Parser health', '')
