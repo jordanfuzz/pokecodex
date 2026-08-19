@@ -37,9 +37,13 @@ describe('ownership scoping on users-pokemon writes', () => {
       [victimUserId]
     )
     await pgPool.query(`delete from users_pokemon where user_id = $1;`, [victimUserId])
-    // Belt-and-suspenders: delete the victim row by id too, so a
-    // takeover-regression bug (row reassigned to a different user_id) can't
-    // leave residue on a real account instead of being swept above.
+    // Belt-and-suspenders: delete the victim row (and its links) by id too,
+    // so a takeover-regression bug (row reassigned to a different user_id)
+    // can't leave residue — or an orphaned link — on a real account instead
+    // of being swept above.
+    await pgPool.query(`delete from users_pokemon_sources where users_pokemon_id = $1;`, [
+      victimRowId,
+    ])
     await pgPool.query(`delete from users_pokemon where id = $1;`, [victimRowId])
     await pgPool.query(`delete from users where id = $1;`, [victimUserId])
   })
