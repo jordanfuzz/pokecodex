@@ -51,16 +51,24 @@ const GAMES = {
   'Ranger: SoA': { id: 44, gen: 4 },
   'Ranger: GS': { id: 45, gen: 4 },
   'Battle Revolution': { id: 46, gen: 4 },
+  // Bulbapedia v= aliases/typos seen for already-tracked games (recon 2026-08).
+  'Box R&S': { id: 41, gen: 3 }, // "Pokémon Box: Ruby & Sapphire" spelled out
+  'Ranger: Soa': { id: 44, gen: 4 }, // case typo for "Ranger: SoA"
+  'Rangers: GS': { id: 45, gen: 4 }, // pluralization typo for "Ranger: GS"
 }
 
 // Untracked games/rows we expect to see; anything else untracked is warned
 // about in the recon report so the map can be extended deliberately.
 const KNOWN_UNTRACKED = [
-  /^MD /, /^Trozei/, /^Pinball/, /^Snap/, /^New Snap/, /^Dash/, /^PokéPark/,
+  /^MD /, /^Trozei/, /^Battle Trozei$/, /^Pinball/, /^Snap/, /^New Snap/, /^Dash/, /^PokéPark/,
   /^Rumble/, /^Shuffle/, /^Picross/, /^Conquest/, /^Duel/, /^Quest/, /^Sleep/,
   /^Masters/, /^Café/, /^UNITE/, /^Magikarp Jump/, /^GO$/, /^HOME$/, /^Bank$/,
   /^Dream World$/, /^Dream Radar$/, /^Pal Park$/, /^Pokéwalker$/,
-  /^Mystery Dungeon/, /^Legends Z-A$/, /^Z-A$/, /^Smile$/, /^Playhouse/,
+  /^Mystery Dungeon/, /^Super MD$/, /^Legends: Z-A$/, /^Z-A$/, /^Smile$/, /^Playhouse/,
+  // gen 8/9 DLC and recent/upcoming spinoffs (out of phase-4 scope; recon 2026-08)
+  /^Expansion Pass$/, /^Sword Expansion Pass$/, /^Shield Expansion Pass$/,
+  /^The Hidden Treasure of Area Zero/, /^Mega Dimension$/, /^Puzzle Challenge$/,
+  /^Pokopia$/,
 ]
 
 export const ROMAN = { I: 1, II: 2, III: 3, IV: 4, V: 5, VI: 6, VII: 7, VIII: 8, IX: 9 }
