@@ -28,9 +28,9 @@ test('parseTemplate ignores pipes inside nested templates and links', () => {
 })
 
 test('parseTemplate treats = inside nested braces as positional', () => {
-  const { params } = parseTemplate('DL|List of Pokémon by Pal Park location|Field')
-  assert.equal(params[1], 'List of Pokémon by Pal Park location')
-  assert.equal(params[2], 'Field')
+  const { params } = parseTemplate('Entry|{{tt|x|note=y}}|v=Ruby')
+  assert.equal(params[1], '{{tt|x|note=y}}')
+  assert.equal(params.v, 'Ruby')
 })
 
 test('extractTemplates returns only top-level templates, in order', () => {
