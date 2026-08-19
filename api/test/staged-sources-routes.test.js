@@ -115,4 +115,39 @@ describe('staged-sources routes', () => {
       assert.ok(bucket.count >= 1)
     })
   })
+
+  describe('PATCH /api/staged-sources/:id', () => {
+    it('edits pending fields and leaves others alone', async () => {
+      const row = await insertStagedRow()
+      const res = await agent
+        .patch(`/api/staged-sources/${row.id}`)
+        .send({ name: 'polished name', source: 'npc-trade' })
+      assert.equal(res.status, 200)
+      assert.equal(res.body.stagedSource.name, 'polished name')
+      assert.equal(res.body.stagedSource.source, 'npc-trade')
+      assert.equal(res.body.stagedSource.description, 'staged test description')
+    })
+
+    it('404s on a non-pending row', async () => {
+      const row = await insertStagedRow({ status: 'rejected' })
+      const res = await agent.patch(`/api/staged-sources/${row.id}`).send({ name: 'x' })
+      assert.equal(res.status, 404)
+    })
+  })
+
+  describe('POST /api/staged-sources/:id/reject', () => {
+    it('rejects a pending row and stamps reviewed_at', async () => {
+      const row = await insertStagedRow()
+      const res = await agent.post(`/api/staged-sources/${row.id}/reject`)
+      assert.equal(res.status, 200)
+      assert.equal(res.body.stagedSource.status, 'rejected')
+      assert.ok(res.body.stagedSource.reviewedAt)
+    })
+
+    it('404s when rejecting twice', async () => {
+      const row = await insertStagedRow()
+      await agent.post(`/api/staged-sources/${row.id}/reject`)
+      assert.equal((await agent.post(`/api/staged-sources/${row.id}/reject`)).status, 404)
+    })
+  })
 })

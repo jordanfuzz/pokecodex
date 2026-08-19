@@ -46,3 +46,28 @@ export const getStagedSummary = () =>
       order by gen;`
     )
     .then((res) => camelize(res.rows))
+
+export const updateStagedSource = (id, { name, description, source, gen, replaceDefault }) =>
+  pgPool
+    .query(
+      `update staged_sources set
+        name = coalesce($2, name),
+        description = coalesce($3, description),
+        source = coalesce($4, source),
+        gen = coalesce($5, gen),
+        replace_default = coalesce($6, replace_default)
+      where id = $1 and status = 'pending'
+      returning *;`,
+      [id, name ?? null, description ?? null, source ?? null, gen ?? null, replaceDefault ?? null]
+    )
+    .then((res) => camelize(res.rows[0] ?? null))
+
+export const rejectStagedSource = (id) =>
+  pgPool
+    .query(
+      `update staged_sources set status = 'rejected', reviewed_at = now()
+      where id = $1 and status = 'pending'
+      returning *;`,
+      [id]
+    )
+    .then((res) => camelize(res.rows[0] ?? null))
