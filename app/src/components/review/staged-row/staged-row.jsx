@@ -9,43 +9,73 @@ const EDITABLE_TYPES = [
 
 const StagedRow = ({ row, selected, onToggleSelected, onAction }) => {
   const [isEditing, setIsEditing] = useState(false)
-  const [draft, setDraft] = useState({
-    name: row.name ?? '',
-    description: row.description ?? '',
-    source: row.source ?? 'special',
-    gen: row.gen,
-  })
+  const [draft, setDraft] = useState(null)
+  const [busy, setBusy] = useState(false)
+
+  const startEdit = () => {
+    setDraft({
+      name: row.name ?? '',
+      description: row.description ?? '',
+      source: row.source ?? 'special',
+      gen: row.gen,
+    })
+    setIsEditing(true)
+  }
+
+  const cancelEdit = () => {
+    setIsEditing(false)
+    setDraft(null)
+  }
+
+  const draftGen = draft ? parseInt(draft.gen, 10) : NaN
+  const draftValid =
+    !!draft &&
+    draft.name.trim().length > 0 &&
+    Number.isInteger(draftGen) &&
+    draftGen >= 1 &&
+    draftGen <= 9
 
   const patch = async () => {
+    if (!draftValid) return
+    setBusy(true)
     try {
       await axios.patch(`/api/staged-sources/${row.id}`, {
         name: draft.name,
         description: draft.description,
         source: draft.source,
-        gen: Number(draft.gen),
+        gen: draftGen,
       })
       setIsEditing(false)
+      setDraft(null)
       await onAction()
     } catch (error) {
       console.error('Failed to save staged row', error)
+    } finally {
+      setBusy(false)
     }
   }
 
   const approve = async (body) => {
+    setBusy(true)
     try {
       await axios.post(`/api/staged-sources/${row.id}/approve`, body ?? {})
       await onAction()
     } catch (error) {
       console.error('Failed to approve staged row', error)
+    } finally {
+      setBusy(false)
     }
   }
 
   const reject = async () => {
+    setBusy(true)
     try {
       await axios.post(`/api/staged-sources/${row.id}/reject`)
       await onAction()
     } catch (error) {
       console.error('Failed to reject staged row', error)
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -57,7 +87,7 @@ const StagedRow = ({ row, selected, onToggleSelected, onAction }) => {
         {isPending && row.rowKind === 'new' && (
           <input type="checkbox" checked={selected} onChange={onToggleSelected} />
         )}
-        <span className={`kind-badge kind-${row.rowKind}`}>{row.rowKind}</span>
+        <span className={`kind-badge badge-kind-${row.rowKind}`}>{row.rowKind}</span>
         {row.confidence && (
           <span className={`confidence-chip confidence-${row.confidence}`}>{row.confidence}</span>
         )}
@@ -83,15 +113,15 @@ const StagedRow = ({ row, selected, onToggleSelected, onAction }) => {
               value={draft.gen}
               onChange={(e) => setDraft({ ...draft, gen: e.target.value })}
             />
-            <button onClick={patch}>Save</button>
-            <button onClick={() => setIsEditing(false)}>Cancel</button>
+            <button type="button" onClick={patch} disabled={busy || !draftValid}>Save</button>
+            <button type="button" onClick={cancelEdit} disabled={busy}>Cancel</button>
           </div>
         ) : (
           <div className="staged-fields">
             <span className="staged-name">{row.name}</span>
             <span className="staged-type">{row.source}</span>
             <span className="staged-desc">{row.description}</span>
-            {isPending && <button onClick={() => setIsEditing(true)}>Edit</button>}
+            {isPending && <button type="button" onClick={startEdit} disabled={busy}>Edit</button>}
           </div>
         ))}
 
@@ -106,8 +136,8 @@ const StagedRow = ({ row, selected, onToggleSelected, onAction }) => {
 
       {isPending && row.rowKind === 'new' && !row.suggestedSourceId && (
         <div className="row-actions">
-          <button className="approve-button" onClick={() => approve()}>Approve</button>
-          <button className="reject-button" onClick={reject}>Reject</button>
+          <button type="button" className="approve-button" onClick={() => approve()} disabled={busy}>Approve</button>
+          <button type="button" className="reject-button" onClick={reject} disabled={busy}>Reject</button>
         </div>
       )}
     </div>
