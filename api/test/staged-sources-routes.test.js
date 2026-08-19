@@ -46,6 +46,7 @@ describe('staged-sources routes', () => {
         assert.equal((await agent.get('/api/staged-sources/summary')).status, 401)
         assert.equal((await agent.patch('/api/staged-sources/x')).status, 401)
         assert.equal((await agent.post('/api/staged-sources/x/reject')).status, 401)
+        assert.equal((await agent.post('/api/staged-sources/x/approve')).status, 401)
       } finally {
         await setAdmin(true)
       }
@@ -226,28 +227,47 @@ describe('staged-sources routes', () => {
          values (gen_random_uuid(), gen_random_uuid(), $1, false);`,
         [source.id]
       )
-      const row = await insertStagedRow({ rowKind: 'existing-unmatched', matchedSourceId: source.id, name: null, source: null, confidence: null, origin: null, games: null })
+      try {
+        await pgPool.query(
+          `insert into users_source_overrides (id, user_id, source_id, is_required)
+           values (gen_random_uuid(), $1, $2, true);`,
+          [userId, source.id]
+        )
+        const row = await insertStagedRow({ rowKind: 'existing-unmatched', matchedSourceId: source.id, name: null, source: null, confidence: null, origin: null, games: null })
 
-      const blocked = await agent.post(`/api/staged-sources/${row.id}/approve`).send({ action: 'delete' })
-      assert.equal(blocked.status, 409)
-      assert.equal(blocked.body.referenceCount, 1)
-      const stillThere = await pgPool.query(`select 1 from sources where id = $1;`, [source.id])
-      assert.equal(stillThere.rows.length, 1, '409 must not half-delete')
+        const blocked = await agent.post(`/api/staged-sources/${row.id}/approve`).send({ action: 'delete' })
+        assert.equal(blocked.status, 409)
+        assert.equal(blocked.body.referenceCount, 2)
+        const stillThere = await pgPool.query(`select 1 from sources where id = $1;`, [source.id])
+        assert.equal(stillThere.rows.length, 1, '409 must not half-delete')
 
-      const confirmed = await agent
-        .post(`/api/staged-sources/${row.id}/approve`)
-        .send({ action: 'delete', confirmReferencedDelete: true })
-      assert.equal(confirmed.status, 200)
-      const refs = await pgPool.query(`select 1 from users_pokemon_sources where source_id = $1;`, [source.id])
-      assert.equal(refs.rows.length, 0)
-      const gone = await pgPool.query(`select 1 from sources where id = $1;`, [source.id])
-      assert.equal(gone.rows.length, 0)
+        const confirmed = await agent
+          .post(`/api/staged-sources/${row.id}/approve`)
+          .send({ action: 'delete', confirmReferencedDelete: true })
+        assert.equal(confirmed.status, 200)
+        const refs = await pgPool.query(`select 1 from users_pokemon_sources where source_id = $1;`, [source.id])
+        assert.equal(refs.rows.length, 0)
+        const overrides = await pgPool.query(`select count(*) from users_source_overrides where source_id = $1;`, [source.id])
+        assert.equal(Number(overrides.rows[0].count), 0, 'cascade should have fired')
+        const gone = await pgPool.query(`select 1 from sources where id = $1;`, [source.id])
+        assert.equal(gone.rows.length, 0)
+      } finally {
+        await pgPool.query(`delete from users_source_overrides where source_id = $1;`, [source.id])
+      }
     })
 
     it('404s on an already-approved row', async () => {
-      const row = await insertStagedRow()
+      const row = await insertStagedRow({ name: 'staged-api-test-404-check' })
       await agent.post(`/api/staged-sources/${row.id}/approve`)
       assert.equal((await agent.post(`/api/staged-sources/${row.id}/approve`)).status, 404)
+    })
+
+    it('audit apply on a row with no matched source is a 400 and leaves it pending', async () => {
+      const row = await insertStagedRow({ rowKind: 'audit', matchedSourceId: null })
+      const res = await agent.post(`/api/staged-sources/${row.id}/approve`).send({ action: 'apply' })
+      assert.equal(res.status, 400)
+      const stillPending = await pgPool.query(`select status from staged_sources where id = $1;`, [row.id])
+      assert.equal(stillPending.rows[0].status, 'pending')
     })
   })
 })

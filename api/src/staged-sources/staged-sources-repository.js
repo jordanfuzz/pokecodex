@@ -110,6 +110,9 @@ export const approveStagedSource = async (id, { action = null, confirmReferenced
       await client.query(`update staged_sources set created_source_id = $2 where id = $1;`, [id, sourceId])
       resolution = 'created'
     } else if (staged.rowKind === 'audit') {
+      if (!staged.matchedSourceId) {
+        throw new InvalidActionError('staged row has no matched source (it may have been deleted); reject it instead')
+      }
       if (action === 'apply') {
         await client.query(
           `update sources set name = $2, description = $3, gen = $4, source = $5, replace_default = $6
@@ -123,8 +126,10 @@ export const approveStagedSource = async (id, { action = null, confirmReferenced
       } else {
         throw new InvalidActionError(`audit rows need action apply or no-change, got ${action}`)
       }
-    } else {
-      // existing-unmatched
+    } else if (staged.rowKind === 'existing-unmatched') {
+      if (!staged.matchedSourceId) {
+        throw new InvalidActionError('staged row has no matched source (it may have been deleted); reject it instead')
+      }
       if (action === 'keep') {
         resolution = 'kept'
       } else if (action === 'update') {
@@ -139,9 +144,16 @@ export const approveStagedSource = async (id, { action = null, confirmReferenced
         )
         resolution = 'updated'
       } else if (action === 'delete') {
+        // users_source_overrides cascades on source delete (see
+        // adhoc/scripts/migrations/2026-08-users-source-overrides.sql), so it
+        // needs no explicit delete here, but it must be counted so the admin
+        // confirms with the full picture of what the delete will take out.
         const referenceCount = (
           await client.query(
-            `select count(*)::int as count from users_pokemon_sources where source_id = $1;`,
+            `select
+              (select count(*) from users_pokemon_sources where source_id = $1)::int
+              + (select count(*) from users_source_overrides where source_id = $1)::int
+              as count;`,
             [staged.matchedSourceId]
           )
         ).rows[0].count
@@ -163,6 +175,10 @@ export const approveStagedSource = async (id, { action = null, confirmReferenced
       } else {
         throw new InvalidActionError(`existing-unmatched rows need action keep, update, or delete, got ${action}`)
       }
+    } else {
+      // Guard for future row_kind enum growth: without this, an unrecognized
+      // kind would silently fall through the existing-unmatched branch above.
+      throw new InvalidActionError(`unknown row kind ${staged.rowKind}`)
     }
 
     const updated = camelize(
@@ -177,7 +193,11 @@ export const approveStagedSource = async (id, { action = null, confirmReferenced
     await client.query('commit')
     return updated
   } catch (error) {
-    await client.query('rollback')
+    try {
+      await client.query('rollback')
+    } catch {
+      // Swallow rollback failures so the original error is what propagates.
+    }
     throw error
   } finally {
     client.release()
