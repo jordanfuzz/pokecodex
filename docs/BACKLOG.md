@@ -170,9 +170,16 @@ priority. Data-gathering work lives in [source-data.md](source-data.md).
       setup route that creates rows isn't idempotent — a repeat call (or a
       race) can create duplicate rows for the same user/game (found 2026-08
       phase-3 final review)
-- [ ] Evolve regression tests to add: inherited id-preservation invariant,
+- [x] Evolve regression tests to add: inherited id-preservation invariant,
       old-row deletion, chained-evolve dedupe (found 2026-08 phase-3 final
-      review)
+      review; added in the phase-3 unit-test-coverage pass, `evolve.test.js`)
+- [ ] `users_pokemon.caught_at` is `timestamp without time zone` and the
+      update path stores the client's Z-suffixed ISO string with the zone
+      silently dropped (UTC wall time), while the insert path stores a JS
+      Date (server-local wall time). Benign today because the api container
+      runs UTC, but any non-UTC deployment would shift edited catch times by
+      the UTC offset on every save. Consider `timestamptz` (found 2026-08
+      unit-test-coverage pass)
 - [ ] `ROLLBACK` failure in `evolveUsersPokemon` can mask the original error
       that triggered the rollback — the caught error from `ROLLBACK` itself
       propagates instead of the real failure (found 2026-08 phase-3 final
