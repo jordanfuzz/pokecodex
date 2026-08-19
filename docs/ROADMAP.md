@@ -91,7 +91,9 @@ Work the "Core v1 issues" section of [BACKLOG.md](BACKLOG.md), starting with a
 re-evaluation of v1 scope against the old MVP definition recorded there.
 - [x] First pass of core issues
 - [x] Fix remaining issues after manual testing (spec: docs/superpowers/specs/2026-08-18-phase-3-findings-design.md)
-- [ ] Automatic testing - What is the unit test coverage of the app at this point? Audit and add tests as needed before moving on.
+- [x] Automatic testing - What is the unit test coverage of the app at this point? Audit and add tests as needed before moving on.
+      (Audit + coverage pass done 2026-08-18: API 46→72 tests, app 9→17; plan
+      and accepted gaps in docs/superpowers/plans/2026-08-18-unit-test-coverage.md)
 
 ### Phase 4 — Source data for gens 1–7 (deadline-critical)
 
