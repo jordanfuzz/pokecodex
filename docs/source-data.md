@@ -10,10 +10,17 @@ catching that follows is the slow part).
 
 ## Position
 
-- Last known position: main pass **stopped before Wynaut** (national dex
-  #360) — unverified against the data; re-confirm before resuming.
-- Add-sources work was scoped to gens 1–5 first, 6+ later — superseded by the
-  progressive plan above.
+- Recon parser (phase 4 increment 1) diffs the full Bulbapedia cache against
+  `sources`: run `docker compose -f compose.dev.yml exec adhoc node
+  scripts/recon-report.js`, read `adhoc/recon-output/report.md` (gitignored).
+- Recon 2026-08-18: 1901 candidates gens 1–7, 879 matched to existing rows,
+  1022 missing, 371 existing unique rows with no candidate (of 717 total).
+  The old "stopped before Wynaut (#360)" bookmark is superseded by the
+  per-gen diff.
+- Note: "missing" and "existing unmatched" are not disjoint — a
+  below-threshold match (including 1-token names hit by the min-token guard)
+  lists the same fact in both; reconcile per pokemon before creating rows.
+  See the report's Summary caveat.
 
 ## Reference sources used
 
