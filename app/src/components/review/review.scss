@@ -1,8 +1,13 @@
 .review-container {
   padding: 1rem 2rem;
 
+  .review-header {
+    color: #fff;
+    font-weight: 100;
+  }
+
   .review-error {
-    color: #c00;
+    color: #f75231;
     font-weight: bold;
   }
 
@@ -11,24 +16,36 @@
     gap: 0.5rem;
     margin-bottom: 1rem;
 
-    .gen-tab.active {
-      font-weight: bold;
-      text-decoration: underline;
+    .gen-tab {
+      background: none;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+      color: inherit;
+      padding: 0.3rem 0.6rem;
+      cursor: pointer;
+
+      &.active {
+        font-weight: bold;
+        border-color: #ffc631;
+        color: #ffc631;
+      }
     }
   }
 
-  .filter-bar {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    margin-bottom: 1rem;
-  }
-
+  .filter-bar,
   .bulk-bar {
     display: flex;
     gap: 1rem;
     align-items: center;
     margin-bottom: 1rem;
+    padding: 0.5rem 0.75rem;
+    background-color: rgba(255, 255, 255, 0.03);
+    border-radius: 4px;
+  }
+
+  .bulk-approve-button {
+    color: #7bce52;
+    border-color: #7bce52;
   }
 
   .pokemon-group {
@@ -36,6 +53,8 @@
 
     .pokemon-group-header {
       margin-bottom: 0.5rem;
+      color: #fff;
+      font-size: 1.1rem;
     }
   }
 

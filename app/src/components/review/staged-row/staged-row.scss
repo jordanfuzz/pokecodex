@@ -1,5 +1,6 @@
 .staged-row {
-  border: 1px solid rgba(0, 0, 0, 0.2);
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 4px;
   padding: 0.5rem 0.75rem;
   margin-bottom: 0.5rem;
@@ -21,6 +22,15 @@
     border: 1px solid currentColor;
   }
 
+  .kind-badge {
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .badge-kind-new { color: #7bce52; }
+  .badge-kind-audit { color: #ffc631; }
+  .badge-kind-existing-unmatched { color: #ff73a5; }
+
   .staged-fields,
   .staged-fields-edit {
     display: flex;
@@ -28,22 +38,76 @@
     align-items: center;
     flex-wrap: wrap;
 
-    .staged-name { font-weight: bold; }
+    .staged-name { font-weight: bold; color: #fff; }
     .staged-desc { opacity: 0.85; }
     textarea { min-width: 20rem; }
   }
 
-  .provenance .raw-snippet {
-    white-space: pre-wrap;
-    font-size: 0.8rem;
-    max-height: 12rem;
-    overflow-y: auto;
+  .provenance {
+    margin-top: 0.4rem;
+
+    summary {
+      cursor: pointer;
+      opacity: 0.75;
+      font-size: 0.85rem;
+    }
+
+    .raw-snippet {
+      white-space: pre-wrap;
+      font-size: 0.8rem;
+      max-height: 12rem;
+      overflow-y: auto;
+      background-color: rgba(0, 0, 0, 0.25);
+      border-radius: 3px;
+      padding: 0.4rem 0.6rem;
+      margin-top: 0.25rem;
+    }
+  }
+
+  .pairing-banner {
+    margin-top: 0.5rem;
+    padding: 0.4rem 0.6rem;
+    background-color: rgba(255, 198, 49, 0.08);
+    border: 1px dashed rgba(255, 198, 49, 0.6);
+    border-radius: 4px;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .audit-diff {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    border-collapse: collapse;
+    background-color: rgba(0, 0, 0, 0.15);
+    border-radius: 3px;
+
+    td { padding: 0.2rem 0.6rem; border: none; }
+    .diff-field { font-weight: bold; opacity: 0.8; }
+    .diff-existing { opacity: 0.7; }
+    tr.changed { background-color: rgba(255, 198, 49, 0.1); }
+    tr.changed .diff-staged { font-weight: bold; text-decoration: underline; }
+  }
+
+  .existing-summary {
+    margin-top: 0.4rem;
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+
+    .staged-name { font-weight: bold; color: #fff; }
+    .staged-desc { opacity: 0.85; }
+    .reference-count { font-size: 0.8rem; opacity: 0.8; }
   }
 
   .row-actions {
     margin-top: 0.5rem;
     display: flex;
     gap: 0.5rem;
+
+    .delete-button { color: #f75231; border-color: #f75231; }
   }
 
   &.status-approved { opacity: 0.6; }
