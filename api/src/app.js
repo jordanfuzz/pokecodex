@@ -12,6 +12,7 @@ import pokemonRouter from './pokemon/pokemon-routes.js'
 import usersPokemonRouter from './users-pokemon/users-pokemon-routes.js'
 import sourcesRouter from './sources/sources-routes.js'
 import usersRouter from './users/users-routes.js'
+import stagedSourcesRouter from './staged-sources/staged-sources-routes.js'
 
 import {
   getUserById,
@@ -63,6 +64,7 @@ app.use('/api', authCheck, pokemonRouter)
 app.use('/api', authCheck, usersPokemonRouter)
 app.use('/api', authCheck, sourcesRouter)
 app.use('/api', authCheck, usersRouter)
+app.use('/api', authCheck, stagedSourcesRouter)
 
 passport.serializeUser((user, done) => {
   done(null, user.id)

@@ -41,6 +41,15 @@ catching that follows is the slow part).
   label expected-non-Bulbapedia types (pokewalker) in the unmatched view and
   (b) add nickname-based matching to the differ/staging `matched_source_id`
   logic.
+- Staging live (phase 4 increment 2, 2026-08-18): `docker compose -f
+  compose.dev.yml exec adhoc node scripts/stage-candidates.js` upserts the
+  review worklist into `staged_sources`: 1578 rows (707 new, 634 audit, 237
+  existing-unmatched). Idempotent — reviewed rows and confirmed pairings are
+  never touched by a rerun. 120 pokewalker rows are staged `expected_absent`
+  and hidden by default. 160 rows carry a pairing suggestion. Review at
+  `/review` in the app (admin only): per-gen tabs, pairing suggestions,
+  guarded delete. Approval is the only path into `sources`. Working the diff
+  per gen = increment 4.
 
 ## Reference sources used
 

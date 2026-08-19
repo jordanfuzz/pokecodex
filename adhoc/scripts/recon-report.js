@@ -9,34 +9,13 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import pgPool from '../pg-pool.js'
-import { parseGameLocations } from '../src/bulbapedia/availability.js'
-import { classifyEntry } from '../src/bulbapedia/classify.js'
-import { parseEventEntries } from '../src/bulbapedia/events.js'
 import { parseTrades } from '../src/bulbapedia/trades.js'
 import { diffCandidates, UNIQUE_SOURCE_TYPES, similarity } from '../src/bulbapedia/differ.js'
+import { collectPokemonCandidates, collectAuxCandidates } from '../src/bulbapedia/collect.js'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const CACHE = path.join(HERE, '..', 'bulbapedia-cache')
 const OUT = path.join(HERE, '..', 'recon-output')
-
-// aux filename fragment -> gen of its candidates (event pages by game pair,
-// distribution pages by gen). ZA/SV/gen-ix pages are out of phase-4 scope
-// but included so nothing is silently dropped. Generation fragments keep the
-// ".json" suffix so "generation-i" cannot substring-match generation-ii/iv/ix.
-const AUX_GENS = [
-  ['generation-i.json', 1], ['generation-ii.json', 2], ['generation-iii.json', 3],
-  ['generation-iv.json', 4], ['generation-vi.json', 6], ['generation-vii.json', 7],
-  ['generation-viii.json', 8], ['generation-ix.json', 9],
-  ['ruby-and-sapphire', 3], ['emerald', 3], ['firered-and-leafgreen', 3],
-  ['colosseum-and-pok-mon-xd', 3], ['diamond-and-pearl', 4], ['platinum', 4],
-  ['heartgold-and-soulsilver', 4], ['black-2-and-white-2', 5],
-  ['black-and-white', 5], ['x-and-y', 6], ['omega-ruby-and-alpha-sapphire', 6],
-  ['sun-and-moon', 7], ['ultra-sun-and-ultra-moon', 7],
-  ['let-s-go-pikachu-and-let-s-go-eevee', 7], ['sword-and-shield', 8],
-  ['brilliant-diamond-and-shining-pearl', 8], ['legends-arceus', 8],
-  ['legends-z-a', 9], ['scarlet-and-violet', 9],
-]
-const auxGen = (filename) => AUX_GENS.find(([fragment]) => filename.includes(fragment))?.[1] ?? null
 
 // Trade headings for gen 8+ games/spinoffs — trades aren't gen-filtered like
 // candidates (parseTrades has no gen field), so unmatched trades need this to
@@ -58,30 +37,12 @@ const unknownGames = new Map()
 
 const pokemonFiles = (await fs.readdir(path.join(CACHE, 'pokemon'))).filter((f) => f.endsWith('.json'))
 for (const file of pokemonFiles) {
-  const pokemonId = parseInt(file.slice(0, 4), 10)
   const page = await readJson(path.join(CACHE, 'pokemon', file))
-  const { entries, warnings: pageWarnings } = parseGameLocations(page.wikitext)
-  warnings.push(...pageWarnings.map((warning) => `${file}: ${warning}`))
-  for (const entry of entries) {
-    const { kind, reasons } = classifyEntry(entry)
-    tallies[kind] = (tallies[kind] ?? 0) + 1
-    if (kind === 'untracked-game' && !entry.gameInfo.expected) {
-      unknownGames.set(entry.game, (unknownGames.get(entry.game) ?? 0) + 1)
-    }
-    if (kind !== 'unique-candidate') continue
-    if (entry.gen === null) {
-      warnings.push(`${file}: candidate without gen (${entry.game})`)
-      continue
-    }
-    candidates.push({
-      pokemonId,
-      gen: entry.gen,
-      game: entry.game,
-      area: entry.area,
-      origin: entry.subsection === 'core' ? 'availability' : 'side-games',
-      reasons,
-    })
-  }
+  const result = collectPokemonCandidates(file, page)
+  warnings.push(...result.warnings)
+  candidates.push(...result.candidates)
+  for (const [kind, n] of Object.entries(result.tallies)) tallies[kind] = (tallies[kind] ?? 0) + n
+  for (const [game, n] of result.unknownGames) unknownGames.set(game, (unknownGames.get(game) ?? 0) + n)
 }
 
 // ---- parse aux pages -----------------------------------------------------
@@ -95,26 +56,9 @@ for (const file of auxFiles) {
     trades.unparsed.push(...parsed.unparsed)
     continue
   }
-  const gen = auxGen(file)
-  if (gen === null) {
-    warnings.push(`aux page with unknown gen mapping: ${file}`)
-    continue
-  }
-  const origin = file.startsWith('list-of-game-based') ? 'distribution' : 'event-list'
-  for (const entry of parseEventEntries(page.wikitext)) {
-    if (entry.ndex === null) {
-      warnings.push(`${file}: event entry without ndex (${entry.pokemon})`)
-      continue
-    }
-    candidates.push({
-      pokemonId: entry.ndex,
-      gen,
-      game: entry.game ?? '',
-      area: [entry.method, entry.met].filter(Boolean).join(' — ') || entry.pokemon,
-      origin,
-      reasons: [origin],
-    })
-  }
+  const result = collectAuxCandidates(file, page)
+  warnings.push(...result.warnings)
+  candidates.push(...result.candidates)
 }
 
 // ---- fetch DB state (SELECT only) ----------------------------------------
