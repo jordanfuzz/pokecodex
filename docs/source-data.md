@@ -10,10 +10,24 @@ catching that follows is the slow part).
 
 ## Position
 
-- Last known position: main pass **stopped before Wynaut** (national dex
-  #360) — unverified against the data; re-confirm before resuming.
-- Add-sources work was scoped to gens 1–5 first, 6+ later — superseded by the
-  progressive plan above.
+- Recon parser (phase 4 increment 1) diffs the full Bulbapedia cache against
+  `sources`: run `docker compose -f compose.dev.yml exec adhoc node
+  scripts/recon-report.js`, read `adhoc/recon-output/report.md` (gitignored).
+  The full matched/missing/unmatchedExisting arrays (untruncated, unlike the
+  report's capped listings) are also written to `adhoc/recon-output/diff.json`
+  (gitignored).
+- Recon 2026-08-18: 1901 candidates gens 1–7 (585 out-of-scope gen 8+ set
+  aside). 879 candidate rows matched to existing rows (346 distinct source
+  rows). 1022 missing candidate rows (687 distinct pokemon+gen+area after
+  collapsing per-version duplicates like a Ruby+Sapphire pair of one gift;
+  451 distinct pokemon+gen). 248 existing unique rows with no candidate are
+  in scope, gen 0–7 (of 594 in-scope unique rows); a further 123 (of 123)
+  are gen 8/9 and out of phase-4 scope. The old "stopped before Wynaut
+  (#360)" bookmark is superseded by the per-gen diff.
+- Note: "missing" and "existing unmatched" are not disjoint — a
+  below-threshold match (including 1-token names hit by the min-token guard)
+  lists the same fact in both; reconcile per pokemon before creating rows.
+  See the report's Summary caveat.
 
 ## Reference sources used
 
@@ -27,7 +41,7 @@ catching that follows is the slow part).
 
 ## Systematic passes still to do
 
-- [ ] Finish the main Bulbapedia pass (from Wynaut onward, per gen)
+- [ ] Work the recon diff per gen (missing candidates + existing-unmatched; supersedes the old resume-at-Wynaut bookmark)
 - [ ] Add regional variants
 - [ ] Add G-max pokemon
 - [ ] Add battle-only forms
