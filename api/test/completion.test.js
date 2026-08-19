@@ -34,6 +34,9 @@ const unown = {
   usersSourcesByGen: [{ id: 'src-a', source: 'variant', name: 'A', gen: 2 }],
   usersSources: ['variant'],
   usersEvolutionSourceIds: [null],
+  usersCatches: [
+    { gameId: 4, gen: 2, region: 'Johto', isolationGroup: null, transferGen: null },
+  ],
 }
 
 describe('buildRequiredSources', () => {
@@ -148,8 +151,25 @@ describe('checkCompletion', () => {
 
   it('with no applicable rules, any catch completes the record', () => {
     assert.equal(checkCompletion(unown, []), true)
-    const uncaught = { ...unown, usersSourcesByGen: [null], usersSources: [null] }
+    const uncaught = {
+      ...unown,
+      usersSourcesByGen: [null],
+      usersSources: [null],
+      usersCatches: [],
+    }
     assert.equal(checkCompletion(uncaught, []), false)
+  })
+
+  it('with no applicable rules, a catch with no source links still completes the record', () => {
+    const linkless = {
+      ...unown,
+      usersSourcesByGen: [null],
+      usersSources: [null],
+      usersCatches: [
+        { gameId: 14, gen: 4, region: 'Sinnoh', isolationGroup: null, transferGen: null },
+      ],
+    }
+    assert.equal(checkCompletion(linkless, []), true)
   })
 
   it('evolution-inherited sources satisfy their row', () => {

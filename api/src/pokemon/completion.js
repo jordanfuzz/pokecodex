@@ -35,6 +35,8 @@ const toCatch = row => ({
 
 // A catch is "from home region" iff its game's generation is the pokemon's
 // debut gen AND its region is the pokemon's home region.
+// keep in sync with getHomeRegionCatchIds in
+// api/src/users-pokemon/users-pokemon-repository.js (same rule, in SQL)
 export const homeRegionCatchFilter = mon => c =>
   Number(c.gen) === Number(mon.originalGen) &&
   Boolean(c.region) &&
@@ -85,10 +87,7 @@ export const buildRequiredSources = (mon, neededRules, overrides = {}) => {
 export const checkCompletion = (mon, requiredSources) => {
   if (!requiredSources.length) {
     // No applicable rules: any catch at all completes the record.
-    return (
-      (mon.usersSourcesByGen || []).some(row => row && row.id) ||
-      Boolean((mon.usersSources || [])[0])
-    )
+    return (mon.usersCatches || []).some(row => row && row.gameId)
   }
   return requiredSources.every(
     entry => entry.caughtIn.length > 0 || entry.caughtViaEvolution

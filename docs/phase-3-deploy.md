@@ -14,14 +14,24 @@ if the code deploys before the table exists, every `/api/all-pokemon` request
    `adhoc/scripts/migrations/2026-08-users-source-overrides.sql`. This has to
    land before the code deploy — the completion engine and the source-override
    routes assume the table already exists.
-2b. **Apply the phase-3 findings migration**:
+3. **Apply the phase-3 findings migration**:
    `adhoc/scripts/migrations/2026-08-phase3-findings.sql` (regions,
-   home regions, isolation groups, and deletion of stored
-   `original`-type source links — the deploy's code derives home-region
-   completion and errors nowhere without it, but users would see wrong
-   home-region state until it runs; apply it in the same window as step 2).
-3. **Deploy code** (normal GitHub Actions self-hosted-runner flow).
-4. **Dry-run the complete-records migration** in the adhoc container:
+   home regions, isolation groups, and deletion of stored `original`-type
+   source links). The columns it adds are required by the main pokemon query
+   and the drawer route — `/api/all-pokemon` and `/api/pokemon` 500 until this
+   migration runs, so it must land before step 5 (code deploy). Between this
+   migration and the code deploy, the OLD code reads stored `original` links
+   that no longer exist, so home-region pills read unsatisfied during the
+   window (near-zero impact: current users have the original rule off) — keep
+   the window short.
+4. **Check query performance**: run `explain analyze` on the main pokemon
+   query (`pokemonWithSourcesQuery` in `api/src/pokemon/pokemon-repository.js`)
+   against the migrated DB and compare against the ~70ms baseline. This branch
+   added a sixth `json_agg(distinct ...)` aggregate and widened another, and
+   this query has a documented 70ms→300ms regression history (see
+   `BACKLOG.md`). Abort the deploy and investigate if it has regressed badly.
+5. **Deploy code** (normal GitHub Actions self-hosted-runner flow).
+6. **Dry-run the complete-records migration** in the adhoc container:
    ```
    docker compose -f compose.dev.yml exec adhoc node scripts/migrate-complete-records.js --dry-run
    ```
@@ -31,9 +41,9 @@ if the code deploys before the table exists, every `/api/all-pokemon` request
    ever exercised against synthetic dev data, not real production
    `complete_records` values, so this is the step most likely to surface
    something unexpected.
-5. **Run it for real** (same command, without `--dry-run`) once the dry-run
+7. **Run it for real** (same command, without `--dry-run`) once the dry-run
    output looks sane.
-6. **Smoke test**:
+8. **Smoke test**:
    - List view: completion checkmarks look right on load.
    - Box view: checked records match what's expected for a known game.
    - Pill override toggle: click a source pill, confirm it flips and the
@@ -47,7 +57,7 @@ if the code deploys before the table exists, every `/api/all-pokemon` request
      show caught (behavior change from deriving base `isCaught` from
      catches).
 
-## The window between (3) and (5)
+## The window between (5) and (7)
 
 Between deploying code and running the complete-records migration for real,
 box view checkboxes will read as unchecked (the new code expects
@@ -57,5 +67,5 @@ window, the write goes through with the new key format sitting alongside any
 old-format keys already in that row — a mix of formats in the same array.
 This is expected and handled: `migrate-complete-records.js`'s dedupe step
 collapses duplicate/mixed-format entries for the same record when it runs,
-so step (5) cleans this up rather than leaving it stuck. Keep the window
-between (3) and (5) as short as practical anyway.
+so step (7) cleans this up rather than leaving it stuck. Keep the window
+between (5) and (7) as short as practical anyway.

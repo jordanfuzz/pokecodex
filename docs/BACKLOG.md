@@ -196,6 +196,10 @@ priority. Data-gathering work lives in [source-data.md](source-data.md).
 - [ ] Note — Hisuian form rows don't exist in the dex data; when they're
       added (phase 7), set `pokemon.home_region = 'Hisui'` for them (found
       2026-08 phase-3 findings)
+- [ ] `evolveUsersPokemon` accepts any client-supplied `evolvedPokemonId`
+      without validating it against `pokemon.evolves_to` — self-affecting
+      only (bogus row on own account), pre-existing (found 2026-08
+      phase-3 findings final review)
 
 ## Features (post-v1 candidates)
 

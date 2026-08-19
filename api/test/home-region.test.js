@@ -21,6 +21,21 @@ const cleanup = async userId => {
     `delete from users_pokemon where user_id = $1 and pokemon_id = $2 and notes = 'home-region-test';`,
     [userId, POKEMON]
   )
+  // Sweep residue the POST test below can leave if an assertion throws
+  // before its own cleanup runs. Scoped to pokemon 399 + null notes + the
+  // last hour so this can never touch real data: real rows are years old or
+  // note-marked, never both null-notes and created in the last hour.
+  await pgPool.query(
+    `delete from users_pokemon_sources where users_pokemon_id in
+     (select id from users_pokemon where user_id = $1 and pokemon_id = $2
+      and notes is null and caught_at > now() - interval '1 hour');`,
+    [userId, POKEMON]
+  )
+  await pgPool.query(
+    `delete from users_pokemon where user_id = $1 and pokemon_id = $2
+     and notes is null and caught_at > now() - interval '1 hour';`,
+    [userId, POKEMON]
+  )
 }
 
 const insertCatch = async (userId, gameId) => {
@@ -84,14 +99,17 @@ describe('home region catch ids', () => {
       gameVersion: DIAMOND,
       pokeball: 1,
     })
-    assert.equal(res.status, 200)
-    assert.ok(Array.isArray(res.body.homeRegionCatchIds))
-    assert.ok(Array.isArray(res.body.usersSourceOverrides))
 
+    // Compute newRowId before any response assertions so a failing
+    // assertion below still lets the finally block clean up the row.
     const newRowId = (await rowIds()).find(id => !before.includes(id))
     assert.ok(newRowId, 'POST should have created a row')
 
     try {
+      assert.equal(res.status, 200)
+      assert.ok(Array.isArray(res.body.homeRegionCatchIds))
+      assert.ok(Array.isArray(res.body.usersSourceOverrides))
+
       const links = await pgPool.query(
         `select * from users_pokemon_sources where users_pokemon_id = $1;`,
         [newRowId]

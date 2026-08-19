@@ -14,6 +14,8 @@ export const getAllForUserAndPokemon = (userId, pokemonId) => {
   return pgPool.query(selectQuery, [userId, pokemonId]).then(res => camelize(res.rows))
 }
 
+// keep in sync with homeRegionCatchFilter in api/src/pokemon/completion.js
+// (same rule, in JS)
 export const getHomeRegionCatchIds = (userId, pokemonId) => {
   return pgPool
     .query(

@@ -66,7 +66,7 @@ const BoxChecklist = ({
                 type="checkbox"
                 onChange={e => handleRecordChange(e.target.checked, pokemon)}
                 disabled={!pokemon.isCaught}
-                checked={pokemon.isCaught && completeRecords.includes(pokemon.recordKey)}
+                checked={isShownInBox(pokemon, completeRecords)}
               />
             </td>
           ) : (

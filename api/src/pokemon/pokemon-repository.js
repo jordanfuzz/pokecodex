@@ -48,7 +48,9 @@ export const getAllForUser = async (userId, generationId = null) => {
         transferGen: row.transferGen == null ? null : Number(row.transferGen),
       }))
 
-    return Object.assign({}, mon, {
+    const { usersSourcesByGen: rawSourcesByGen, ...monWithoutRawRows } = mon
+
+    return Object.assign({}, monWithoutRawRows, {
       isComplete,
       requiredSources,
       sourcesByType,
