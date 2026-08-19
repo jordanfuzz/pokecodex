@@ -78,7 +78,7 @@ const Review = () => {
   }
 
   const selectableIds = rows
-    .filter(row => row.rowKind === 'new' && row.status === 'pending')
+    .filter(row => row.rowKind === 'new' && row.status === 'pending' && !row.suggestedSourceId)
     .map(row => row.id)
 
   const selectedSelectable = selectableIds.filter(id => selectedIds.has(id))

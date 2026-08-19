@@ -107,6 +107,20 @@
     display: flex;
     gap: 0.5rem;
 
+    button {
+      background: none;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+      color: inherit;
+      padding: 0.3rem 0.6rem;
+      cursor: pointer;
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+    }
+
     .delete-button { color: #f75231; border-color: #f75231; }
   }
 

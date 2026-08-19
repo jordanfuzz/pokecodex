@@ -292,7 +292,8 @@ export const bulkApproveStagedSources = async (ids) => {
         (
           await client.query(
             `select * from staged_sources
-             where id = $1 and status = 'pending' and row_kind = 'new' for update;`,
+             where id = $1 and status = 'pending' and row_kind = 'new'
+               and suggested_source_id is null for update;`,
             [id]
           )
         ).rows[0] ?? null

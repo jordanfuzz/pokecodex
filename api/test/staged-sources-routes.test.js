@@ -325,18 +325,23 @@ describe('staged-sources routes', () => {
       const source = await insertTestSource()
       const audit = await insertStagedRow({ rowKind: 'audit', matchedSourceId: source.id })
       const rejected = await insertStagedRow({ status: 'rejected' })
+      const suggestedSource = await insertTestSource()
+      const suggested = await insertStagedRow({ suggestedSourceId: suggestedSource.id, suggestionReason: 'nickname' })
 
       const res = await agent
         .post('/api/staged-sources/bulk-approve')
-        .send({ ids: [a.id, b.id, audit.id, rejected.id] })
+        .send({ ids: [a.id, b.id, audit.id, rejected.id, suggested.id] })
       assert.equal(res.status, 200)
       assert.deepEqual(new Set(res.body.approvedIds), new Set([a.id, b.id]))
-      assert.deepEqual(new Set(res.body.skippedIds), new Set([audit.id, rejected.id]))
+      assert.deepEqual(new Set(res.body.skippedIds), new Set([audit.id, rejected.id, suggested.id]))
 
       const created = await pgPool.query(
         `select name from sources where name in ('staged-api-test-bulk-a', 'staged-api-test-bulk-b');`
       )
       assert.equal(created.rows.length, 2)
+
+      const stillPending = await pgPool.query(`select status from staged_sources where id = $1;`, [suggested.id])
+      assert.equal(stillPending.rows[0].status, 'pending', 'suggestion-bearing row must not be bulk-approved')
     })
   })
 })

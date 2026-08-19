@@ -127,7 +127,7 @@ const StagedRow = ({ row, selected, onToggleSelected, onAction }) => {
   return (
     <div className={`staged-row kind-${row.rowKind} status-${row.status}`}>
       <div className="staged-row-header">
-        {isPending && row.rowKind === 'new' && (
+        {isPending && row.rowKind === 'new' && !row.suggestedSourceId && (
           <input type="checkbox" checked={selected} onChange={onToggleSelected} />
         )}
         <span className={`kind-badge badge-kind-${row.rowKind}`}>{row.rowKind}</span>
@@ -219,8 +219,12 @@ const StagedRow = ({ row, selected, onToggleSelected, onAction }) => {
           )}
           {row.rowKind === 'audit' && (
             <>
-              <button type="button" onClick={() => approve({ action: 'no-change' })} disabled={busy}>Existing is fine</button>
-              <button type="button" onClick={() => approve({ action: 'apply' })} disabled={busy}>Apply parsed changes</button>
+              {row.matchedSource && (
+                <>
+                  <button type="button" onClick={() => approve({ action: 'no-change' })} disabled={busy}>Existing is fine</button>
+                  <button type="button" onClick={() => approve({ action: 'apply' })} disabled={busy}>Apply parsed changes</button>
+                </>
+              )}
               <button type="button" className="reject-button" onClick={reject} disabled={busy}>Reject</button>
             </>
           )}

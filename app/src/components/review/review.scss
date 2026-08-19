@@ -44,8 +44,17 @@
   }
 
   .bulk-approve-button {
+    background: none;
+    border: 1px solid #7bce52;
+    border-radius: 3px;
     color: #7bce52;
-    border-color: #7bce52;
+    padding: 0.3rem 0.6rem;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
   }
 
   .pokemon-group {
