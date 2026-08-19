@@ -7,6 +7,7 @@ import {
   getBoxDataForUser,
   setupBoxDataForUser,
   updateUsersBoxData,
+  getHomeRegionCatchIds,
 } from '../users-pokemon/users-pokemon-repository.js'
 import { getAllPokeballs, getAllGameVersions } from '../game-data/game-data-repository.js'
 import {
@@ -38,6 +39,7 @@ router.get('/pokemon', async (req, res) => {
       userId,
       req.query.pokemonId
     ),
+    homeRegionCatchIds: await getHomeRegionCatchIds(userId, req.query.pokemonId),
     pokeballs: await getAllPokeballs(),
     gameVersions: await getAllGameVersions(),
   }
@@ -59,6 +61,11 @@ router.post('/pokemon', async (req, res) => {
       userId,
       req.body.pokemonId
     ),
+    usersSourceOverrides: await getSourceOverridesForUserAndPokemon(
+      userId,
+      req.body.pokemonId
+    ),
+    homeRegionCatchIds: await getHomeRegionCatchIds(userId, req.body.pokemonId),
     pokeballs: await getAllPokeballs(),
     gameVersions: await getAllGameVersions(),
   }

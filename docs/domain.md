@@ -48,6 +48,14 @@ Decisions already made:
   enough" to track twice.)
 - The "unique sources" user rule should include `special`, `prize`, and `gift`
   (listed as still to-apply pre-hiatus).
+- "From home region" (the `original` source type) is **derived, not
+  logged**: a catch qualifies iff its game's generation equals the
+  pokemon's `original_gen` AND the game's region equals the pokemon's
+  `home_region` (so SoulSilver Sinnoh catches, remakes, and Let's Go don't
+  count). Stored `original` links were deleted; the pill and catch tags
+  compute from catch data. Evolution needs no special case — the evolved
+  record keeps the original catch's game, so the check runs against the
+  evolution's own home games.
 
 Gen scoping: each source row carries a gen (0 = all gens), and the checklist
 only shows sources obtainable in the selected gen. **Unsolved: the multi-gen
@@ -125,6 +133,13 @@ Notable game-specific rules encoded or planned:
 - Punctuation Unown don't exist in gen 2.
 - A caught pokemon satisfies a gen's box only if caught in that gen or earlier
   *along a valid transfer path* (the Let's Go Vaporeon rule).
+- Isolated games (`isolation_group`): Let's Go pair (`lets-go`), Colosseum
+  (`colosseum`), XD (`xd`). Their boxes only count catches from the same
+  group. Outbound, a game's catches transfer as `transfer_gen` (Let's Go:
+  8, via Home) or their own gen (Colosseum/XD trade out to GBA gen 3).
+- `game_versions.region` / `pokemon.home_region` back the home-region rule;
+  peripherals (Channel, Box, Ranch, Ranger, Battle Revolution) have null
+  region and are never home games.
 
 ## Filtering (current behavior)
 

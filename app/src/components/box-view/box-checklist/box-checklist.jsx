@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { completeRecordsForVersion, isShownInBox } from '../box-view.logic'
 import './box-checklist.scss'
 
 import pokeball from '../../../media/pokeball.png'
@@ -15,14 +16,8 @@ const BoxChecklist = ({
 }) => {
   const [completeRecords, setCompleteRecords] = useState([])
 
-  // TODO: This is duplicated between box and box-checklist. Refactor to be in one place.
   useEffect(() => {
-    if (!usersBoxData) return
-
-    const boxDataForVersion = usersBoxData.find(
-      gameVersion => gameVersion.gameId === selectedVersion.id
-    )
-    setCompleteRecords(boxDataForVersion?.completeRecords ?? [])
+    setCompleteRecords(completeRecordsForVersion(usersBoxData, selectedVersion))
   }, [usersBoxData, selectedVersion])
 
   const handleRecordChange = (checked, mon) => {
@@ -43,7 +38,11 @@ const BoxChecklist = ({
   }
 
   const handleChecklistSave = () => {
-    handleUpdateUsersBoxData(completeRecords)
+    const pruned = completeRecords.filter(key => {
+      const mon = filteredPokemon.find(m => m.recordKey === key)
+      return mon ? mon.isCaught : true
+    })
+    handleUpdateUsersBoxData(pruned)
   }
 
   const renderListRows = () => {
@@ -67,14 +66,12 @@ const BoxChecklist = ({
                 type="checkbox"
                 onChange={e => handleRecordChange(e.target.checked, pokemon)}
                 disabled={!pokemon.isCaught}
-                checked={completeRecords.includes(pokemon.recordKey)}
+                checked={isShownInBox(pokemon, completeRecords)}
               />
             </td>
           ) : (
             <td className="checklist-checkbox">
-              {pokemon.isCaught && completeRecords.includes(pokemon.recordKey)
-                ? '✅'
-                : '⬜'}
+              {isShownInBox(pokemon, completeRecords) ? '✅' : '⬜'}
             </td>
           )}
 

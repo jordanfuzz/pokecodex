@@ -177,6 +177,29 @@ priority. Data-gathering work lives in [source-data.md](source-data.md).
       that triggered the rollback — the caught error from `ROLLBACK` itself
       propagates instead of the real failure (found 2026-08 phase-3 final
       review)
+- [ ] `pokemonWithSourcesQuery`'s new `users_catches` aggregate and widened
+      `users_sources_by_gen` jsonb have unmeasured perf impact — run
+      `explain analyze` against a restored prod dump before/at deploy (this
+      query has a documented history of going from ~70ms to ~300ms when it
+      grew a join; see domain.md's performance trade-off note) (found 2026-08
+      phase-3 findings)
+- [ ] Declined for now — gen 2 → gen 1 Time Capsule back-trades in box view
+      (a gen 2 catch of a gen-1 dex pokemon could satisfy gen 1 boxes) (found
+      2026-08 phase-3 findings)
+- [ ] Declined for now — Virtual Console gen 1–2 → gen 7 transfer path (only
+      correct if gen 1–2 playthroughs are on 3DS VC; app can't tell from the
+      game alone) (found 2026-08 phase-3 findings)
+- [ ] Note — box view is deliberately form-only (decision 2026-08-18): if a
+      global non-standard source rule (e.g. shiny) ever ships, box rows for
+      it need the `entryMakesBoxRow` gate revisited (found 2026-08 phase-3
+      findings)
+- [ ] Note — Hisuian form rows don't exist in the dex data; when they're
+      added (phase 7), set `pokemon.home_region = 'Hisui'` for them (found
+      2026-08 phase-3 findings)
+- [ ] `evolveUsersPokemon` accepts any client-supplied `evolvedPokemonId`
+      without validating it against `pokemon.evolves_to` — self-affecting
+      only (bogus row on own account), pre-existing (found 2026-08
+      phase-3 findings final review)
 
 ## Features (post-v1 candidates)
 

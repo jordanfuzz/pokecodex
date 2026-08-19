@@ -8,7 +8,8 @@
     "start": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "dev:host": "vite"
+    "dev:host": "vite",
+    "test": "vitest run"
   },
   "author": "jordan@cooperplanet.com",
   "license": "ISC",
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^6.0.5",
-    "vite": "^8.2.1"
+    "vite": "^8.2.1",
+    "vitest": "^4.1.11"
   }
 }

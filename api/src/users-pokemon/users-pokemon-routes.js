@@ -6,12 +6,14 @@ import {
   updateNoteForUsersPokemon,
   updateUsersPokemon,
   evolveUsersPokemon,
+  getHomeRegionCatchIds,
 } from './users-pokemon-repository.js'
 import { getAllPokeballs, getAllGameVersions } from '../game-data/game-data-repository.js'
 import {
   getUsersPokemonSources,
   getEvolutionSourcesForPokemon,
 } from '../sources/sources-repository.js'
+import { getSourceOverridesForUserAndPokemon } from '../users/source-overrides-repository.js'
 
 router.get('/users-pokemon', async (req, res) => {
   const response = {
@@ -31,6 +33,11 @@ router.put('/users-pokemon', async (req, res) => {
       userId,
       req.body.pokemonId
     ),
+    usersSourceOverrides: await getSourceOverridesForUserAndPokemon(
+      userId,
+      req.body.pokemonId
+    ),
+    homeRegionCatchIds: await getHomeRegionCatchIds(userId, req.body.pokemonId),
   }
   res.status(200).send(response)
 })
@@ -44,6 +51,7 @@ router.delete('/users-pokemon', async (req, res) => {
       userId,
       req.body.pokemonId
     ),
+    homeRegionCatchIds: await getHomeRegionCatchIds(userId, req.body.pokemonId),
   }
   res.status(200).send(response)
 })
@@ -65,6 +73,10 @@ router.put('/users-pokemon/evolve', async (req, res) => {
       req.body.oldPokemonData.pokemonId
     ),
     usersPokemonEvolutionSources: await getEvolutionSourcesForPokemon(
+      userId,
+      req.body.oldPokemonData.pokemonId
+    ),
+    homeRegionCatchIds: await getHomeRegionCatchIds(
       userId,
       req.body.oldPokemonData.pokemonId
     ),

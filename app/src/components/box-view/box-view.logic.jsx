@@ -68,3 +68,25 @@ export const wallpapers = [
 ]
 
 export const largeWallpaper = pokemonBox
+
+// Gens 1-2 and 3+ have no transfer path between them.
+export const transferPathOk = (catchGen, versionGen) =>
+  catchGen <= versionGen && !(catchGen <= 2 && versionGen >= 3)
+
+// c: {gameId, gen, isolationGroup, transferGen}; version: a game_versions row.
+// Isolated boxes (Let's Go, Colosseum, XD) only count catches from their own
+// group. Catches from isolated games leave via transferGen (Let's Go -> 8 via
+// Home) or their own gen (Colosseum/XD trade out to GBA gen 3).
+export const catchSatisfiesBox = (c, version) => {
+  if (version.isolationGroup) return c.isolationGroup === version.isolationGroup
+  const effectiveGen = c.transferGen ?? c.gen
+  return transferPathOk(effectiveGen, version.generationId)
+}
+
+export const completeRecordsForVersion = (usersBoxData, version) =>
+  usersBoxData?.find(game => game.gameId === version.id)?.completeRecords ?? []
+
+// The single definition of "shown as in-box": a valid catch AND a checked
+// record. Sprite, read-mode checklist, and edit-mode checkbox all use this.
+export const isShownInBox = (mon, completeRecords) =>
+  Boolean(mon.isCaught) && completeRecords.includes(mon.recordKey)

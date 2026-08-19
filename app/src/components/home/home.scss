@@ -110,3 +110,28 @@
   right: 15px;
   font-size: 24px;
 }
+
+.sources-loading {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 10px 5px;
+  min-height: 45px;
+}
+
+.skeleton-pill {
+  width: 110px;
+  height: 31px;
+  margin: 5px;
+  background-color: rgba(0, 0, 0, 0.25);
+  animation: skeleton-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}

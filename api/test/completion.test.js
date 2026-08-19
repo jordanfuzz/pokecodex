@@ -34,6 +34,9 @@ const unown = {
   usersSourcesByGen: [{ id: 'src-a', source: 'variant', name: 'A', gen: 2 }],
   usersSources: ['variant'],
   usersEvolutionSourceIds: [null],
+  usersCatches: [
+    { gameId: 4, gen: 2, region: 'Johto', isolationGroup: null, transferGen: null },
+  ],
 }
 
 describe('buildRequiredSources', () => {
@@ -45,8 +48,11 @@ describe('buildRequiredSources', () => {
   it('marks per-row caught state', () => {
     const required = buildRequiredSources(unown, ['variant'])
     const byId = Object.fromEntries(required.map(r => [r.sourceId, r]))
-    assert.deepEqual(byId['src-a'].caughtInGens, [2])
-    assert.deepEqual(byId['src-b'].caughtInGens, [])
+    assert.deepEqual(
+      byId['src-a'].caughtIn.map(c => c.gen),
+      [2]
+    )
+    assert.deepEqual(byId['src-b'].caughtIn, [])
   })
 
   it('an override forces a normally-excluded source in', () => {
@@ -106,6 +112,23 @@ describe('buildRequiredSources', () => {
     assert.equal(required[0].caughtViaEvolution, false)
     assert.equal(checkCompletion(wildEvolved, required), false)
   })
+
+  it('two catches of one source in different games of the same gen stay separate caughtIn entries', () => {
+    const twoGames = {
+      ...unown,
+      usersSourcesByGen: [
+        { id: 'src-a', source: 'variant', name: 'A', gen: 2, gameId: 4 },
+        { id: 'src-a', source: 'variant', name: 'A', gen: 2, gameId: 5 },
+      ],
+    }
+    const required = buildRequiredSources(twoGames, ['variant'])
+    const entry = required.find(r => r.sourceId === 'src-a')
+    assert.equal(entry.caughtIn.length, 2)
+    assert.deepEqual(
+      entry.caughtIn.map(c => c.gameId),
+      [4, 5]
+    )
+  })
 })
 
 describe('checkCompletion', () => {
@@ -128,8 +151,25 @@ describe('checkCompletion', () => {
 
   it('with no applicable rules, any catch completes the record', () => {
     assert.equal(checkCompletion(unown, []), true)
-    const uncaught = { ...unown, usersSourcesByGen: [null], usersSources: [null] }
+    const uncaught = {
+      ...unown,
+      usersSourcesByGen: [null],
+      usersSources: [null],
+      usersCatches: [],
+    }
     assert.equal(checkCompletion(uncaught, []), false)
+  })
+
+  it('with no applicable rules, a catch with no source links still completes the record', () => {
+    const linkless = {
+      ...unown,
+      usersSourcesByGen: [null],
+      usersSources: [null],
+      usersCatches: [
+        { gameId: 14, gen: 4, region: 'Sinnoh', isolationGroup: null, transferGen: null },
+      ],
+    }
+    assert.equal(checkCompletion(linkless, []), true)
   })
 
   it('evolution-inherited sources satisfy their row', () => {
@@ -150,5 +190,89 @@ describe('checkCompletion', () => {
     }
     const required = buildRequiredSources(abra, ['npc-trade'])
     assert.equal(checkCompletion(abra, required), true)
+  })
+})
+
+describe('auto-computed home region', () => {
+  const tangela = {
+    originalGen: 1,
+    homeRegion: 'Kanto',
+    sourcesByType: [
+      {
+        id: 'src-original',
+        type: 'original',
+        name: 'From home region',
+        image: null,
+        replaceDefault: false,
+        firstGen: 1,
+      },
+    ],
+    usersSourcesByGen: [null],
+    usersSources: [null],
+    usersEvolutionSourceIds: [null],
+    usersCatches: [],
+  }
+
+  it('a catch in a home game satisfies the original source', () => {
+    const mon = {
+      ...tangela,
+      usersCatches: [
+        { gameId: 1, gen: 1, region: 'Kanto', isolationGroup: null, transferGen: null },
+      ],
+    }
+    const required = buildRequiredSources(mon, ['original'])
+    assert.equal(required[0].caughtIn.length, 1)
+    assert.equal(checkCompletion(mon, required), true)
+  })
+
+  it('same gen but wrong region does not satisfy it', () => {
+    // e.g. a Sinnoh pokemon caught in Soul Silver (gen 4, Johto)
+    const mon = {
+      ...tangela,
+      originalGen: 4,
+      homeRegion: 'Sinnoh',
+      usersCatches: [
+        { gameId: 18, gen: 4, region: 'Johto', isolationGroup: null, transferGen: null },
+      ],
+    }
+    const required = buildRequiredSources(mon, ['original'])
+    assert.equal(required[0].caughtIn.length, 0)
+    assert.equal(checkCompletion(mon, required), false)
+  })
+
+  it('right region but wrong gen (a remake) does not satisfy it', () => {
+    const mon = {
+      ...tangela,
+      usersCatches: [
+        { gameId: 12, gen: 3, region: 'Kanto', isolationGroup: null, transferGen: null },
+      ],
+    }
+    const required = buildRequiredSources(mon, ['original'])
+    assert.equal(required[0].caughtIn.length, 0)
+  })
+
+  it('stored original links are ignored — only catches count', () => {
+    const mon = {
+      ...tangela,
+      usersSourcesByGen: [
+        { id: 'src-original', source: 'original', name: 'From home region', gen: 1 },
+      ],
+      usersCatches: [],
+    }
+    const required = buildRequiredSources(mon, ['original'])
+    assert.equal(required[0].caughtIn.length, 0)
+    assert.equal(checkCompletion(mon, required), false)
+  })
+
+  it('null-region games never qualify', () => {
+    const mon = {
+      ...tangela,
+      homeRegion: null,
+      usersCatches: [
+        { gameId: 40, gen: 1, region: null, isolationGroup: null, transferGen: null },
+      ],
+    }
+    const required = buildRequiredSources(mon, ['original'])
+    assert.equal(required[0].caughtIn.length, 0)
   })
 })

@@ -27,10 +27,16 @@ const Catch = props => {
   useEffect(() => {
     if (!isEditMode || !usersPokemonSources || !catchData) return
 
+    const originalIds = new Set(
+      (activePokemonSources ?? [])
+        .filter(x => x.source === 'original')
+        .map(x => x.id)
+    )
     setSelectedSources(
       usersPokemonSources
         .filter(x => x.pokemonId === activeUsersPokemon.id)
         .map(x => x.id)
+        .filter(id => !originalIds.has(id))
     )
     setSelectedGameVersion(
       catchData.gameVersions.find(x => x.name === activeUsersPokemon.gameVersion)?.id ??
@@ -42,18 +48,20 @@ const Catch = props => {
 
   if (!activePokemonSources || !catchData) return null
 
-  const sourceOptions = activePokemonSources.map((x, i) => {
-    const label = (
-      <span className="option-container" key={i}>
-        <img
-          src={x.image ? x.image : activePokemon.defaultImage}
-          className="source-option-image"
-        />
-        {x.name}
-      </span>
-    )
-    return { value: x.id, label }
-  })
+  const sourceOptions = activePokemonSources
+    .filter(x => x.source !== 'original')
+    .map((x, i) => {
+      const label = (
+        <span className="option-container" key={i}>
+          <img
+            src={x.image ? x.image : activePokemon.defaultImage}
+            className="source-option-image"
+          />
+          {x.name}
+        </span>
+      )
+      return { value: x.id, label }
+    })
 
   const pokeballOptions = catchData.pokeballs.map(x => {
     const label = <img src={x.image} className="pokeball-option-image" />

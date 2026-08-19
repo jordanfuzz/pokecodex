@@ -94,7 +94,9 @@ New API-side module owning required-entry expansion:
 - Replace the hand-rolled fan-out switch (`box-view.jsx:97-213`) with rows
   rendered from the API's `requiredSources` (filtered by the selected game's
   gen/dex rules, which stay client-side inputs to display).
-- Forced types with no current `case` (e.g. shiny) get box rows for free.
+- Individually forced (pill-override) sources get box rows; a *globally*
+  enabled non-standard rule (e.g. shiny) deliberately does not — box view
+  is form-only (decision 2026-08-18, see the phase-3 findings spec).
 - Checklist row keys move from `id` / `id:variantName` (mixed number/string)
   to a stable `id:sourceId` scheme; one-time migration of existing
   `users_box_data.complete_records` values.
