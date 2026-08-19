@@ -14,6 +14,12 @@ if the code deploys before the table exists, every `/api/all-pokemon` request
    `adhoc/scripts/migrations/2026-08-users-source-overrides.sql`. This has to
    land before the code deploy — the completion engine and the source-override
    routes assume the table already exists.
+2b. **Apply the phase-3 findings migration**:
+   `adhoc/scripts/migrations/2026-08-phase3-findings.sql` (regions,
+   home regions, isolation groups, and deletion of stored
+   `original`-type source links — the deploy's code derives home-region
+   completion and errors nowhere without it, but users would see wrong
+   home-region state until it runs; apply it in the same window as step 2).
 3. **Deploy code** (normal GitHub Actions self-hosted-runner flow).
 4. **Dry-run the complete-records migration** in the adhoc container:
    ```
@@ -32,6 +38,14 @@ if the code deploys before the table exists, every `/api/all-pokemon` request
    - Box view: checked records match what's expected for a known game.
    - Pill override toggle: click a source pill, confirm it flips and the
      drawer/list both reflect it; clear the override afterward.
+   - Home-region pill: a pokemon caught in its debut game shows the
+     "From home region" pill achieved without a stored tag.
+   - Box view isolated games: the Let's Go box only shows catches made in
+     Let's Go.
+   - Deleted `original` links: spot-check a pokemon whose only source link
+     was the deleted 'original' link — its box-view base row should now
+     show caught (behavior change from deriving base `isCaught` from
+     catches).
 
 ## The window between (3) and (5)
 
