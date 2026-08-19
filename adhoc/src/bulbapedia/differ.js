@@ -22,12 +22,18 @@ const tokens = (text) =>
 export const similarity = (a, b) => {
   const tokensA = tokens(a)
   const tokensB = tokens(b)
-  if (tokensA.size === 0 || tokensB.size === 0) return 0
+  // A single shared token (e.g. a 1-word source name like "Fossil") is not
+  // enough signal to claim a match — require at least 2 tokens per side.
+  if (tokensA.size < 2 || tokensB.size < 2) return 0
   let common = 0
   for (const token of tokensA) if (tokensB.has(token)) common++
   return common / Math.min(tokensA.size, tokensB.size)
 }
 
+// Multiple candidates legitimately matching the same source row is correct
+// by design, not a bug: e.g. separate Ruby and Sapphire candidate rows for
+// one gift that Bulbapedia records as a single gen-3 source both match that
+// one source. Do not dedupe candidates against an already-matched source.
 export const diffCandidates = (candidates, sources, threshold = 0.34) => {
   const uniqueSources = sources.filter((source) => UNIQUE_SOURCE_TYPES.includes(source.source))
   const matchedSourceIds = new Set()
@@ -43,7 +49,9 @@ export const diffCandidates = (candidates, sources, threshold = 0.34) => {
     let bestScore = 0
     for (const source of pool) {
       const score = similarity(candidate.area, `${source.name} ${source.description ?? ''}`)
-      if (score > bestScore) {
+      // Tie-break equal scores deterministically by id so results don't
+      // depend on source array order.
+      if (score > bestScore || (score === bestScore && best !== null && source.id < best.id)) {
         best = source
         bestScore = score
       }

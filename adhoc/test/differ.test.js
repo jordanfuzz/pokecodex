@@ -38,3 +38,38 @@ test('gen-0 existing rows are eligible for any candidate gen', () => {
   const { matched } = diffCandidates(candidates, gameCorner)
   assert.equal(matched.length, 1)
 })
+
+test('similarity requires at least 2 tokens per side to avoid single-word over-matching', () => {
+  assert.equal(similarity('Fossil', 'Claw Fossil obtained at the museum'), 0)
+})
+
+test('diffCandidates does not match a single-token source name against unrelated area text', () => {
+  const fossilSources = [{ id: 'e', pokemonId: 138, name: 'Fossil', description: null, gen: 3, source: 'fossil' }]
+  const candidates = [{ pokemonId: 138, gen: 3, area: 'Revive from Claw Fossil obtained at the Mt. Chimney excavation site' }]
+  const { missing, unmatchedExisting } = diffCandidates(candidates, fossilSources)
+  assert.equal(missing.length, 1)
+  assert.deepEqual(unmatchedExisting.map((source) => source.id), ['e'])
+})
+
+test('diffCandidates breaks equal-score ties by lexicographically smaller source id', () => {
+  const tiedSources = [
+    { id: 'b', pokemonId: 999, name: 'Mystery Gift', description: 'Received via wireless communication', gen: 4, source: 'event' },
+    { id: 'a', pokemonId: 999, name: 'Mystery Gift', description: 'Received via wireless communication', gen: 4, source: 'event' },
+  ]
+  const candidates = [{ pokemonId: 999, gen: 4, area: 'Mystery Gift received via wireless communication' }]
+  const { matched } = diffCandidates(candidates, tiedSources)
+  assert.equal(matched.length, 1)
+  assert.equal(matched[0].source.id, 'a')
+})
+
+test('diffCandidates lets multiple same-gen candidates legitimately match one source (e.g. Ruby+Sapphire rows of one gift)', () => {
+  const oneGift = [{ id: 'f', pokemonId: 380, name: 'Egg Move', description: 'Received as an egg from the old man in Lavaridge', gen: 3, source: 'gift' }]
+  const candidates = [
+    { pokemonId: 380, gen: 3, area: 'Ruby: Received as an egg from the old man in Lavaridge' },
+    { pokemonId: 380, gen: 3, area: 'Sapphire: Received as an egg from the old man in Lavaridge' },
+  ]
+  const { matched, unmatchedExisting } = diffCandidates(candidates, oneGift)
+  assert.equal(matched.length, 2)
+  assert.equal(matched[0].source.id, matched[1].source.id)
+  assert.deepEqual(unmatchedExisting, [])
+})
