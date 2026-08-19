@@ -68,6 +68,10 @@ const { rows, warnings: buildWarnings } = buildStagedRows(
 )
 warnings.push(...buildWarnings)
 
+if (rows.length === 0) {
+  throw new Error('no staged rows built — refusing to run the stale delete against an empty emission')
+}
+
 // ---- upsert ------------------------------------------------------------------
 // where status = 'pending': reviewed rows are a permanent audit trail.
 // pairing_confirmed guards row_kind/matched/suggested: a restage must not
@@ -87,6 +91,7 @@ on conflict (natural_key) do update set
   pokemon_id = excluded.pokemon_id,
   name = excluded.name,
   description = excluded.description,
+  image = excluded.image,
   gen = excluded.gen,
   source = excluded.source,
   replace_default = excluded.replace_default,
@@ -114,8 +119,10 @@ try {
       row.rawSnippet, row.origin, row.games, row.parserVersion,
     ])
   }
+  // A parser change that re-keys a candidate must not destroy a human-confirmed
+  // pairing; the confirmed row lingers pending for the reviewer instead.
   const { rowCount: staleDeleted } = await client.query(
-    `delete from staged_sources where status = 'pending' and not (natural_key = any($1::text[]))`,
+    `delete from staged_sources where status = 'pending' and not pairing_confirmed and not (natural_key = any($1::text[]))`,
     [rows.map((row) => row.naturalKey)]
   )
   await client.query('commit')
@@ -124,8 +131,13 @@ try {
   console.log(`stale pending rows deleted: ${staleDeleted}`)
   console.log(`warnings: ${warnings.length}`)
   for (const warning of warnings.slice(0, 40)) console.log(`  ${warning}`)
+  if (warnings.length > 40) console.log(`  ...and ${warnings.length - 40} more`)
 } catch (error) {
-  await client.query('rollback')
+  try {
+    await client.query('rollback')
+  } catch {
+    // swallow rollback failure so the original error propagates
+  }
   throw error
 } finally {
   client.release()
