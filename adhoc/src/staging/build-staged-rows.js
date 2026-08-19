@@ -11,9 +11,12 @@ const EXPECTED_ABSENT_TYPES = ['pokewalker']
 
 // The game is deliberately excluded: per-version duplicates (a Ruby and a
 // Sapphire row of one gift) share a key and collapse into one staged row.
+// Nickname is included: the differ branches on candidate.nickname before
+// scoring, so two candidates sharing (origin, pokemonId, gen, area) but with
+// different nicknames (e.g. two distinct in-game trades) must not collapse.
 export const candidateKey = (candidate) =>
   createHash('sha1')
-    .update(['candidate', candidate.origin, candidate.pokemonId, candidate.gen, candidate.area].join(' '))
+    .update(['candidate', candidate.origin, candidate.pokemonId, candidate.gen, candidate.area, candidate.nickname ?? ''].join(' '))
     .digest('hex')
 
 // First match wins; keep npc-trade above gift (trade entries often carry
@@ -48,8 +51,10 @@ export const buildStagedRows = ({ matched, missing, suggestions, unmatchedExisti
   const warnings = []
 
   // Group candidate-bearing entries by natural key. A key can't appear in
-  // both matched and missing: identical (origin, pokemonId, gen, area)
-  // candidates see the same pool and scores, so they diff identically.
+  // both matched and missing: identical (origin, pokemonId, gen, area,
+  // nickname) candidates see the same pool and scores, so they diff
+  // identically — nickname is part of the key precisely because the differ
+  // branches on it before scoring.
   const groups = new Map()
   const groupFor = (candidate) => {
     const key = candidateKey(candidate)

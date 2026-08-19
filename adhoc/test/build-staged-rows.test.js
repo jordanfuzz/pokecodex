@@ -22,6 +22,18 @@ describe('candidateKey', () => {
     assert.notEqual(candidateKey(candidate()), candidateKey(candidate({ gen: 4 })))
     assert.notEqual(candidateKey(candidate()), candidateKey(candidate({ area: 'other' })))
   })
+
+  it('differs when only the nickname differs', () => {
+    assert.notEqual(
+      candidateKey(candidate({ nickname: 'Marcel' })),
+      candidateKey(candidate({ nickname: 'Spearsy' })))
+  })
+
+  it('still collapses per-version when nicknames are equal', () => {
+    assert.equal(
+      candidateKey(candidate({ game: 'Ruby', nickname: 'Marcel' })),
+      candidateKey(candidate({ game: 'Sapphire', nickname: 'Marcel' })))
+  })
 })
 
 describe('guessSourceType', () => {
