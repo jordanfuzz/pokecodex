@@ -27,6 +27,7 @@ export const parseGameLocations = (wikitext) => {
     const heading = chunk.match(/^====\s*(.*?)\s*====$/)
     if (heading) {
       subsection = heading[1].toLowerCase()
+      gen = null
       continue
     }
     for (const template of extractTemplates(chunk.replace(/<!--[\s\S]*?-->/g, ''))) {

@@ -72,3 +72,24 @@ test('parseGameLocations ignores commented-out entries and missing section', () 
   assert.deepEqual(empty.entries, [])
   assert.equal(empty.warnings.length, 1)
 })
+
+const NO_GEN_FIXTURE = `===Game locations===
+{{Availability/Gen|gen=IX}}
+{{Availability/Entry1|v=Scarlet|area=Core table entry}}
+|}
+|}
+
+====In side games====
+{{Availability/Entry1|v=Masters EX|area=Side game entry with no Gen template}}
+|}
+|}
+`
+
+test('parseGameLocations resets gen at subsection boundaries', () => {
+  const { entries } = parseGameLocations(NO_GEN_FIXTURE)
+  const scarlet = entries.find((entry) => entry.game === 'Scarlet')
+  assert.equal(scarlet.gen, 9)
+  const masters = entries.find((entry) => entry.game === 'Masters EX')
+  assert.equal(masters.subsection, 'in side games')
+  assert.equal(masters.gen, null)
+})
