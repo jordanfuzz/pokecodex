@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { parseTemplate, extractTemplates } from '../src/bulbapedia/wikitext.js'
+import { parseTemplate, extractTemplates, cleanWikitext } from '../src/bulbapedia/wikitext.js'
 
 test('parseTemplate splits named params', () => {
   const { name, params } = parseTemplate('Availability/Entry1|v=Emerald|t=FFF|area=Hatch')
@@ -39,4 +39,20 @@ test('extractTemplates returns only top-level templates, in order', () => {
   assert.equal(templates.length, 2)
   assert.equal(templates[0].name, 'Availability/Gen')
   assert.equal(templates[1].params.area, '{{p|Wobbuffet}} egg')
+})
+
+test('cleanWikitext resolves the common inline templates', () => {
+  assert.equal(cleanWikitext('{{rt|130|Hoenn}} ({{gdis|Mirage Island|III}})'), 'Route 130 (Mirage Island)')
+  assert.equal(cleanWikitext('{{pkmn|breeding|Breed}} {{p|Wobbuffet}} holding a [[Lax Incense]]'), 'Breed Wobbuffet holding a Lax Incense')
+  assert.equal(cleanWikitext('{{DL|List of Pokémon by Pal Park location|Field}}'), 'Field')
+})
+
+test('cleanWikitext resolves labelled links, bold, br, comments', () => {
+  const raw = "Hatch {{pkmn|Egg}} [[List of in-game event Pokémon in Pokémon Emerald#Wynaut|received]] from an old couple in [[Lavaridge Town]]<br>{{rt|130|Hoenn}}<!-- note -->"
+  assert.equal(cleanWikitext(raw), 'Hatch Egg received from an old couple in Lavaridge Town; Route 130')
+})
+
+test('cleanWikitext falls back to last positional param for unknown templates', () => {
+  assert.equal(cleanWikitext('{{OBP|Underground Path|Kanto Routes 5–6|Underground Path (Rt. 5–6)}}'), 'Underground Path (Rt. 5–6)')
+  assert.equal(cleanWikitext('{{Shiny}}'), 'Shiny')
 })

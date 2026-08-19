@@ -62,3 +62,45 @@ export const extractTemplates = (text) => {
   }
   return templates
 }
+
+// Inline template handlers. Anything absent falls back to its last
+// positional param, which covers {{p|X}}, {{pkmn|a|label}}, {{OBP|..|label}},
+// {{ga|Red}}, etc. Handlers exist only where the last positional param is
+// NOT the desired label (gdis/rt end in a gen numeral or region) or a fixed
+// word fits better.
+const INLINE_TEMPLATES = {
+  rt: (p) => `Route ${p[1]}`,
+  gdis: (p) => p[1],
+  dl: (p) => p[3] ?? p[2],
+  color2: (p) => p[3] ?? p[2],
+  safari: () => 'Safari Zone',
+  player: () => 'the player',
+  j: () => '',
+  sup: () => '',
+  tt: (p) => p[1] ?? '',
+  tm: (p) => (p[2] ? `TM${p[1]} (${p[2]})` : `TM${p[1]}`),
+}
+
+const lastPositional = (name, params) => {
+  const keys = Object.keys(params).filter((key) => /^\d+$/.test(key))
+  return keys.length ? params[keys[keys.length - 1]] : name
+}
+
+export const cleanWikitext = (raw) => {
+  let text = raw.replace(/<!--[\s\S]*?-->/g, '')
+  const innermost = /\{\{([^{}]*)\}\}/
+  for (let match; (match = text.match(innermost)); ) {
+    const { name, params } = parseTemplate(match[1])
+    const handler = INLINE_TEMPLATES[name.toLowerCase()]
+    const replacement = handler ? handler(params) ?? '' : lastPositional(name, params)
+    text = text.slice(0, match.index) + replacement + text.slice(match.index + match[0].length)
+  }
+  return text
+    .replace(/\[\[[^\]|]*\|([^\]]*)\]\]/g, '$1')
+    .replace(/\[\[([^\]]*)\]\]/g, '$1')
+    .replace(/'''?/g, '')
+    .replace(/<br\s*\/?>/gi, '; ')
+    .replace(/<\/?[a-z][^>]*>/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
