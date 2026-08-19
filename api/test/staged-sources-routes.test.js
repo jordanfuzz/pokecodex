@@ -44,6 +44,8 @@ describe('staged-sources routes', () => {
         await setAdmin(false)
         assert.equal((await agent.get('/api/staged-sources')).status, 401)
         assert.equal((await agent.get('/api/staged-sources/summary')).status, 401)
+        assert.equal((await agent.patch('/api/staged-sources/x')).status, 401)
+        assert.equal((await agent.post('/api/staged-sources/x/reject')).status, 401)
       } finally {
         await setAdmin(true)
       }
