@@ -90,3 +90,65 @@ export const completeRecordsForVersion = (usersBoxData, version) =>
 // record. Sprite, read-mode checklist, and edit-mode checkbox all use this.
 export const isShownInBox = (mon, completeRecords) =>
   Boolean(mon.isCaught) && completeRecords.includes(mon.recordKey)
+
+// Derives the rows a version's boxes hold from the /api/all-pokemon payload:
+// the version's dex slice, plus one row per required source that the version
+// displays (variants always; gender/regional unless the version ignores
+// them; anything else only when user-forced), each keyed and marked caught
+// against this version's transfer rules.
+export const filterPokemonForVersion = (allPokemon, selectedVersion) => {
+  let filteredPokemon = allPokemon
+  if (selectedVersion.dexLimit)
+    filteredPokemon = allPokemon.slice(0, selectedVersion.dexLimit)
+  else if (selectedVersion.limitedDex)
+    filteredPokemon = allPokemon.filter(mon => selectedVersion.limitedDex.includes(mon.id))
+
+  if (selectedVersion.addMeltanLine) {
+    const meltan = allPokemon.find(mon => mon.id === 808)
+    const melmetal = allPokemon.find(mon => mon.id === 809)
+    filteredPokemon = [...filteredPokemon, meltan, melmetal]
+  }
+
+  const versionGen = selectedVersion.generationId
+
+  const entryMakesBoxRow = entry => {
+    if (entry.type === 'male' || entry.type === 'female')
+      return !selectedVersion.ignoreGender
+    if (entry.type === 'regional') return !selectedVersion.ignoreRegionalVariants
+    if (entry.type === 'variant') return true
+    // Non-standard types only appear as box rows when the user forced them.
+    return entry.isOverridden
+  }
+
+  return filteredPokemon
+    .map(mon => {
+      let replacedDefault = false
+      const newEntries = (mon.requiredSources || [])
+        .filter(entryMakesBoxRow)
+        .filter(entry => entry.firstGen <= versionGen)
+        .map(entry => {
+          if (entry.replaceDefault) replacedDefault = true
+          return {
+            ...mon,
+            variant: entry.name,
+            recordKey: `${mon.id}:${entry.sourceId}`,
+            isCaught: (entry.caughtIn || []).some(c =>
+              catchSatisfiesBox(c, selectedVersion)
+            ),
+            image:
+              mon.imagesBySource.find(x => x[0] === entry.name)?.[1] || mon.defaultImage,
+          }
+        })
+
+      const isCaught = (mon.usersCatches || []).some(c =>
+        catchSatisfiesBox(c, selectedVersion)
+      )
+      const baseEntry = Object.assign({}, mon, {
+        isCaught,
+        recordKey: `${mon.id}`,
+        image: mon.defaultImage,
+      })
+      return replacedDefault ? newEntries : [baseEntry, ...newEntries]
+    })
+    .flat()
+}

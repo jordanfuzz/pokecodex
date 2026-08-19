@@ -3,7 +3,7 @@ import axios from 'axios'
 import { Link, Navigate } from 'react-router'
 import Box from './box/box'
 import BoxChecklist from './box-checklist/box-checklist'
-import { catchSatisfiesBox } from './box-view.logic'
+import { filterPokemonForVersion } from './box-view.logic'
 import './box-view.scss'
 
 const BoxView = () => {
@@ -77,65 +77,7 @@ const BoxView = () => {
   }
 
   const handleFilterPokemon = allPokemon => {
-    let filteredPokemon = allPokemon
-    if (selectedVersion.dexLimit)
-      filteredPokemon = allPokemon.slice(0, selectedVersion.dexLimit)
-    else if (selectedVersion.limitedDex)
-      filteredPokemon = allPokemon.filter(mon =>
-        selectedVersion.limitedDex.includes(mon.id)
-      )
-
-    if (selectedVersion.addMeltanLine) {
-      const meltan = allPokemon.find(mon => mon.id === 808)
-      const melmetal = allPokemon.find(mon => mon.id === 809)
-      filteredPokemon = [...filteredPokemon, meltan, melmetal]
-    }
-
-    const versionGen = selectedVersion.generationId
-
-    const entryMakesBoxRow = entry => {
-      if (entry.type === 'male' || entry.type === 'female')
-        return !selectedVersion.ignoreGender
-      if (entry.type === 'regional') return !selectedVersion.ignoreRegionalVariants
-      if (entry.type === 'variant') return true
-      // Non-standard types only appear as box rows when the user forced them.
-      return entry.isOverridden
-    }
-
-    const pokemonWithSources = filteredPokemon
-      .map(mon => {
-        let replacedDefault = false
-        const newEntries = (mon.requiredSources || [])
-          .filter(entryMakesBoxRow)
-          .filter(entry => entry.firstGen <= versionGen)
-          .map(entry => {
-            if (entry.replaceDefault) replacedDefault = true
-            return {
-              ...mon,
-              variant: entry.name,
-              recordKey: `${mon.id}:${entry.sourceId}`,
-              isCaught: (entry.caughtIn || []).some(c =>
-                catchSatisfiesBox(c, selectedVersion)
-              ),
-              image:
-                mon.imagesBySource.find(x => x[0] === entry.name)?.[1] ||
-                mon.defaultImage,
-            }
-          })
-
-        const isCaught = (mon.usersCatches || []).some(c =>
-          catchSatisfiesBox(c, selectedVersion)
-        )
-        const baseEntry = Object.assign({}, mon, {
-          isCaught,
-          recordKey: `${mon.id}`,
-          image: mon.defaultImage,
-        })
-        return replacedDefault ? newEntries : [baseEntry, ...newEntries]
-      })
-      .flat()
-
-    setFilteredPokemon(pokemonWithSources)
+    setFilteredPokemon(filterPokemonForVersion(allPokemon, selectedVersion))
   }
 
   const handleVersionChange = version => {
