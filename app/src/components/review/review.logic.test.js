@@ -74,6 +74,26 @@ describe('fieldDiffs', () => {
     expect(byField.gen.changed).toBe(false)
   })
 
+  it('marks the gen row unchanged when the matched source is gen 0 (multi-gen), even if staged gen differs', () => {
+    const row = {
+      name: 'same',
+      description: 'same',
+      gen: 5,
+      source: 'gift',
+      replaceDefault: false,
+      matchedSource: {
+        name: 'same',
+        description: 'same',
+        gen: 0,
+        source: 'gift',
+        replaceDefault: false,
+      },
+    }
+    const diffs = fieldDiffs(row)
+    const byField = Object.fromEntries(diffs.map(d => [d.field, d]))
+    expect(byField.gen.changed).toBe(false)
+  })
+
   it('treats a null matchedSource (no match) as all-fields-new', () => {
     const row = {
       name: 'Parsed name',

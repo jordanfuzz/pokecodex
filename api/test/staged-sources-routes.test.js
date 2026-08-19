@@ -196,6 +196,16 @@ describe('staged-sources routes', () => {
       assert.equal(updated.rows[0].source, 'npc-trade')
     })
 
+    it('audit apply preserves gen 0 (multi-gen) sources instead of narrowing to the staged gen', async () => {
+      const source = await insertTestSource({ gen: 0 })
+      const row = await insertStagedRow({ rowKind: 'audit', matchedSourceId: source.id, name: 'staged-api-test-multigen-applied', gen: 3 })
+      const res = await agent.post(`/api/staged-sources/${row.id}/approve`).send({ action: 'apply' })
+      assert.equal(res.body.stagedSource.resolution, 'updated')
+      const updated = await pgPool.query(`select name, gen from sources where id = $1;`, [source.id])
+      assert.equal(updated.rows[0].name, 'staged-api-test-multigen-applied')
+      assert.equal(updated.rows[0].gen, 0, 'gen 0 (multi-gen) must not be narrowed by apply')
+    })
+
     it('audit with a missing action is a 400', async () => {
       const source = await insertTestSource()
       const row = await insertStagedRow({ rowKind: 'audit', matchedSourceId: source.id })

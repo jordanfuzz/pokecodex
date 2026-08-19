@@ -44,6 +44,9 @@ export const fieldDiffs = row => {
   return DIFF_FIELDS.map(field => {
     const staged = row[field] ?? null
     const current = existing[field] ?? null
-    return { field, staged, existing: current, changed: staged !== current }
+    // apply preserves gen 0 (multi-gen) server-side (see approveStagedSource's
+    // audit 'apply' branch), so don't highlight it as a pending change here.
+    const changed = field === 'gen' && current === 0 ? false : staged !== current
+    return { field, staged, existing: current, changed }
   })
 }

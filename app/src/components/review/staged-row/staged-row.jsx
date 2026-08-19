@@ -15,10 +15,10 @@ const StagedRow = ({ row, selected, onToggleSelected, onAction }) => {
 
   const startEdit = () => {
     setDraft({
-      name: row.name ?? '',
-      description: row.description ?? '',
-      source: row.source ?? 'special',
-      gen: row.gen,
+      name: row.name ?? row.matchedSource?.name ?? '',
+      description: row.description ?? row.matchedSource?.description ?? '',
+      source: row.source ?? row.matchedSource?.source ?? 'special',
+      gen: row.gen ?? row.matchedSource?.gen,
     })
     setIsEditing(true)
   }
@@ -33,7 +33,9 @@ const StagedRow = ({ row, selected, onToggleSelected, onAction }) => {
     !!draft &&
     draft.name.trim().length > 0 &&
     Number.isInteger(draftGen) &&
-    draftGen >= 1 &&
+    // gen 0 = multi-gen sentinel; legitimate for existing sources, so the
+    // valid range starts at 0, not 1.
+    draftGen >= 0 &&
     draftGen <= 9
 
   const patch = async () => {
@@ -138,7 +140,7 @@ const StagedRow = ({ row, selected, onToggleSelected, onAction }) => {
         {!isPending && <span className="resolution-chip">{row.status}: {row.resolution}</span>}
       </div>
 
-      {row.rowKind !== 'existing-unmatched' &&
+      {(row.rowKind !== 'existing-unmatched' || isEditing) &&
         (isEditing ? (
           <div className="staged-fields-edit">
             <input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
@@ -206,6 +208,9 @@ const StagedRow = ({ row, selected, onToggleSelected, onAction }) => {
           <span className="staged-type">{row.matchedSource.source}</span>
           <span className="staged-desc">{row.matchedSource.description}</span>
           <span className="reference-count">{row.referenceCount} user reference(s)</span>
+          {isPending && !isEditing && (
+            <button type="button" onClick={startEdit} disabled={busy}>Edit</button>
+          )}
         </div>
       )}
 
@@ -231,6 +236,9 @@ const StagedRow = ({ row, selected, onToggleSelected, onAction }) => {
           {row.rowKind === 'existing-unmatched' && (
             <>
               <button type="button" onClick={() => approve({ action: 'keep' })} disabled={busy}>Keep</button>
+              {row.name != null && (
+                <button type="button" onClick={() => approve({ action: 'update' })} disabled={busy}>Update existing</button>
+              )}
               <button type="button" className="delete-button" onClick={guardedDelete} disabled={busy}>Delete</button>
               <button type="button" className="reject-button" onClick={reject} disabled={busy}>Skip</button>
             </>

@@ -127,7 +127,12 @@ export const approveStagedSource = async (id, { action = null, confirmReferenced
       }
       if (action === 'apply') {
         await client.query(
-          `update sources set name = $2, description = $3, gen = $4, source = $5, replace_default = $6
+          // gen = 0 is the multi-gen sentinel (see sources table doc); the
+          // parent spec froze the multi-gen model, so nothing in this
+          // increment may narrow a gen-0 source down to a single gen.
+          `update sources set name = $2, description = $3,
+            gen = case when gen = 0 then gen else $4 end,
+            source = $5, replace_default = $6
            where id = $1;`,
           [staged.matchedSourceId, staged.name, staged.description, staged.gen,
             staged.source, staged.replaceDefault ?? false]
@@ -146,9 +151,12 @@ export const approveStagedSource = async (id, { action = null, confirmReferenced
         resolution = 'kept'
       } else if (action === 'update') {
         await client.query(
+          // gen = 0 is the multi-gen sentinel; same guard as the audit
+          // 'apply' branch above — nothing in this increment may narrow it.
           `update sources set
             name = coalesce($2, name), description = coalesce($3, description),
-            gen = coalesce($4, gen), source = coalesce($5, source),
+            gen = case when gen = 0 then gen else coalesce($4, gen) end,
+            source = coalesce($5, source),
             replace_default = coalesce($6, replace_default)
            where id = $1;`,
           [staged.matchedSourceId, staged.name, staged.description, staged.gen,
