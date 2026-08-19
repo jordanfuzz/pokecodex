@@ -64,7 +64,7 @@ for (const file of pokemonFiles) {
   warnings.push(...pageWarnings.map((warning) => `${file}: ${warning}`))
   for (const entry of entries) {
     const { kind, reasons } = classifyEntry(entry)
-    tallies[kind]++
+    tallies[kind] = (tallies[kind] ?? 0) + 1
     if (kind === 'untracked-game' && !entry.gameInfo.expected) {
       unknownGames.set(entry.game, (unknownGames.get(entry.game) ?? 0) + 1)
     }
@@ -119,9 +119,9 @@ for (const file of auxFiles) {
 
 // ---- fetch DB state (SELECT only) ----------------------------------------
 const { rows: sources } = await pgPool.query(
-  'select id, pokemon_id as "pokemonId", name, description, gen, source from sources'
+  'select id, pokemon_id as "pokemonId", name, description, gen, source from sources order by id'
 )
-const { rows: pokemon } = await pgPool.query('select id, name from pokemon')
+const { rows: pokemon } = await pgPool.query('select id, name from pokemon order by id')
 await pgPool.end()
 const pokemonName = new Map(pokemon.map(({ id, name }) => [id, name]))
 
@@ -129,6 +129,37 @@ const pokemonName = new Map(pokemon.map(({ id, name }) => [id, name]))
 const inScope = candidates.filter((candidate) => candidate.gen >= 1 && candidate.gen <= 7)
 const outOfScope = candidates.length - inScope.length
 const { matched, missing, unmatchedExisting } = diffCandidates(inScope, sources)
+
+// distinct matched source rows — `matched.length` counts candidate rows, and
+// several candidates (e.g. per-version Ruby/Sapphire rows of one gift)
+// legitimately match the same source row, so it is not directly comparable
+// to source-row counts like unmatchedExisting.
+const distinctMatchedSourceIds = new Set(matched.map(({ source }) => source.id)).size
+
+// `missing` holds one entry per candidate row, so a gift listed once per
+// version (Ruby, Sapphire, ...) shows up as literal duplicates. Collapse
+// rows identical in (pokemonId, gen, area) for reporting; keep the raw
+// count too since it is what "candidate rows" means everywhere else.
+const missingGroups = new Map()
+for (const candidate of missing) {
+  const key = `${candidate.pokemonId}::${candidate.gen}::${candidate.area}`
+  if (!missingGroups.has(key)) missingGroups.set(key, { ...candidate, games: new Set() })
+  missingGroups.get(key).games.add(candidate.game || candidate.origin)
+}
+const missingRows = [...missingGroups.values()]
+const missingDistinctGenArea = missingRows.length
+const missingDistinctPokemonGen = new Set(missing.map((c) => `${c.pokemonId}::${c.gen}`)).size
+
+// Sources aren't gen-filtered before diffCandidates (only candidates are),
+// so unmatchedExisting mixes in-scope (gen 0–7, gen 0 being eligible for
+// any candidate gen) rows with gen 8/9 rows that can never match a gen 1–7
+// candidate by construction. Split the reporting so the two aren't summed
+// together as if comparable.
+const uniqueSourcesAll = sources.filter((s) => UNIQUE_SOURCE_TYPES.includes(s.source))
+const uniqueSourcesInScope = uniqueSourcesAll.filter((s) => s.gen <= 7)
+const uniqueSourcesOutOfScope = uniqueSourcesAll.length - uniqueSourcesInScope.length
+const unmatchedInScope = unmatchedExisting.filter((s) => s.gen <= 7)
+const unmatchedOutOfScope = unmatchedExisting.length - unmatchedInScope.length
 
 // trades: nicknames vs existing npc-trade row names
 const npcTradeRows = sources.filter((source) => source.source === 'npc-trade')
@@ -179,12 +210,13 @@ lines.push(`Generated ${new Date().toISOString()} from ${pokemonFiles.length} po
 lines.push('## Summary', '')
 lines.push(`- Availability entries: ${Object.values(tallies).reduce((a, b) => a + b, 0)} (${tallies['unique-candidate']} unique candidates, ${tallies.generic} generic, ${tallies.unavailable} unavailable, ${tallies['untracked-game']} untracked-game)`)
 lines.push(`- Total candidates gens 1–7: ${inScope.length} (${outOfScope} out-of-scope gen 8+ candidates set aside)`)
-lines.push(`- Matched to existing rows: ${matched.length}; missing (no existing row): ${missing.length}`)
-lines.push(`- Existing unique rows with no candidate: ${unmatchedExisting.length} of ${sources.filter((s) => UNIQUE_SOURCE_TYPES.includes(s.source)).length}`)
+lines.push(`- Matched to existing rows: ${matched.length} candidate rows (${distinctMatchedSourceIds} distinct source rows — several candidates, e.g. per-version Ruby/Sapphire rows of one gift, legitimately match the same source row); missing (no existing row): ${missing.length} candidate rows (${missingDistinctGenArea} distinct pokemon+gen+area after collapsing per-version duplicates, ${missingDistinctPokemonGen} distinct pokemon+gen)`)
+lines.push(`- Existing unique rows with no candidate: ${unmatchedInScope.length} of ${uniqueSourcesInScope.length} in scope (gen 0–7); ${unmatchedOutOfScope} of ${uniqueSourcesOutOfScope} out of scope (gen 8/9, set aside — phase 4 covers gens 1–7 only)`)
 lines.push(`- Caveat: 'missing' and 'existing unmatched' are NOT disjoint — a below-threshold match (including 1-token names hit by the min-token guard) lists the same fact in both; reconcile per pokemon before creating rows.`)
 const tradeMissesOutOfScope = tradeMisses.filter(({ trade }) => isOutOfScopeTrade(trade)).length
 const tradeMissesInScope = tradeMisses.length - tradeMissesOutOfScope
-lines.push(`- Trades parsed: ${trades.trades.length} (${trades.unparsed.length} unparsed rows); nickname-matched to npc-trade rows: ${tradeMatches.length}, unmatched: ${tradeMisses.length} (${tradeMissesInScope} in-scope gen 1–7, ${tradeMissesOutOfScope} out-of-scope gen 8+)`, '')
+lines.push(`- Trades parsed: ${trades.trades.length} (${trades.unparsed.length} unparsed rows); loosely matched to npc-trade rows: ${tradeMatches.length}, unmatched: ${tradeMisses.length} (${tradeMissesInScope} in-scope gen 1–7, ${tradeMissesOutOfScope} out-of-scope gen 8+)`)
+lines.push(`- Caveat: trade matching ignores game/gen (parsed trades carry no game/gen field), so a "loose match" can pair a trade with an npc-trade row from a different game — matching is on name/description vs nickname/location text only, not confirmed same-game identity.`, '')
 
 lines.push('## Sanity checks', '')
 for (const { check, pass } of sanity) lines.push(`- [${pass ? 'x' : ' '}] ${check}`)
@@ -199,23 +231,27 @@ lines.push('')
 
 const CAP = 250
 lines.push('## Missing candidates (suspected new sources)', '')
+lines.push('(Rows identical in pokemon+gen+area — e.g. separate Ruby and Sapphire candidates for one gift Bulbapedia records once — are collapsed to one bullet listing every version in the game field.)', '')
 for (let gen = 1; gen <= 7; gen++) {
-  const genMissing = missing.filter((candidate) => candidate.gen === gen)
-  if (!genMissing.length) continue
-  lines.push(`### Gen ${gen} — ${genMissing.length}`, '')
-  for (const candidate of genMissing.slice(0, CAP)) {
-    lines.push(`- #${candidate.pokemonId} ${pokemonName.get(candidate.pokemonId) ?? '?'} [${candidate.game || candidate.origin}]: ${candidate.area.slice(0, 160)}`)
+  const genMissingRaw = missing.filter((candidate) => candidate.gen === gen)
+  if (!genMissingRaw.length) continue
+  const genRows = missingRows.filter((row) => row.gen === gen)
+  lines.push(`### Gen ${gen} — ${genMissingRaw.length} rows (${genRows.length} distinct)`, '')
+  for (const candidate of genRows.slice(0, CAP)) {
+    const games = [...candidate.games]
+    const gameLabel = games.length > 1 ? `[${games.join(', ')}]` : `[${games[0] ?? ''}]`
+    lines.push(`- #${candidate.pokemonId} ${pokemonName.get(candidate.pokemonId) ?? '?'} ${gameLabel}: ${candidate.area.slice(0, 160)}`)
   }
-  if (genMissing.length > CAP) lines.push(`- ... and ${genMissing.length - CAP} more (see candidates.json)`)
+  if (genRows.length > CAP) lines.push(`- ... and ${genRows.length - CAP} more (see diff.json)`)
   lines.push('')
 }
 
 lines.push('## Existing unique rows with no Bulbapedia candidate', '')
-lines.push('(Parser misses or data errors — the gen 1 audit starts here. Some of these also appear in "Missing candidates" above — see the overlap caveat in Summary.)', '')
-for (const source of unmatchedExisting.slice(0, CAP)) {
+lines.push(`(Parser misses or data errors — the gen 1 audit starts here. Some of these also appear in "Missing candidates" above — see the overlap caveat in Summary. In-scope (gen 0–7) rows only; ${unmatchedOutOfScope} gen 8/9 rows are out of phase-4 scope and excluded from this list — see diff.json for the full unmatchedExisting array.)`, '')
+for (const source of unmatchedInScope.slice(0, CAP)) {
   lines.push(`- #${source.pokemonId} ${pokemonName.get(source.pokemonId) ?? '?'} gen ${source.gen} [${source.source}] ${source.name}`)
 }
-if (unmatchedExisting.length > CAP) lines.push(`- ... and ${unmatchedExisting.length - CAP} more`)
+if (unmatchedInScope.length > CAP) lines.push(`- ... and ${unmatchedInScope.length - CAP} more (see diff.json)`)
 lines.push('')
 
 lines.push('## Unmatched trades', '')
@@ -223,13 +259,14 @@ for (const { trade } of tradeMisses.slice(0, CAP)) {
   const scopeLabel = isOutOfScopeTrade(trade) ? ' [gen 8+/out of scope]' : ''
   lines.push(`- ${trade.receives.name} for ${trade.gives.name}${trade.nickname ? ` "${trade.nickname}"` : ''} (${trade.heading})${scopeLabel}`)
 }
-if (tradeMisses.length > CAP) lines.push(`- ... and ${tradeMisses.length - CAP} more (see candidates.json)`)
+if (tradeMisses.length > CAP) lines.push(`- ... and ${tradeMisses.length - CAP} more (see diff.json)`)
 lines.push('')
 
 lines.push('## Parser health', '')
 lines.push(`- Warnings: ${warnings.length}`)
 for (const warning of warnings.slice(0, 50)) lines.push(`  - ${warning}`)
 if (warnings.length > 50) lines.push(`  - ... and ${warnings.length - 50} more (see parser-health.json)`)
+lines.push(`- Gen-5 distributions gap: AUX_GENS has no "generation-v" entry — the cache holds no "...distributions-in-generation-v" page. Gen-5 distributions therefore contribute zero candidates, silently, with nothing else in this report to flag the gap. (Whether Bulbapedia even has such a page is unverified — not fetched to check.)`)
 lines.push(`- Unknown (unexpected) game names:`)
 for (const [game, count] of [...unknownGames.entries()].sort((a, b) => b[1] - a[1])) {
   lines.push(`  - ${game}: ${count}`)
@@ -240,6 +277,10 @@ await fs.writeFile(path.join(OUT, 'candidates.json'), JSON.stringify({ candidate
 await fs.writeFile(
   path.join(OUT, 'parser-health.json'),
   JSON.stringify({ tallies, warnings, unknownGames: Object.fromEntries(unknownGames), unparsedTradeRows: trades.unparsed, sanity }, null, 2)
+)
+await fs.writeFile(
+  path.join(OUT, 'diff.json'),
+  JSON.stringify({ matched, missing, unmatchedExisting, tradeMisses }, null, 2)
 )
 console.log(`report written to ${path.join(OUT, 'report.md')}`)
 console.log(`sanity: ${sanity.filter((s) => s.pass).length}/${sanity.length} passing`)

@@ -4,7 +4,7 @@ import { diffCandidates, similarity } from '../src/bulbapedia/differ.js'
 
 const sources = [
   { id: 'a', pokemonId: 360, name: 'Lavaridge Springs', description: 'Egg received from an old couple in Lavaridge Town.', gen: 3, source: 'gift' },
-  { id: 'b', pokemonId: 360, name: 'Wild', description: null, gen: 0, source: 'wild' },
+  { id: 'b', pokemonId: 360, name: 'Wild Grass', description: null, gen: 0, source: 'wild' },
   { id: 'c', pokemonId: 207, name: 'Ghost Tower', description: 'Old hand-entered row that Bulbapedia does not corroborate.', gen: 2, source: 'gift' },
 ]
 
@@ -27,7 +27,11 @@ test('diffCandidates matches candidates to existing rows by pokemon, gen, and te
 })
 
 test('diffCandidates never matches against non-unique source types', () => {
-  const candidates = [{ pokemonId: 360, gen: 3, area: 'Wild' }]
+  // area and source b's name are both 2-token and identical, so similarity
+  // would be 1.0 if the UNIQUE_SOURCE_TYPES filter weren't applied — this
+  // pins the type filter rather than accidentally passing via the min-token
+  // guard (a 1-token area like 'Wild' scores 0 regardless of the filter).
+  const candidates = [{ pokemonId: 360, gen: 3, area: 'Wild Grass' }]
   const { missing } = diffCandidates(candidates, sources)
   assert.equal(missing.length, 1)
 })
