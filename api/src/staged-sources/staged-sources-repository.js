@@ -78,6 +78,20 @@ export const rejectStagedSource = (id) =>
     )
     .then((res) => camelize(res.rows[0] ?? null))
 
+// The ONLY code that creates a sources row from a staged row; both approval
+// paths must go through it so future guards apply to each.
+const createSourceFromStaged = async (client, staged) => {
+  const sourceId = randomUUID()
+  await client.query(
+    `insert into sources (id, pokemon_id, name, description, image, gen, source, replace_default)
+     values ($1,$2,$3,$4,$5,$6,$7,$8);`,
+    [sourceId, staged.pokemonId, staged.name, staged.description, staged.image,
+      staged.gen, staged.source, staged.replaceDefault ?? false]
+  )
+  await client.query(`update staged_sources set created_source_id = $2 where id = $1;`, [staged.id, sourceId])
+  return sourceId
+}
+
 export class InvalidActionError extends Error {}
 export class ReferencedSourceError extends Error {
   constructor(referenceCount) {
@@ -105,14 +119,7 @@ export const approveStagedSource = async (id, { action = null, confirmReferenced
 
     let resolution
     if (staged.rowKind === 'new') {
-      const sourceId = randomUUID()
-      await client.query(
-        `insert into sources (id, pokemon_id, name, description, image, gen, source, replace_default)
-         values ($1,$2,$3,$4,$5,$6,$7,$8);`,
-        [sourceId, staged.pokemonId, staged.name, staged.description, staged.image,
-          staged.gen, staged.source, staged.replaceDefault ?? false]
-      )
-      await client.query(`update staged_sources set created_source_id = $2 where id = $1;`, [id, sourceId])
+      await createSourceFromStaged(client, staged)
       resolution = 'created'
     } else if (staged.rowKind === 'audit') {
       if (!staged.matchedSourceId) {
@@ -242,6 +249,8 @@ export const resolvePairing = async (id, confirm) => {
           )
         ).rows[0]
       )
+      // Assumes at most one pending existing-unmatched row per matched_source_id;
+      // stage-candidates dedupes by natural_key so this holds in practice.
       await client.query(
         `update staged_sources set status = 'approved', resolution = 'paired', reviewed_at = now()
          where row_kind = 'existing-unmatched' and matched_source_id = $1 and status = 'pending';`,
@@ -292,13 +301,7 @@ export const bulkApproveStagedSources = async (ids) => {
         skippedIds.push(id)
         continue
       }
-      const sourceId = randomUUID()
-      await client.query(
-        `insert into sources (id, pokemon_id, name, description, image, gen, source, replace_default)
-         values ($1,$2,$3,$4,$5,$6,$7,$8);`,
-        [sourceId, staged.pokemonId, staged.name, staged.description, staged.image,
-          staged.gen, staged.source, staged.replaceDefault ?? false]
-      )
+      const sourceId = await createSourceFromStaged(client, staged)
       await client.query(
         `update staged_sources set status = 'approved', resolution = 'created',
           created_source_id = $2, reviewed_at = now()

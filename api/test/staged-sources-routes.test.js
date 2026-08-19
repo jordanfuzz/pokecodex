@@ -292,6 +292,7 @@ describe('staged-sources routes', () => {
       assert.equal(res.body.stagedSource.matchedSourceId, source.id)
       assert.equal(res.body.stagedSource.suggestedSourceId, null)
       assert.equal(res.body.stagedSource.pairingConfirmed, true)
+      assert.equal(res.body.stagedSource.status, 'pending')
 
       const resolved = await pgPool.query(`select status, resolution from staged_sources where id = $1;`, [partner.id])
       assert.equal(resolved.rows[0].status, 'approved')
@@ -304,6 +305,7 @@ describe('staged-sources routes', () => {
       const row = await insertStagedRow({ suggestedSourceId: source.id, suggestionReason: 'fuzzy:0.20' })
 
       const res = await agent.post(`/api/staged-sources/${row.id}/pairing`).send({ confirm: false })
+      assert.equal(res.status, 200)
       assert.equal(res.body.stagedSource.suggestedSourceId, null)
       assert.equal(res.body.stagedSource.rowKind, 'new')
       const untouched = await pgPool.query(`select status from staged_sources where id = $1;`, [partner.id])
