@@ -93,6 +93,11 @@ describe('staged-sources routes', () => {
          select gen_random_uuid(), gen_random_uuid(), $1, false from generate_series(1, 2);`,
         [source.id]
       )
+      await pgPool.query(
+        `insert into users_source_overrides (id, user_id, source_id, is_required)
+         values (gen_random_uuid(), $1, $2, true);`,
+        [userId, source.id]
+      )
       try {
         await insertStagedRow({ rowKind: 'existing-unmatched', matchedSourceId: source.id, name: null, source: null, confidence: null, origin: null, games: null })
         const res = await agent.get('/api/staged-sources?gen=1&rowKind=existing-unmatched')
@@ -100,9 +105,10 @@ describe('staged-sources routes', () => {
         assert.ok(row)
         assert.equal(row.pokemonName.toLowerCase(), 'bulbasaur')
         assert.equal(row.matchedSource.name, source.name)
-        assert.equal(row.referenceCount, 2)
+        assert.equal(row.referenceCount, 3)
       } finally {
         await pgPool.query(`delete from users_pokemon_sources where source_id = $1;`, [source.id])
+        await pgPool.query(`delete from users_source_overrides where source_id = $1;`, [source.id])
       }
     })
   })
@@ -252,6 +258,7 @@ describe('staged-sources routes', () => {
         const gone = await pgPool.query(`select 1 from sources where id = $1;`, [source.id])
         assert.equal(gone.rows.length, 0)
       } finally {
+        await pgPool.query(`delete from users_pokemon_sources where source_id = $1;`, [source.id])
         await pgPool.query(`delete from users_source_overrides where source_id = $1;`, [source.id])
       }
     })

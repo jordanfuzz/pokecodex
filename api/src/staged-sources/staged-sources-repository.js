@@ -19,7 +19,8 @@ export const listStagedSources = ({
       `select ss.*, p.name as pokemon_name,
         row_to_json(ms) as matched_source,
         row_to_json(sg) as suggested_source,
-        coalesce(refs.count, 0) as reference_count
+        -- Must stay in lockstep with approveStagedSource's delete-branch reference count.
+        coalesce(refs.count, 0) + coalesce(override_refs.count, 0) as reference_count
       from staged_sources ss
       join pokemon p on p.id = ss.pokemon_id
       left join sources ms on ms.id = ss.matched_source_id
@@ -28,6 +29,10 @@ export const listStagedSources = ({
         select source_id, count(*)::int as count
         from users_pokemon_sources group by source_id
       ) refs on refs.source_id = ss.matched_source_id
+      left join (
+        select source_id, count(*)::int as count
+        from users_source_overrides group by source_id
+      ) override_refs on override_refs.source_id = ss.matched_source_id
       where (cast($1 as integer) is null or ss.gen = $1)
         and (cast($2 as staged_status) is null or ss.status = $2)
         and (cast($3 as staged_row_kind) is null or ss.row_kind = $3)
