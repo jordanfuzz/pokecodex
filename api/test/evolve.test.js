@@ -154,6 +154,129 @@ describe('evolveUsersPokemon', () => {
   })
 })
 
+// Regression tests from the phase-3 final review (BACKLOG.md): old-row
+// deletion, the inherited-link id-preservation invariant, and chained-evolve
+// evolved-tag dedupe.
+describe('evolveUsersPokemon regressions', () => {
+  const CHAIN = 65 // Alakazam
+
+  let userId, gameId
+
+  const chainCleanup = async uid => {
+    await pgPool.query(
+      `delete from users_pokemon_sources where users_pokemon_id in
+       (select id from users_pokemon where user_id = $1 and pokemon_id = any($2::int[]) and notes = 'evolve-test');`,
+      [uid, [BASE, EVOLVED, CHAIN]]
+    )
+    await pgPool.query(
+      `delete from users_pokemon where user_id = $1 and pokemon_id = any($2::int[]) and notes = 'evolve-test';`,
+      [uid, [BASE, EVOLVED, CHAIN]]
+    )
+  }
+
+  beforeEach(async () => {
+    userId = (await pgPool.query(userIdQuery)).rows[0].id
+    gameId = (await pgPool.query('select id from game_versions limit 1;')).rows[0].id
+    await chainCleanup(userId)
+  })
+
+  after(async () => {
+    const uid = (await pgPool.query(userIdQuery)).rows[0].id
+    await chainCleanup(uid)
+  })
+
+  const insertBase = async () => {
+    const upId = randomUUID()
+    await pgPool.query(
+      `insert into users_pokemon(id, user_id, pokemon_id, notes, game_id, pokeball, caught_at)
+       values($1, $2, $3, 'evolve-test', $4, 1, now());`,
+      [upId, userId, BASE, gameId]
+    )
+    return upId
+  }
+
+  const evolve = (fromRowId, fromPokemonId, toPokemonId) =>
+    evolveUsersPokemon({
+      userId,
+      evolvedPokemonId: toPokemonId,
+      oldPokemonData: {
+        id: fromRowId,
+        pokemonId: fromPokemonId,
+        pokeball: 1,
+        gameId,
+        caughtAt: new Date().toISOString(),
+        notes: 'evolve-test',
+      },
+    })
+
+  const rowFor = async pokemonId =>
+    (
+      await pgPool.query(
+        `select * from users_pokemon where user_id = $1 and pokemon_id = $2 and notes = 'evolve-test';`,
+        [userId, pokemonId]
+      )
+    ).rows[0]
+
+  it('deletes the base row after a successful evolve', async () => {
+    const upId = await insertBase()
+    await evolve(upId, BASE, EVOLVED)
+
+    const oldRow = await pgPool.query(`select * from users_pokemon where id = $1;`, [
+      upId,
+    ])
+    assert.equal(oldRow.rows.length, 0, 'base row must be gone')
+    assert.ok(await rowFor(EVOLVED), 'evolved row must exist')
+  })
+
+  it('moves ordinary links to the evolution preserving their link ids, as inherited', async () => {
+    const upId = await insertBase()
+    const plainSourceId = (
+      await pgPool.query(
+        `select id from sources where pokemon_id = $1
+         and source not in ('shiny', 'male', 'female', 'evolved', 'original') limit 1;`,
+        [BASE]
+      )
+    ).rows[0].id
+    const linkId = randomUUID()
+    await pgPool.query(
+      `insert into users_pokemon_sources(id, users_pokemon_id, source_id) values($1, $2, $3);`,
+      [linkId, upId, plainSourceId]
+    )
+
+    await evolve(upId, BASE, EVOLVED)
+
+    const evolvedRow = await rowFor(EVOLVED)
+    const movedLink = (
+      await pgPool.query(`select * from users_pokemon_sources where id = $1;`, [linkId])
+    ).rows[0]
+    assert.ok(movedLink, 'link row survives the move under the same id')
+    assert.equal(movedLink.users_pokemon_id, evolvedRow.id)
+    assert.equal(movedLink.is_inherited, true)
+    assert.equal(movedLink.source_id, plainSourceId)
+  })
+
+  it('a chained evolve leaves exactly one evolved tag: the final form’s own', async () => {
+    const upId = await insertBase()
+    await evolve(upId, BASE, EVOLVED)
+    const kadabraRow = await rowFor(EVOLVED)
+
+    await evolve(kadabraRow.id, EVOLVED, CHAIN)
+
+    const alakazamRow = await rowFor(CHAIN)
+    const evolvedLinks = (
+      await pgPool.query(
+        `select ups.is_inherited, s.pokemon_id from users_pokemon_sources ups
+         join sources s on s.id = ups.source_id
+         where ups.users_pokemon_id = $1 and s.source = 'evolved';`,
+        [alakazamRow.id]
+      )
+    ).rows
+    assert.equal(evolvedLinks.length, 1, 'exactly one evolved tag after the chain')
+    assert.equal(evolvedLinks[0].pokemon_id, CHAIN, 'the tag is the final form’s own')
+    assert.equal(evolvedLinks[0].is_inherited, false)
+  })
+})
+
 describe('evolveUsersPokemon gender swap', () => {
   const G_BASE = 456 // Finneon
   const G_EVOLVED = 457 // Lumineon
