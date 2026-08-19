@@ -1,0 +1,118 @@
+import './setup.js'
+import assert from 'node:assert/strict'
+import { describe, it, before, after } from 'node:test'
+import app from '../src/app.js'
+import pgPool from '../src/pg-pool.js'
+import { loginAgent } from './helpers.js'
+import {
+  applyStagedMigration, insertStagedRow, cleanupStagedTestRows,
+  insertTestSource, cleanupTestSources,
+} from './staged-helpers.js'
+
+let agent, userId, savedIsAdmin
+const setAdmin = (value) =>
+  pgPool.query(`update users set is_admin = $1 where id = $2;`, [value, userId])
+
+// Everything lives inside one outer describe so this suite's own before/after
+// hooks are scoped to it, rather than sitting at the module's top level. Node's
+// test runner fires same-level hooks in registration order: setup.js (imported
+// above) registers a root-level `after` that ends the pg pool, and — since that
+// import runs before this file's own `before`/`after` calls — a *root-level*
+// after here would run its pool-using cleanup queries after the pool was
+// already ended. Nesting inside a describe makes this suite's after run when
+// the describe finishes, which is before the root-level teardown runs.
+describe('staged-sources routes', () => {
+  before(async () => {
+    await applyStagedMigration()
+    agent = await loginAgent(app)
+    userId = (await agent.get('/api/auth/login')).body.id
+    savedIsAdmin = (
+      await pgPool.query(`select is_admin from users where id = $1;`, [userId])
+    ).rows[0].is_admin
+    await setAdmin(true)
+  })
+
+  after(async () => {
+    await cleanupStagedTestRows()
+    await cleanupTestSources()
+    await setAdmin(savedIsAdmin)
+  })
+
+  describe('admin gate', () => {
+    it('a non-admin gets 401 from every staged-sources route', async () => {
+      try {
+        await setAdmin(false)
+        assert.equal((await agent.get('/api/staged-sources')).status, 401)
+        assert.equal((await agent.get('/api/staged-sources/summary')).status, 401)
+      } finally {
+        await setAdmin(true)
+      }
+    })
+
+    it('the gate does not block other /api routes for non-admins', async () => {
+      try {
+        await setAdmin(false)
+        assert.equal((await agent.get('/api/sources?pokemonId=1')).status, 200)
+      } finally {
+        await setAdmin(true)
+      }
+    })
+  })
+
+  describe('GET /api/staged-sources', () => {
+    before(async () => {
+      await insertStagedRow({ gen: 1, name: 'list-a' })
+      await insertStagedRow({ gen: 2, name: 'list-b' })
+      await insertStagedRow({ gen: 1, status: 'rejected', name: 'list-c' })
+      await insertStagedRow({ gen: 1, expectedAbsent: true, rowKind: 'existing-unmatched', name: null, source: null, confidence: null, origin: null, games: null })
+    })
+
+    it('defaults to pending rows without expected-absent, filtered by gen', async () => {
+      const res = await agent.get('/api/staged-sources?gen=1')
+      assert.equal(res.status, 200)
+      const names = res.body.stagedSources.map((r) => r.name)
+      assert.ok(names.includes('list-a'))
+      assert.ok(!names.includes('list-b'), 'gen filter applies')
+      assert.ok(!names.includes('list-c'), 'rejected excluded by default')
+      assert.ok(!res.body.stagedSources.some((r) => r.expectedAbsent), 'expected-absent hidden by default')
+    })
+
+    it('includeExpected=true and status=all widen the listing', async () => {
+      const res = await agent.get('/api/staged-sources?gen=1&includeExpected=true&status=all')
+      assert.ok(res.body.stagedSources.some((r) => r.expectedAbsent))
+      assert.ok(res.body.stagedSources.some((r) => r.status === 'rejected'))
+    })
+
+    it('joins pokemon name, matched source, and reference count', async () => {
+      const source = await insertTestSource()
+      await pgPool.query(
+        `insert into users_pokemon_sources (id, users_pokemon_id, source_id, is_inherited)
+         select gen_random_uuid(), gen_random_uuid(), $1, false from generate_series(1, 2);`,
+        [source.id]
+      )
+      try {
+        await insertStagedRow({ rowKind: 'existing-unmatched', matchedSourceId: source.id, name: null, source: null, confidence: null, origin: null, games: null })
+        const res = await agent.get('/api/staged-sources?gen=1&rowKind=existing-unmatched')
+        const row = res.body.stagedSources.find((r) => r.matchedSourceId === source.id)
+        assert.ok(row)
+        assert.equal(row.pokemonName.toLowerCase(), 'bulbasaur')
+        assert.equal(row.matchedSource.name, source.name)
+        assert.equal(row.referenceCount, 2)
+      } finally {
+        await pgPool.query(`delete from users_pokemon_sources where source_id = $1;`, [source.id])
+      }
+    })
+  })
+
+  describe('GET /api/staged-sources/summary', () => {
+    it('returns counts by gen, status, rowKind, expectedAbsent', async () => {
+      const res = await agent.get('/api/staged-sources/summary')
+      assert.equal(res.status, 200)
+      const bucket = res.body.summary.find(
+        (s) => s.gen === 1 && s.status === 'pending' && s.rowKind === 'new' && s.expectedAbsent === false
+      )
+      assert.ok(bucket)
+      assert.ok(bucket.count >= 1)
+    })
+  })
+})
