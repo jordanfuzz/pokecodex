@@ -1,5 +1,6 @@
 import pgPool from '../pg-pool.js'
 import camelize from 'camelize'
+import { randomUUID } from 'crypto'
 
 export const isUserAdmin = (userId) =>
   pgPool
@@ -71,3 +72,114 @@ export const rejectStagedSource = (id) =>
       [id]
     )
     .then((res) => camelize(res.rows[0] ?? null))
+
+export class InvalidActionError extends Error {}
+export class ReferencedSourceError extends Error {
+  constructor(referenceCount) {
+    super('Source is referenced by user tracking rows')
+    this.referenceCount = referenceCount
+  }
+}
+
+export const approveStagedSource = async (id, { action = null, confirmReferencedDelete = false } = {}) => {
+  const client = await pgPool.connect()
+  try {
+    await client.query('begin')
+    const staged = camelize(
+      (
+        await client.query(
+          `select * from staged_sources where id = $1 and status = 'pending' for update;`,
+          [id]
+        )
+      ).rows[0] ?? null
+    )
+    if (!staged) {
+      await client.query('rollback')
+      return null
+    }
+
+    let resolution
+    if (staged.rowKind === 'new') {
+      const sourceId = randomUUID()
+      await client.query(
+        `insert into sources (id, pokemon_id, name, description, image, gen, source, replace_default)
+         values ($1,$2,$3,$4,$5,$6,$7,$8);`,
+        [sourceId, staged.pokemonId, staged.name, staged.description, staged.image,
+          staged.gen, staged.source, staged.replaceDefault ?? false]
+      )
+      await client.query(`update staged_sources set created_source_id = $2 where id = $1;`, [id, sourceId])
+      resolution = 'created'
+    } else if (staged.rowKind === 'audit') {
+      if (action === 'apply') {
+        await client.query(
+          `update sources set name = $2, description = $3, gen = $4, source = $5, replace_default = $6
+           where id = $1;`,
+          [staged.matchedSourceId, staged.name, staged.description, staged.gen,
+            staged.source, staged.replaceDefault ?? false]
+        )
+        resolution = 'updated'
+      } else if (action === 'no-change') {
+        resolution = 'kept'
+      } else {
+        throw new InvalidActionError(`audit rows need action apply or no-change, got ${action}`)
+      }
+    } else {
+      // existing-unmatched
+      if (action === 'keep') {
+        resolution = 'kept'
+      } else if (action === 'update') {
+        await client.query(
+          `update sources set
+            name = coalesce($2, name), description = coalesce($3, description),
+            gen = coalesce($4, gen), source = coalesce($5, source),
+            replace_default = coalesce($6, replace_default)
+           where id = $1;`,
+          [staged.matchedSourceId, staged.name, staged.description, staged.gen,
+            staged.source, staged.replaceDefault]
+        )
+        resolution = 'updated'
+      } else if (action === 'delete') {
+        const referenceCount = (
+          await client.query(
+            `select count(*)::int as count from users_pokemon_sources where source_id = $1;`,
+            [staged.matchedSourceId]
+          )
+        ).rows[0].count
+        if (referenceCount > 0 && !confirmReferencedDelete) throw new ReferencedSourceError(referenceCount)
+        await client.query(`delete from users_pokemon_sources where source_id = $1;`, [staged.matchedSourceId])
+        // Null every staged reference before the delete so the FKs allow it;
+        // this row's raw_snippet snapshot preserves what was deleted.
+        await client.query(
+          `update staged_sources set suggested_source_id = null, suggestion_reason = null
+           where suggested_source_id = $1;`,
+          [staged.matchedSourceId]
+        )
+        await client.query(
+          `update staged_sources set matched_source_id = null where matched_source_id = $1;`,
+          [staged.matchedSourceId]
+        )
+        await client.query(`delete from sources where id = $1;`, [staged.matchedSourceId])
+        resolution = 'deleted'
+      } else {
+        throw new InvalidActionError(`existing-unmatched rows need action keep, update, or delete, got ${action}`)
+      }
+    }
+
+    const updated = camelize(
+      (
+        await client.query(
+          `update staged_sources set status = 'approved', resolution = $2, reviewed_at = now()
+           where id = $1 returning *;`,
+          [id, resolution]
+        )
+      ).rows[0]
+    )
+    await client.query('commit')
+    return updated
+  } catch (error) {
+    await client.query('rollback')
+    throw error
+  } finally {
+    client.release()
+  }
+}

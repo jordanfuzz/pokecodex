@@ -2,6 +2,7 @@ import express from 'express'
 const router = express.Router()
 import {
   isUserAdmin, listStagedSources, getStagedSummary, updateStagedSource, rejectStagedSource,
+  approveStagedSource, InvalidActionError, ReferencedSourceError,
 } from './staged-sources-repository.js'
 
 // Path-scoped: this router is mounted at /api alongside the others, and an
@@ -42,6 +43,23 @@ router.post('/staged-sources/:id/reject', async (req, res) => {
   const stagedSource = await rejectStagedSource(req.params.id)
   if (!stagedSource) return res.status(404).send({ message: 'No pending staged source with that id' })
   res.status(200).send({ stagedSource })
+})
+
+router.post('/staged-sources/:id/approve', async (req, res) => {
+  try {
+    const stagedSource = await approveStagedSource(req.params.id, {
+      action: req.body?.action ?? null,
+      confirmReferencedDelete: req.body?.confirmReferencedDelete === true,
+    })
+    if (!stagedSource) return res.status(404).send({ message: 'No pending staged source with that id' })
+    res.status(200).send({ stagedSource })
+  } catch (error) {
+    if (error instanceof InvalidActionError) return res.status(400).send({ message: error.message })
+    if (error instanceof ReferencedSourceError) {
+      return res.status(409).send({ message: error.message, referenceCount: error.referenceCount })
+    }
+    throw error
+  }
 })
 
 export default router

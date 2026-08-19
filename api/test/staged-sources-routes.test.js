@@ -152,4 +152,102 @@ describe('staged-sources routes', () => {
       assert.equal((await agent.post(`/api/staged-sources/${row.id}/reject`)).status, 404)
     })
   })
+
+  describe('POST /api/staged-sources/:id/approve', () => {
+    it('new: inserts into sources and records created_source_id', async () => {
+      const row = await insertStagedRow({ name: 'staged-api-test-created' })
+      const res = await agent.post(`/api/staged-sources/${row.id}/approve`)
+      assert.equal(res.status, 200)
+      assert.equal(res.body.stagedSource.status, 'approved')
+      assert.equal(res.body.stagedSource.resolution, 'created')
+      const created = await pgPool.query(`select * from sources where id = $1;`, [
+        res.body.stagedSource.createdSourceId,
+      ])
+      assert.equal(created.rows.length, 1)
+      assert.equal(created.rows[0].name, 'staged-api-test-created')
+      assert.equal(created.rows[0].pokemon_id, 1)
+    })
+
+    it('audit no-change: resolution kept, sources untouched', async () => {
+      const source = await insertTestSource()
+      const row = await insertStagedRow({ rowKind: 'audit', matchedSourceId: source.id, name: 'parsed name' })
+      const res = await agent.post(`/api/staged-sources/${row.id}/approve`).send({ action: 'no-change' })
+      assert.equal(res.body.stagedSource.resolution, 'kept')
+      const kept = await pgPool.query(`select name from sources where id = $1;`, [source.id])
+      assert.equal(kept.rows[0].name, source.name)
+    })
+
+    it('audit apply: updates the matched sources row from staged fields', async () => {
+      const source = await insertTestSource()
+      const row = await insertStagedRow({ rowKind: 'audit', matchedSourceId: source.id, name: 'staged-api-test-applied', source: 'npc-trade' })
+      const res = await agent.post(`/api/staged-sources/${row.id}/approve`).send({ action: 'apply' })
+      assert.equal(res.body.stagedSource.resolution, 'updated')
+      const updated = await pgPool.query(`select name, source from sources where id = $1;`, [source.id])
+      assert.equal(updated.rows[0].name, 'staged-api-test-applied')
+      assert.equal(updated.rows[0].source, 'npc-trade')
+    })
+
+    it('audit with a missing action is a 400', async () => {
+      const source = await insertTestSource()
+      const row = await insertStagedRow({ rowKind: 'audit', matchedSourceId: source.id })
+      assert.equal((await agent.post(`/api/staged-sources/${row.id}/approve`)).status, 400)
+    })
+
+    it('existing-unmatched keep: resolution kept', async () => {
+      const source = await insertTestSource()
+      const row = await insertStagedRow({ rowKind: 'existing-unmatched', matchedSourceId: source.id, name: null, source: null, confidence: null, origin: null, games: null })
+      const res = await agent.post(`/api/staged-sources/${row.id}/approve`).send({ action: 'keep' })
+      assert.equal(res.body.stagedSource.resolution, 'kept')
+    })
+
+    it('existing-unmatched update: coalesces staged fields onto the source', async () => {
+      const source = await insertTestSource()
+      const row = await insertStagedRow({ rowKind: 'existing-unmatched', matchedSourceId: source.id, name: 'staged-api-test-renamed', source: null, confidence: null, origin: null, games: null })
+      await agent.post(`/api/staged-sources/${row.id}/approve`).send({ action: 'update' })
+      const updated = await pgPool.query(`select name, source from sources where id = $1;`, [source.id])
+      assert.equal(updated.rows[0].name, 'staged-api-test-renamed')
+      assert.equal(updated.rows[0].source, source.source, 'null staged fields fall back to existing')
+    })
+
+    it('unreferenced delete removes the source outright', async () => {
+      const source = await insertTestSource()
+      const row = await insertStagedRow({ rowKind: 'existing-unmatched', matchedSourceId: source.id, name: null, source: null, confidence: null, origin: null, games: null })
+      const res = await agent.post(`/api/staged-sources/${row.id}/approve`).send({ action: 'delete' })
+      assert.equal(res.body.stagedSource.resolution, 'deleted')
+      assert.equal(res.body.stagedSource.matchedSourceId, null, 'ref nulled so the FK allows the delete')
+      const gone = await pgPool.query(`select 1 from sources where id = $1;`, [source.id])
+      assert.equal(gone.rows.length, 0)
+    })
+
+    it('referenced delete 409s without the confirm flag, deletes refs with it', async () => {
+      const source = await insertTestSource()
+      await pgPool.query(
+        `insert into users_pokemon_sources (id, users_pokemon_id, source_id, is_inherited)
+         values (gen_random_uuid(), gen_random_uuid(), $1, false);`,
+        [source.id]
+      )
+      const row = await insertStagedRow({ rowKind: 'existing-unmatched', matchedSourceId: source.id, name: null, source: null, confidence: null, origin: null, games: null })
+
+      const blocked = await agent.post(`/api/staged-sources/${row.id}/approve`).send({ action: 'delete' })
+      assert.equal(blocked.status, 409)
+      assert.equal(blocked.body.referenceCount, 1)
+      const stillThere = await pgPool.query(`select 1 from sources where id = $1;`, [source.id])
+      assert.equal(stillThere.rows.length, 1, '409 must not half-delete')
+
+      const confirmed = await agent
+        .post(`/api/staged-sources/${row.id}/approve`)
+        .send({ action: 'delete', confirmReferencedDelete: true })
+      assert.equal(confirmed.status, 200)
+      const refs = await pgPool.query(`select 1 from users_pokemon_sources where source_id = $1;`, [source.id])
+      assert.equal(refs.rows.length, 0)
+      const gone = await pgPool.query(`select 1 from sources where id = $1;`, [source.id])
+      assert.equal(gone.rows.length, 0)
+    })
+
+    it('404s on an already-approved row', async () => {
+      const row = await insertStagedRow()
+      await agent.post(`/api/staged-sources/${row.id}/approve`)
+      assert.equal((await agent.post(`/api/staged-sources/${row.id}/approve`)).status, 404)
+    })
+  })
 })
