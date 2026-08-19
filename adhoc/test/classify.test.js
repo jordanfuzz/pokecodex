@@ -51,3 +51,31 @@ test('side-game prize language is a unique candidate (Stadium 2 Gligar)', () => 
   }))
   assert.equal(result.kind, 'unique-candidate')
 })
+
+test('bare trade language is a unique candidate', () => {
+  const result = classifyEntry(entry({ area: 'Trade Trumbeak on Route 8' }))
+  assert.equal(result.kind, 'unique-candidate')
+  assert.ok(result.reasons.includes('trade language'))
+})
+
+test('Colosseum/XD shadow snags are unique candidates', () => {
+  const result = classifyEntry(entry({ area: 'Phenac City (Shadow)' }))
+  assert.equal(result.kind, 'unique-candidate')
+  assert.ok(result.reasons.includes('shadow snag'))
+})
+
+test('widened side-game completion language is a unique candidate (Channel Nice Cards)', () => {
+  const result = classifyEntry(entry({ area: 'Collect all 101 Nice Cards' }))
+  assert.equal(result.kind, 'unique-candidate')
+})
+
+test('explicit only-one language is a unique candidate (Lake of Rage Red Gyarados)', () => {
+  const result = classifyEntry(entry({ area: 'Lake of Rage (Only one)' }))
+  assert.equal(result.kind, 'unique-candidate')
+  assert.ok(result.reasons.includes('explicit only-one'))
+})
+
+test('generic rows carry no reasons', () => {
+  const result = classifyEntry(entry({ area: 'Route 130 (Mirage Island)' }))
+  assert.deepEqual(result.reasons, [])
+})

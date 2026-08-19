@@ -6,11 +6,13 @@ export const UNIQUE_PATTERNS = [
   { rx: /first partner|starter/i, reason: 'starter' },
   { rx: /received|gift|given|reward/i, reason: 'gift language' },
   { rx: /in-game trade|trade with|traded (?:for|from)/i, reason: 'npc trade' },
+  { rx: /\btrade\b/i, reason: 'trade language' },
+  { rx: /\(shadow\)|snag/i, reason: 'shadow snag' },
   { rx: /game corner|prize|lottery/i, reason: 'prize' },
   { rx: /fossil/i, reason: 'fossil' },
   { rx: /honey tree/i, reason: 'honey tree' },
   { rx: /only one|one per (?:save|game)/i, reason: 'explicit only-one' },
-  { rx: /beat(?:ing)? the|defeat(?:ing)?.*(?:round|castle|cup|mode)/i, reason: 'side-game completion prize' },
+  { rx: /beat(?:ing)? the|defeat(?:ing)?.*(?:round|castle|cup|mode)|collect(?:ing)? all|for the first time/i, reason: 'side-game completion prize' },
 ]
 
 export const classifyEntry = (entry) => {
